@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Enums modeled as plain strings (not Prisma `enum`) so the schema stays
+// identical across SQLite (dev) and PostgreSQL (prod) — allowed values are
+// validated at the application layer with zod, see src/lib/validation.ts.
+
+model Cliente {
+  id                  String  @id @default(uuid())
+  tipoPessoa          String // "PF" | "PJ"
+  razaoSocial         String // nome civil quando PF
+  nomeFantasia        String?
+  cpfCnpj             String  @unique
+  inscricaoEstadual   String?
+  enderecoLogradouro  String
+  enderecoNumero      String
+  enderecoComplemento String?
+  enderecoBairro      String
+  enderecoCidade      String
+  enderecoUf          String
+  enderecoCep         String
+  telefone            String
+  email               String
+  responsavelNome     String?
+  responsavelCpf      String?
+
+  regimeTributarioId String?
+  regimeTributario   RegimeTributario? @relation(fields: [regimeTributarioId], references: [id])
+  servicos           ClienteServico[]
+  contratos          Contrato[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("clientes")
+}
+
+// MEI, Simples Nacional, Lucro Presumido, Lucro Real — decide qual família de
+// modelo de contrato/proposta carrega e qual catálogo de serviços aparece.
+model RegimeTributario {
+  id       String          @id @default(uuid())
+  nome     String          @unique
+  slug     String          @unique
+  ordem    Int             @default(0)
+  ativo    Boolean         @default(true)
+  clientes Cliente[]
+  servicos ServicoRegime[]
+  planos   Plano[]
+
+  @@map("regimes_tributarios")
+}
+
+// Catálogo de serviços que a Sedra oferece (Contabilidade, Departamento
+// Pessoal, Escrita Fiscal...). Disponibilidade por regime é modelada em
+// ServicoRegime, não aqui — o mesmo serviço pode aparecer para vários regimes.
+model Servico {
+  id        String           @id @default(uuid())
+  nome      String           @unique
+  descricao String?
+  categoria String?
+  ordem     Int              @default(0)
+  ativo     Boolean          @default(true)
+  regimes   ServicoRegime[]
+  clientes  ClienteServico[]
+  planos    Plano[]
+
+  @@map("servicos")
+}
+
+// Tabela associativa N:N — controla quais serviços aparecem na etapa 3 do
+// wizard para cada regime tributário selecionado na etapa 2.
+model ServicoRegime {
+  servicoId          String
+  servico            Servico          @relation(fields: [servicoId], references: [id], onDelete: Cascade)
+  regimeTributarioId String
+  regimeTributario   RegimeTributario @relation(fields: [regimeTributarioId], references: [id], onDelete: Cascade)
+
+  @@id([servicoId, regimeTributarioId])
+  @@map("servicos_regimes")
+}
+
+// Serviços que um cliente específico selecionou/contratou, cada um com o
+// plano escolhido (etapa 4). planoId fica nulo até o usuário escolher.
+model ClienteServico {
+  clienteId String
+  cliente   Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  servicoId String
+  servico   Servico  @relation(fields: [servicoId], references: [id], onDelete: Cascade)
+  planoId   String?
+  plano     Plano?   @relation(fields: [planoId], references: [id])
+  criadoEm  DateTime @default(now())
+
+  @@id([clienteId, servicoId])
+  @@map("clientes_servicos")
+}
+
+// Variação comercial de um serviço: valor, vigência, multa. Quando
+// regimeTributarioId é nulo, o plano vale para qualquer regime que ofereça o
+// serviço; quando preenchido, é específico daquele regime (ex.: o plano MEI
+// tem limites de uso que o plano geral não tem).
+model Plano {
+  id                 String            @id @default(uuid())
+  servicoId          String
+  servico            Servico           @relation(fields: [servicoId], references: [id], onDelete: Cascade)
+  regimeTributarioId String?
+  regimeTributario   RegimeTributario? @relation(fields: [regimeTributarioId], references: [id])
+  nome               String
+  valor              Float
+  vigenciaMeses      Int
+  multaPercentual    Float? // ex.: 50 :: nulo/zero = "não possui"
+  multaDescricao     String? // ex.: "50% do saldo restante"
+  ordem              Int               @default(0)
+  ativo              Boolean           @default(true)
+  limites            PlanoLimiteUso[]
+  clienteServicos    ClienteServico[]
+
+  @@map("planos")
+}
+
+// Um plano pode ter mais de um limite de uso mensal com regra própria de
+// excedente — o contrato MEI real cobra por lançamento E por nota fiscal,
+// cada um com uma tarifação diferente.
+model PlanoLimiteUso {
+  id              String                @id @default(uuid())
+  planoId         String
+  plano           Plano                 @relation(fields: [planoId], references: [id], onDelete: Cascade)
+  unidade         String // "lançamentos", "notas fiscais"
+  quantidade      Int
+  tipoCobranca    String // "faixa" (degraus por %) | "por_unidade" (linear)
+  valorPorUnidade Float? // usado quando tipoCobranca = "por_unidade"
+  faixas          PlanoFaixaExcedente[]
+
+  @@map("planos_limites_uso")
+}
+
+// Degraus de cobrança por excedente quando tipoCobranca = "faixa"
+// (ex.: até 33% de excedente = R$9,90; até 66% = R$19,90; acima = R$29,90).
+model PlanoFaixaExcedente {
+  id               String         @id @default(uuid())
+  planoLimiteUsoId String
+  planoLimiteUso   PlanoLimiteUso @relation(fields: [planoLimiteUsoId], references: [id], onDelete: Cascade)
+  percentualAte    Float // 33, 66, 999 (999 = "acima disso")
+  valorAdicional   Float
+  ordem            Int            @default(0)
+
+  @@map("planos_faixas_excedente")
+}
+
+// Contador atômico de numeração sequencial — uma linha por "chave" (ex.:
+// "contrato", e futuramente "proposta"), incrementada em transação.
+model Contador {
+  chave String @id
+  valor Int    @default(0)
+
+  @@map("contadores")
+}
+
+// Documento efetivamente emitido. Guarda um snapshot completo (texto
+// renderizado, campos editáveis, regime usado) no momento da emissão, para
+// que edições futuras nos modelos/planos não alterem contratos já emitidos.
+model Contrato {
+  id                         String   @id @default(uuid())
+  clienteId                  String
+  cliente                    Cliente  @relation(fields: [clienteId], references: [id])
+  numeroSequencial           Int      @unique
+  regimeSlug                 String
+  contratanteNomeSnapshot    String
+  contratanteCpfCnpjSnapshot String
+  enderecoSnapshot           String
+  valorFinal                 String
+  vigenciaMeses              Int
+  multaTexto                 String
+  servicosSnapshot           String // nomes dos serviços, separados por vírgula
+  textoCompleto              String // texto integral renderizado no momento da emissão
+  status                     String   @default("emitido") // emitido | assinado | cancelado
+  arquivoPdf                 String?
+  arquivoDocx                String?
+  dataEmissao                DateTime @default(now())
+  criadoEm                   DateTime @default(now())
+
+  @@map("contratos")
+}
