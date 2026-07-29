@@ -1,6 +1,5 @@
-import { readFile } from "node:fs/promises";
 import { prisma } from "@/lib/prisma";
-import { caminhoAbsoluto } from "@/lib/documentos/armazenamento";
+import { lerArquivoContrato } from "@/lib/documentos/armazenamento";
 
 const CONTENT_TYPES = {
   pdf: "application/pdf",
@@ -22,12 +21,12 @@ export async function GET(
     return new Response("Contrato não encontrado", { status: 404 });
   }
 
-  const caminhoRelativo = tipo === "pdf" ? contrato.arquivoPdf : contrato.arquivoDocx;
-  if (!caminhoRelativo) {
+  const referencia = tipo === "pdf" ? contrato.arquivoPdf : contrato.arquivoDocx;
+  if (!referencia) {
     return new Response("Arquivo não disponível", { status: 404 });
   }
 
-  const conteudo = await readFile(caminhoAbsoluto(caminhoRelativo));
+  const conteudo = await lerArquivoContrato(referencia);
   const numero = String(contrato.numeroSequencial).padStart(6, "0");
 
   return new Response(new Uint8Array(conteudo), {

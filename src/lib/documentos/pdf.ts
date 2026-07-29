@@ -1,7 +1,31 @@
 import puppeteer from "puppeteer-core";
 import { classificarLinha } from "./linhas";
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+// Em produção (Vercel/AWS Lambda, Linux) não existe um Chrome instalado nem
+// disco gravável fora de /tmp — usamos o binário do @sparticuz/chromium,
+// feito sob medida para esses ambientes serverless. Localmente (Windows),
+// aponta para o Chrome já instalado na máquina.
+async function resolverConfiguracaoBrowser(): Promise<{
+  executablePath: string;
+  args: string[];
+}> {
+  const emServerless = Boolean(
+    process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
+  );
+
+  if (emServerless) {
+    const chromium = (await import("@sparticuz/chromium")).default;
+    return {
+      executablePath: await chromium.executablePath(),
+      args: chromium.args,
+    };
+  }
+
+  const executablePath =
+    process.env.PUPPETEER_EXECUTABLE_PATH ||
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+  return { executablePath, args: ["--no-sandbox", "--disable-gpu"] };
+}
 
 function escapeHtml(texto: string): string {
   return texto
@@ -102,12 +126,9 @@ ${corpo}
 /** Renderiza o texto do contrato em PDF via Chrome headless. */
 export async function gerarPdf(textoCompleto: string): Promise<Buffer> {
   const html = paginaCompleta(textoParaHtml(textoCompleto));
+  const { executablePath, args } = await resolverConfiguracaoBrowser();
 
-  const browser = await puppeteer.launch({
-    executablePath: CHROME_PATH,
-    headless: true,
-    args: ["--no-sandbox", "--disable-gpu"],
-  });
+  const browser = await puppeteer.launch({ executablePath, headless: true, args });
 
   try {
     const page = await browser.newPage();
