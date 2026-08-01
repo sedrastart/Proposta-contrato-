@@ -7,7 +7,7 @@ import {
   montarDadosContrato,
   type OverridesEditaveis,
 } from "@/lib/contrato-dados";
-import { renderContrato, renderProposta } from "@/lib/templates";
+import { renderContrato } from "@/lib/templates";
 import { proximoNumeroSequencial } from "@/lib/numero-sequencial";
 import { gerarDocx } from "@/lib/documentos/docx";
 import { gerarPdf } from "@/lib/documentos/pdf";
@@ -21,19 +21,22 @@ export type GerarPropostaResultado =
   | { sucesso: true; propostaId: string }
   | { sucesso: false; erro: string };
 
-/** Gera e grava a proposta comercial (resumo, sem cláusulas) — numeração
- * sequencial e PDF salvo no Storage própios, independentes do Contrato. */
+/** Grava a proposta comercial com o texto já editado pelo usuário (a partir
+ * do rascunho inicial) — numeração sequencial e PDF salvo no Storage
+ * próprios, independentes do Contrato. */
 export async function gerarPropostaAction(
   clienteId: string,
-  overrides: OverridesEditaveis
+  textoCompleto: string
 ): Promise<GerarPropostaResultado> {
   const cliente = await buscarClienteParaContrato(clienteId);
   if (!cliente || !cliente.regimeTributario || cliente.servicos.length === 0) {
     return { sucesso: false, erro: "Cliente sem regime, serviços ou plano definidos" };
   }
+  if (!textoCompleto.trim()) {
+    return { sucesso: false, erro: "O texto da proposta não pode estar vazio" };
+  }
 
-  const dados = { ...montarDadosContrato(cliente), ...overrides };
-  const textoCompleto = renderProposta(dados);
+  const dados = montarDadosContrato(cliente);
 
   const numeroSequencial = await proximoNumeroSequencial("proposta");
   const pdf = await gerarPdf(textoCompleto);

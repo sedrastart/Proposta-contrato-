@@ -2,7 +2,12 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { renderContrato, type DadosContrato, type ClausulaRenderavel } from "@/lib/templates";
+import {
+  renderContrato,
+  renderPropostaDraft,
+  type DadosContrato,
+  type ClausulaRenderavel,
+} from "@/lib/templates";
 import { gerarContratoAction, gerarPropostaAction } from "./actions";
 
 const inputClass =
@@ -24,6 +29,7 @@ export function PreviaEditor({
   const [isPending, startTransition] = useTransition();
   const [isPendingProposta, startTransitionProposta] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
+  const [erroProposta, setErroProposta] = useState<string | null>(null);
   const [propostaGerada, setPropostaGerada] = useState<string | null>(null);
   const [overrides, setOverrides] = useState({
     contratanteNome: dadosIniciais.contratanteNome,
@@ -33,6 +39,9 @@ export function PreviaEditor({
     vigenciaMeses: dadosIniciais.vigenciaMeses,
     multaDescricao: dadosIniciais.multaDescricao,
   });
+  const [propostaTexto, setPropostaTexto] = useState(() =>
+    renderPropostaDraft(regimeSlug, dadosIniciais)
+  );
 
   const dados: DadosContrato = useMemo(
     () => ({ ...dadosIniciais, ...overrides }),
@@ -60,29 +69,85 @@ export function PreviaEditor({
     });
   }
 
-  function baixarProposta() {
-    setErro(null);
+  function recarregarRascunho() {
+    setPropostaTexto(renderPropostaDraft(regimeSlug, dados));
+  }
+
+  function gerarProposta() {
+    setErroProposta(null);
     setPropostaGerada(null);
     startTransitionProposta(async () => {
-      const resultado = await gerarPropostaAction(clienteId, overrides);
+      const resultado = await gerarPropostaAction(clienteId, propostaTexto);
       if (!resultado.sucesso) {
-        setErro(resultado.erro);
+        setErroProposta(resultado.erro);
         return;
       }
       setPropostaGerada(resultado.propostaId);
-      router.refresh();
     });
   }
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
-      <div className="rounded-lg border border-neutral-200 bg-white p-6">
-        <p className="mb-3 text-xs uppercase tracking-wide text-neutral-500">
-          Documento renderizado (somente leitura)
-        </p>
-        <pre className="max-h-[70vh] overflow-y-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-neutral-800">
-          {texto}
-        </pre>
+      <div className="space-y-6">
+        <div className="rounded-lg border border-neutral-200 bg-white p-6">
+          <p className="mb-3 text-xs uppercase tracking-wide text-neutral-500">
+            Documento renderizado (somente leitura)
+          </p>
+          <pre className="max-h-[70vh] overflow-y-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-neutral-800">
+            {texto}
+          </pre>
+        </div>
+
+        <div className="rounded-lg border border-neutral-200 bg-white p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-xs uppercase tracking-wide text-neutral-500">
+              Proposta comercial (editável)
+            </p>
+            <button
+              type="button"
+              onClick={recarregarRascunho}
+              className="text-xs text-neutral-500 hover:underline"
+            >
+              Recarregar rascunho
+            </button>
+          </div>
+          <p className="mb-3 text-xs text-neutral-500">
+            Rascunho pré-preenchido com os dados do cliente — edite livremente
+            (adicione diagnóstico, opções de pacote, condições específicas)
+            antes de gerar o PDF.
+          </p>
+          <textarea
+            value={propostaTexto}
+            onChange={(e) => setPropostaTexto(e.target.value)}
+            rows={20}
+            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 font-mono text-xs leading-relaxed text-neutral-800 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+          />
+
+          {erroProposta && (
+            <div className="mt-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {erroProposta}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={gerarProposta}
+            disabled={isPendingProposta}
+            className="mt-3 w-full rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
+          >
+            {isPendingProposta ? "Gerando proposta..." : "Gerar proposta comercial (PDF)"}
+          </button>
+          {propostaGerada && (
+            <a
+              href={`/api/propostas/${propostaGerada}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 block rounded-md bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-700 hover:underline"
+            >
+              Proposta gerada — clique para baixar o PDF →
+            </a>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -150,29 +215,6 @@ export function PreviaEditor({
             {erro}
           </div>
         )}
-
-        <button
-          type="button"
-          onClick={baixarProposta}
-          disabled={isPendingProposta}
-          className="w-full rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
-        >
-          {isPendingProposta ? "Gerando proposta..." : "Gerar proposta comercial (PDF)"}
-        </button>
-        {propostaGerada && (
-          <a
-            href={`/api/propostas/${propostaGerada}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block rounded-md bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-700 hover:underline"
-          >
-            Proposta gerada — clique para baixar o PDF →
-          </a>
-        )}
-        <p className="text-xs text-neutral-500">
-          Resumo comercial simples (sem cláusulas) para enviar ao cliente
-          antes de fechar o contrato. Fica salva no histórico do cliente.
-        </p>
 
         <button
           type="button"
