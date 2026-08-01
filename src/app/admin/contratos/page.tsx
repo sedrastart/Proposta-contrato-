@@ -43,20 +43,31 @@ export default async function AdminContratosPage({
         afetados.
       </p>
 
-      <div className="mt-6 flex gap-1 border-b border-neutral-200">
-        {modelos.map((modelo) => (
+      <div className="mt-6 flex items-center justify-between border-b border-neutral-200">
+        <div className="flex gap-1">
+          {modelos.map((modelo) => (
+            <Link
+              key={modelo.slug}
+              href={`/admin/contratos?modelo=${modelo.slug}`}
+              className={`border-b-2 px-4 py-2 text-sm font-medium ${
+                modelo.slug === modeloAtivo?.slug
+                  ? "border-neutral-900 text-neutral-900"
+                  : "border-transparent text-neutral-500 hover:text-neutral-900"
+              }`}
+            >
+              {modelo.nome}
+            </Link>
+          ))}
+        </div>
+        {modeloAtivo && (
           <Link
-            key={modelo.slug}
-            href={`/admin/contratos?modelo=${modelo.slug}`}
-            className={`border-b-2 px-4 py-2 text-sm font-medium ${
-              modelo.slug === modeloAtivo?.slug
-                ? "border-neutral-900 text-neutral-900"
-                : "border-transparent text-neutral-500 hover:text-neutral-900"
-            }`}
+            href={`/admin/contratos/preview?modelo=${modeloAtivo.slug}`}
+            target="_blank"
+            className="mb-2 rounded-md border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
           >
-            {modelo.nome}
+            Visualizar contrato →
           </Link>
-        ))}
+        )}
       </div>
 
       {modeloAtivo && (
