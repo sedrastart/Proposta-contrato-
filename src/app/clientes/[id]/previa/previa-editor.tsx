@@ -67,10 +67,8 @@ export function PreviaEditor({
         setErro(resultado.erro);
         return;
       }
-      const link = document.createElement("a");
-      link.href = `data:application/pdf;base64,${resultado.pdfBase64}`;
-      link.download = resultado.nomeArquivo;
-      link.click();
+      window.open(`/api/propostas/${resultado.propostaId}`, "_blank");
+      router.refresh();
     });
   }
 
@@ -161,7 +159,7 @@ export function PreviaEditor({
         </button>
         <p className="text-xs text-neutral-500">
           Resumo comercial simples (sem cláusulas) para enviar ao cliente
-          antes de fechar o contrato. Não fica salvo no histórico.
+          antes de fechar o contrato. Fica salva no histórico do cliente.
         </p>
 
         <button

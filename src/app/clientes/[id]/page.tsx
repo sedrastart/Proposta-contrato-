@@ -25,7 +25,7 @@ export default async function ClienteDetalhePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [cliente, regimes, contratos] = await Promise.all([
+  const [cliente, regimes, contratos, propostas] = await Promise.all([
     prisma.cliente.findUnique({
       where: { id },
       include: { servicos: { include: { servico: true } } },
@@ -35,6 +35,10 @@ export default async function ClienteDetalhePage({
       orderBy: { ordem: "asc" },
     }),
     prisma.contrato.findMany({
+      where: { clienteId: id },
+      orderBy: { numeroSequencial: "desc" },
+    }),
+    prisma.proposta.findMany({
       where: { clienteId: id },
       orderBy: { numeroSequencial: "desc" },
     }),
@@ -164,6 +168,47 @@ export default async function ClienteDetalhePage({
           >
             Ver prévia do contrato →
           </Link>
+        </div>
+      )}
+
+      {propostas.length > 0 && (
+        <div className="mt-10">
+          <p className="mb-2 text-xs uppercase tracking-wide text-neutral-500">
+            Histórico de propostas comerciais
+          </p>
+          <div className="overflow-hidden rounded-lg border border-neutral-200">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
+                <tr>
+                  <th className="px-4 py-2 font-medium">Número</th>
+                  <th className="px-4 py-2 font-medium">Emitida em</th>
+                  <th className="px-4 py-2 font-medium">Valor</th>
+                  <th className="px-4 py-2 font-medium">Download</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {propostas.map((p) => (
+                  <tr key={p.id}>
+                    <td className="px-4 py-2 font-mono text-neutral-900">
+                      {String(p.numeroSequencial).padStart(6, "0")}
+                    </td>
+                    <td className="px-4 py-2 text-neutral-600">
+                      {new Intl.DateTimeFormat("pt-BR").format(p.dataEmissao)}
+                    </td>
+                    <td className="px-4 py-2 text-neutral-600">{p.valorFinal}</td>
+                    <td className="px-4 py-2">
+                      <a
+                        href={`/api/propostas/${p.id}`}
+                        className="text-neutral-700 hover:underline"
+                      >
+                        PDF
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

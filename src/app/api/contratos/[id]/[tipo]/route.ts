@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { lerArquivoContrato } from "@/lib/documentos/armazenamento";
+import { lerArquivoArmazenado } from "@/lib/documentos/armazenamento";
 
 const CONTENT_TYPES = {
   pdf: "application/pdf",
@@ -26,7 +26,7 @@ export async function GET(
     return new Response("Arquivo não disponível", { status: 404 });
   }
 
-  const conteudo = await lerArquivoContrato(referencia);
+  const conteudo = await lerArquivoArmazenado(referencia);
   const numero = String(contrato.numeroSequencial).padStart(6, "0");
 
   return new Response(new Uint8Array(conteudo), {

@@ -59,8 +59,31 @@ export async function salvarArquivosContrato(
   };
 }
 
-/** Lê de volta um arquivo salvo por salvarArquivosContrato, seja qual for o backend usado. */
-export async function lerArquivoContrato(referencia: string): Promise<Buffer> {
+/** Salva o PDF de uma proposta comercial, indexado pelo próprio número sequencial (independente do de contrato). */
+export async function salvarArquivoProposta(
+  numeroSequencial: number,
+  pdf: Buffer
+): Promise<{ arquivoPdf: string }> {
+  const nomeBase = `proposta-${String(numeroSequencial).padStart(6, "0")}`;
+
+  if (supabaseConfigurado()) {
+    const supabase = clienteSupabase();
+    const chavePdf = `${nomeBase}.pdf`;
+    const resultado = await supabase.storage
+      .from(BUCKET)
+      .upload(chavePdf, pdf, { contentType: CONTENT_TYPES.pdf, upsert: true });
+    if (resultado.error) throw resultado.error;
+    return { arquivoPdf: `supabase:${chavePdf}` };
+  }
+
+  await mkdir(STORAGE_ROOT, { recursive: true });
+  const caminhoPdf = path.join(STORAGE_ROOT, `${nomeBase}.pdf`);
+  await writeFile(caminhoPdf, pdf);
+  return { arquivoPdf: `local:${path.relative(process.cwd(), caminhoPdf)}` };
+}
+
+/** Lê de volta um arquivo salvo por salvarArquivosContrato/salvarArquivoProposta, seja qual for o backend usado. */
+export async function lerArquivoArmazenado(referencia: string): Promise<Buffer> {
   if (referencia.startsWith("supabase:")) {
     const chave = referencia.slice("supabase:".length);
     const supabase = clienteSupabase();

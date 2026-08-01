@@ -40,6 +40,7 @@ model Cliente {
   regimeTributario   RegimeTributario? @relation(fields: [regimeTributarioId], references: [id])
   servicos           ClienteServico[]
   contratos          Contrato[]
+  propostas          Proposta[]
 
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
@@ -221,4 +222,27 @@ model Contrato {
   criadoEm                   DateTime @default(now())
 
   @@map("contratos")
+}
+
+// Resumo comercial (sem clausulas juridicas) enviado ao cliente antes do
+// contrato. Numeracao sequencial propria (chave "proposta" no Contador),
+// independente da numeracao de Contrato.
+model Proposta {
+  id                         String   @id @default(uuid())
+  clienteId                  String
+  cliente                    Cliente  @relation(fields: [clienteId], references: [id])
+  numeroSequencial           Int      @unique
+  contratanteNomeSnapshot    String
+  contratanteCpfCnpjSnapshot String
+  enderecoSnapshot           String
+  valorFinal                 String
+  vigenciaMeses              Int
+  multaTexto                 String
+  servicosSnapshot           String
+  textoCompleto              String
+  arquivoPdf                 String?
+  dataEmissao                DateTime @default(now())
+  criadoEm                   DateTime @default(now())
+
+  @@map("propostas")
 }

@@ -162,11 +162,21 @@ export type ExcluirClienteResultado =
 export async function excluirClienteAction(
   clienteId: string
 ): Promise<ExcluirClienteResultado> {
-  const totalContratos = await prisma.contrato.count({ where: { clienteId } });
-  if (totalContratos > 0) {
+  const [totalContratos, totalPropostas] = await Promise.all([
+    prisma.contrato.count({ where: { clienteId } }),
+    prisma.proposta.count({ where: { clienteId } }),
+  ]);
+  if (totalContratos > 0 || totalPropostas > 0) {
+    const partes: string[] = [];
+    if (totalContratos > 0) {
+      partes.push(`${totalContratos} contrato${totalContratos !== 1 ? "s" : ""} emitido${totalContratos !== 1 ? "s" : ""}`);
+    }
+    if (totalPropostas > 0) {
+      partes.push(`${totalPropostas} proposta${totalPropostas !== 1 ? "s" : ""} emitida${totalPropostas !== 1 ? "s" : ""}`);
+    }
     return {
       sucesso: false,
-      erro: `Não é possível excluir: existem ${totalContratos} contrato${totalContratos !== 1 ? "s" : ""} emitido${totalContratos !== 1 ? "s" : ""} para este cliente.`,
+      erro: `Não é possível excluir: existem ${partes.join(" e ")} para este cliente.`,
     };
   }
 

@@ -11,19 +11,18 @@ import { renderContrato, renderProposta } from "@/lib/templates";
 import { proximoNumeroSequencial } from "@/lib/numero-sequencial";
 import { gerarDocx } from "@/lib/documentos/docx";
 import { gerarPdf } from "@/lib/documentos/pdf";
-import { salvarArquivosContrato } from "@/lib/documentos/armazenamento";
+import { salvarArquivosContrato, salvarArquivoProposta } from "@/lib/documentos/armazenamento";
 
 export type GerarContratoResultado =
   | { sucesso: true; contratoId: string }
   | { sucesso: false; erro: string };
 
 export type GerarPropostaResultado =
-  | { sucesso: true; pdfBase64: string; nomeArquivo: string }
+  | { sucesso: true; propostaId: string }
   | { sucesso: false; erro: string };
 
-/** Gera o PDF da proposta comercial (resumo, sem cláusulas) sob demanda —
- * não é persistida, pois é só um resumo de apoio ao envio manual, refeito a
- * qualquer momento a partir dos dados atuais do cliente. */
+/** Gera e grava a proposta comercial (resumo, sem cláusulas) — numeração
+ * sequencial e PDF salvo no Storage própios, independentes do Contrato. */
 export async function gerarPropostaAction(
   clienteId: string,
   overrides: OverridesEditaveis
@@ -34,14 +33,29 @@ export async function gerarPropostaAction(
   }
 
   const dados = { ...montarDadosContrato(cliente), ...overrides };
-  const texto = renderProposta(dados);
-  const pdf = await gerarPdf(texto);
+  const textoCompleto = renderProposta(dados);
 
-  return {
-    sucesso: true,
-    pdfBase64: pdf.toString("base64"),
-    nomeArquivo: `proposta-${cliente.razaoSocial.replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase()}.pdf`,
-  };
+  const numeroSequencial = await proximoNumeroSequencial("proposta");
+  const pdf = await gerarPdf(textoCompleto);
+  const { arquivoPdf } = await salvarArquivoProposta(numeroSequencial, pdf);
+
+  const proposta = await prisma.proposta.create({
+    data: {
+      clienteId,
+      numeroSequencial,
+      contratanteNomeSnapshot: dados.contratanteNome,
+      contratanteCpfCnpjSnapshot: dados.contratanteCpfCnpj,
+      enderecoSnapshot: dados.contratanteEndereco,
+      valorFinal: dados.valor,
+      vigenciaMeses: dados.vigenciaMeses,
+      multaTexto: dados.multaDescricao,
+      servicosSnapshot: dados.servicosSelecionados.join(", "),
+      textoCompleto,
+      arquivoPdf,
+    },
+  });
+
+  return { sucesso: true, propostaId: proposta.id };
 }
 
 export async function gerarContratoAction(
