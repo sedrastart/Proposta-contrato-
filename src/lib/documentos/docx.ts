@@ -5,8 +5,111 @@ import {
   TextRun,
   HeadingLevel,
   AlignmentType,
+  Header,
+  Footer,
+  ImageRun,
+  ExternalHyperlink,
+  PageNumber,
+  Tab,
+  TabStopType,
+  TabStopPosition,
+  HorizontalPositionAlign,
+  HorizontalPositionRelativeFrom,
+  VerticalPositionAlign,
+  VerticalPositionRelativeFrom,
 } from "docx";
 import { classificarLinha } from "./linhas";
+import { LOGO_SEDRA_PNG_BASE64, MARCA_DAGUA_PNG_BASE64 } from "./marca-assets";
+import { CONTRATADO } from "../templates/contratado";
+
+const LOGO_BUFFER = Buffer.from(LOGO_SEDRA_PNG_BASE64, "base64");
+const MARCA_DAGUA_BUFFER = Buffer.from(MARCA_DAGUA_PNG_BASE64, "base64");
+
+// Dimensões originais dos recortes (px), para manter a proporção.
+const LOGO_ORIGINAL = { width: 321, height: 288 };
+const MARCA_DAGUA_ORIGINAL = { width: 1381, height: 609 };
+
+function pxParaMm(mm: number): number {
+  return (mm / 25.4) * 96;
+}
+
+function construirCabecalho(): Header {
+  const larguraLogoMm = 20;
+  const larguraLogoPx = pxParaMm(larguraLogoMm);
+  const alturaLogoPx = larguraLogoPx * (LOGO_ORIGINAL.height / LOGO_ORIGINAL.width);
+
+  return new Header({
+    children: [
+      new Paragraph({
+        tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
+        children: [
+          new TextRun({
+            bold: true,
+            children: ["Página ", PageNumber.CURRENT, " de ", PageNumber.TOTAL_PAGES],
+          }),
+          new Tab(),
+          new ImageRun({
+            type: "png",
+            data: LOGO_BUFFER,
+            transformation: { width: larguraLogoPx, height: alturaLogoPx },
+          }),
+        ],
+      }),
+    ],
+  });
+}
+
+function construirRodape(): Footer {
+  const larguraMarcaMm = 100;
+  const larguraMarcaPx = pxParaMm(larguraMarcaMm);
+  const alturaMarcaPx =
+    larguraMarcaPx * (MARCA_DAGUA_ORIGINAL.height / MARCA_DAGUA_ORIGINAL.width);
+
+  return new Footer({
+    children: [
+      new Paragraph({
+        children: [
+          new ImageRun({
+            type: "png",
+            data: MARCA_DAGUA_BUFFER,
+            transformation: { width: larguraMarcaPx, height: alturaMarcaPx },
+            floating: {
+              horizontalPosition: {
+                relative: HorizontalPositionRelativeFrom.PAGE,
+                align: HorizontalPositionAlign.RIGHT,
+              },
+              verticalPosition: {
+                relative: VerticalPositionRelativeFrom.PAGE,
+                align: VerticalPositionAlign.BOTTOM,
+              },
+              behindDocument: true,
+              allowOverlap: true,
+            },
+          }),
+        ],
+      }),
+      new Paragraph({ children: [new TextRun({ text: `• ${CONTRATADO.telefone}` })] }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "• " }),
+          new ExternalHyperlink({
+            link: `mailto:${CONTRATADO.email}`,
+            children: [new TextRun({ text: CONTRATADO.email, style: "Hyperlink" })],
+          }),
+        ],
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "• " }),
+          new ExternalHyperlink({
+            link: `https://${CONTRATADO.site}`,
+            children: [new TextRun({ text: CONTRATADO.site, style: "Hyperlink" })],
+          }),
+        ],
+      }),
+    ],
+  });
+}
 
 /** Converte o texto do contrato (já renderizado a partir do template) em um .docx real. */
 export function gerarDocx(textoCompleto: string): Promise<Buffer> {
@@ -64,7 +167,25 @@ export function gerarDocx(textoCompleto: string): Promise<Buffer> {
   }
 
   const documento = new Document({
-    sections: [{ properties: {}, children: paragraphs }],
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: {
+              top: "36mm",
+              bottom: "28mm",
+              left: "20mm",
+              right: "20mm",
+              header: "10mm",
+              footer: "10mm",
+            },
+          },
+        },
+        headers: { default: construirCabecalho() },
+        footers: { default: construirRodape() },
+        children: paragraphs,
+      },
+    ],
   });
 
   return Packer.toBuffer(documento);
