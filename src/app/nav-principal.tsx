@@ -14,6 +14,12 @@ export function NavPrincipal() {
           <Link href="/clientes" className="hover:text-neutral-900">
             Clientes
           </Link>
+          <Link href="/propostas" className="hover:text-neutral-900">
+            Propostas
+          </Link>
+          <Link href="/contratos" className="hover:text-neutral-900">
+            Contratos
+          </Link>
           <Link href="/admin" className="hover:text-neutral-900">
             Área administrativa
           </Link>
