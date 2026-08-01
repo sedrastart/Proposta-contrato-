@@ -13,9 +13,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div>
       <div className="border-b border-neutral-200 bg-white">
         <div className="mx-auto flex w-full max-w-5xl items-center gap-1 px-6">
-          <Link href="/" className="mr-4 py-3 text-sm font-semibold text-neutral-900">
-            Sedra · admin
-          </Link>
           {ABAS.map((aba) => (
             <Link
               key={aba.href}
