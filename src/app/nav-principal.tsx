@@ -8,6 +8,9 @@ export function NavPrincipal() {
           Sedra · Propostas e Contratos
         </Link>
         <nav className="flex gap-4 text-sm font-medium text-neutral-600">
+          <Link href="/" className="hover:text-neutral-900">
+            Início
+          </Link>
           <Link href="/clientes" className="hover:text-neutral-900">
             Clientes
           </Link>
