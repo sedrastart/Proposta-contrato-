@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { renderContrato, type DadosContrato, type ClausulaRenderavel } from "@/lib/templates";
-import { gerarContratoAction } from "./actions";
+import { gerarContratoAction, gerarPropostaAction } from "./actions";
 
 const inputClass =
   "w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900";
@@ -22,6 +22,7 @@ export function PreviaEditor({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isPendingProposta, startTransitionProposta] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
   const [overrides, setOverrides] = useState({
     contratanteNome: dadosIniciais.contratanteNome,
@@ -55,6 +56,21 @@ export function PreviaEditor({
       } else {
         setErro(resultado.erro);
       }
+    });
+  }
+
+  function baixarProposta() {
+    setErro(null);
+    startTransitionProposta(async () => {
+      const resultado = await gerarPropostaAction(clienteId, overrides);
+      if (!resultado.sucesso) {
+        setErro(resultado.erro);
+        return;
+      }
+      const link = document.createElement("a");
+      link.href = `data:application/pdf;base64,${resultado.pdfBase64}`;
+      link.download = resultado.nomeArquivo;
+      link.click();
     });
   }
 
@@ -137,11 +153,24 @@ export function PreviaEditor({
 
         <button
           type="button"
+          onClick={baixarProposta}
+          disabled={isPendingProposta}
+          className="w-full rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
+        >
+          {isPendingProposta ? "Gerando proposta..." : "Baixar proposta comercial (PDF)"}
+        </button>
+        <p className="text-xs text-neutral-500">
+          Resumo comercial simples (sem cláusulas) para enviar ao cliente
+          antes de fechar o contrato. Não fica salvo no histórico.
+        </p>
+
+        <button
+          type="button"
           onClick={gerar}
           disabled={isPending}
           className="w-full rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
         >
-          {isPending ? "Gerando documentos..." : "Gerar Proposta + Contrato (PDF/DOCX) →"}
+          {isPending ? "Gerando documentos..." : "Gerar Contrato (PDF/DOCX) →"}
         </button>
       </div>
     </div>

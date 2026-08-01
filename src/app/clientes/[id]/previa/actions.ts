@@ -7,7 +7,7 @@ import {
   montarDadosContrato,
   type OverridesEditaveis,
 } from "@/lib/contrato-dados";
-import { renderContrato } from "@/lib/templates";
+import { renderContrato, renderProposta } from "@/lib/templates";
 import { proximoNumeroSequencial } from "@/lib/numero-sequencial";
 import { gerarDocx } from "@/lib/documentos/docx";
 import { gerarPdf } from "@/lib/documentos/pdf";
@@ -16,6 +16,33 @@ import { salvarArquivosContrato } from "@/lib/documentos/armazenamento";
 export type GerarContratoResultado =
   | { sucesso: true; contratoId: string }
   | { sucesso: false; erro: string };
+
+export type GerarPropostaResultado =
+  | { sucesso: true; pdfBase64: string; nomeArquivo: string }
+  | { sucesso: false; erro: string };
+
+/** Gera o PDF da proposta comercial (resumo, sem cláusulas) sob demanda —
+ * não é persistida, pois é só um resumo de apoio ao envio manual, refeito a
+ * qualquer momento a partir dos dados atuais do cliente. */
+export async function gerarPropostaAction(
+  clienteId: string,
+  overrides: OverridesEditaveis
+): Promise<GerarPropostaResultado> {
+  const cliente = await buscarClienteParaContrato(clienteId);
+  if (!cliente || !cliente.regimeTributario || cliente.servicos.length === 0) {
+    return { sucesso: false, erro: "Cliente sem regime, serviços ou plano definidos" };
+  }
+
+  const dados = { ...montarDadosContrato(cliente), ...overrides };
+  const texto = renderProposta(dados);
+  const pdf = await gerarPdf(texto);
+
+  return {
+    sucesso: true,
+    pdfBase64: pdf.toString("base64"),
+    nomeArquivo: `proposta-${cliente.razaoSocial.replace(/[^a-zA-Z0-9]+/g, "-").toLowerCase()}.pdf`,
+  };
+}
 
 export async function gerarContratoAction(
   clienteId: string,

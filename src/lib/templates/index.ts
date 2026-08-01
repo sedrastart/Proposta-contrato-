@@ -5,6 +5,7 @@ import { renderContratoGeral } from "./contrato-geral";
 
 export type { DadosContrato } from "./types";
 export type { ClausulaRenderavel } from "./motor";
+export { renderProposta } from "./proposta";
 
 export function renderContrato(
   regimeSlug: string,
