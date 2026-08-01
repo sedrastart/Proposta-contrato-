@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import {
   buscarClienteParaContrato,
+  buscarClausulasModelo,
   montarDadosContrato,
   type OverridesEditaveis,
 } from "@/lib/contrato-dados";
@@ -25,8 +26,9 @@ export async function gerarContratoAction(
     return { sucesso: false, erro: "Cliente sem regime, serviços ou plano definidos" };
   }
 
+  const clausulas = await buscarClausulasModelo(cliente.regimeTributario.slug);
   const dados = { ...montarDadosContrato(cliente), ...overrides };
-  const textoCompleto = renderContrato(cliente.regimeTributario.slug, dados);
+  const textoCompleto = renderContrato(cliente.regimeTributario.slug, dados, clausulas);
 
   const numeroSequencial = await proximoNumeroSequencial("contrato");
 

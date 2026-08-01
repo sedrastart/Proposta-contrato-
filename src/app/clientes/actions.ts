@@ -155,6 +155,27 @@ export async function atualizarServicosAction(
   revalidatePath(`/clientes/${clienteId}`);
 }
 
+export type ExcluirClienteResultado =
+  | { sucesso: true }
+  | { sucesso: false; erro: string };
+
+export async function excluirClienteAction(
+  clienteId: string
+): Promise<ExcluirClienteResultado> {
+  const totalContratos = await prisma.contrato.count({ where: { clienteId } });
+  if (totalContratos > 0) {
+    return {
+      sucesso: false,
+      erro: `Não é possível excluir: existem ${totalContratos} contrato${totalContratos !== 1 ? "s" : ""} emitido${totalContratos !== 1 ? "s" : ""} para este cliente.`,
+    };
+  }
+
+  await prisma.cliente.delete({ where: { id: clienteId } });
+  revalidatePath("/clientes");
+  revalidatePath("/");
+  return { sucesso: true };
+}
+
 export async function definirPlanoAction(
   clienteId: string,
   servicoId: string,

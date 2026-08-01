@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { buscarClienteParaContrato, montarDadosContrato } from "@/lib/contrato-dados";
+import {
+  buscarClienteParaContrato,
+  buscarClausulasModelo,
+  montarDadosContrato,
+} from "@/lib/contrato-dados";
 import { PreviaEditor } from "./previa-editor";
 
 export default async function PreviaPage({
@@ -28,6 +32,7 @@ export default async function PreviaPage({
   }
 
   const dados = montarDadosContrato(cliente);
+  const clausulas = await buscarClausulasModelo(cliente.regimeTributario.slug);
 
   return (
     <main className="mx-auto w-full max-w-6xl px-6 py-10">
@@ -52,6 +57,7 @@ export default async function PreviaPage({
         clienteId={cliente.id}
         regimeSlug={cliente.regimeTributario.slug}
         dadosIniciais={dados}
+        clausulas={clausulas}
       />
     </main>
   );

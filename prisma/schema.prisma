@@ -167,6 +167,36 @@ model Contador {
   @@map("contadores")
 }
 
+// Um dos dois modelos de contrato ("geral" para Simples/Presumido/Real e
+// "mei" para MEI) — agrupa as cláusulas e anexos editáveis pela área
+// administrativa, para que ajustes de texto jurídico não exijam deploy.
+model ModeloContrato {
+  id        String           @id @default(uuid())
+  slug      String           @unique
+  nome      String
+  clausulas ClausulaModelo[]
+
+  @@map("modelos_contrato")
+}
+
+// Cada cláusula (tipo "clausula") ou anexo (tipo "anexo") do modelo. O corpo
+// pode conter placeholders {{chave}} — ex.: {{valor}}, {{vigenciaTexto}} —
+// substituídos em runtime a partir dos dados do cliente/plano escolhido. O
+// cabeçalho (identificação das partes) e o bloco de assinatura continuam
+// fixos no código, não são cláusulas.
+model ClausulaModelo {
+  id               String         @id @default(uuid())
+  modeloContratoId String
+  modeloContrato   ModeloContrato @relation(fields: [modeloContratoId], references: [id], onDelete: Cascade)
+  tipo             String
+  titulo           String
+  corpo            String
+  ordem            Int            @default(0)
+  ativo            Boolean        @default(true)
+
+  @@map("clausulas_modelo")
+}
+
 // Documento efetivamente emitido. Guarda um snapshot completo (texto
 // renderizado, campos editáveis, regime usado) no momento da emissão, para
 // que edições futuras nos modelos/planos não alterem contratos já emitidos.

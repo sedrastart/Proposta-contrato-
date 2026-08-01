@@ -1,6 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { formatCpfCnpj, currency, dataExtenso } from "@/lib/format";
-import type { DadosContrato } from "@/lib/templates";
+import type { DadosContrato, ClausulaRenderavel } from "@/lib/templates";
+
+/** Cláusulas ativas do modelo (geral ou mei), na ordem de exibição no documento. */
+export async function buscarClausulasModelo(
+  regimeSlug: string
+): Promise<ClausulaRenderavel[]> {
+  const slugModelo = regimeSlug === "mei" ? "mei" : "geral";
+  return prisma.clausulaModelo.findMany({
+    where: { modeloContrato: { slug: slugModelo }, ativo: true },
+    orderBy: { ordem: "asc" },
+    select: { tipo: true, titulo: true, corpo: true },
+  });
+}
 
 export async function buscarClienteParaContrato(clienteId: string) {
   return prisma.cliente.findUnique({

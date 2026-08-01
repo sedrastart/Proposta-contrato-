@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatCpfCnpj } from "@/lib/format";
+import { BotaoExcluirCliente } from "../botao-excluir-cliente";
 import { RegimeSelector } from "./regime-selector";
 import { ServicoSelector } from "./servico-selector";
 import { PlanoSelector } from "./plano-selector";
@@ -83,9 +84,12 @@ export default async function ClienteDetalhePage({
             </p>
           )}
         </div>
-        <span className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-600">
-          {cliente.tipoPessoa === "PJ" ? "Pessoa Jurídica" : "Pessoa Física"}
-        </span>
+        <div className="flex flex-col items-end gap-2">
+          <span className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-600">
+            {cliente.tipoPessoa === "PJ" ? "Pessoa Jurídica" : "Pessoa Física"}
+          </span>
+          <BotaoExcluirCliente clienteId={cliente.id} nomeCliente={cliente.razaoSocial} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-x-6 divide-y divide-neutral-100 rounded-lg border border-neutral-200 p-5">

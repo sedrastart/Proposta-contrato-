@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { renderContrato, type DadosContrato } from "@/lib/templates";
+import { renderContrato, type DadosContrato, type ClausulaRenderavel } from "@/lib/templates";
 import { gerarContratoAction } from "./actions";
 
 const inputClass =
@@ -13,10 +13,12 @@ export function PreviaEditor({
   clienteId,
   regimeSlug,
   dadosIniciais,
+  clausulas,
 }: {
   clienteId: string;
   regimeSlug: string;
   dadosIniciais: DadosContrato;
+  clausulas: ClausulaRenderavel[];
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -35,7 +37,10 @@ export function PreviaEditor({
     [dadosIniciais, overrides]
   );
 
-  const texto = useMemo(() => renderContrato(regimeSlug, dados), [regimeSlug, dados]);
+  const texto = useMemo(
+    () => renderContrato(regimeSlug, dados, clausulas),
+    [regimeSlug, dados, clausulas]
+  );
 
   function set<K extends keyof typeof overrides>(campo: K, valor: (typeof overrides)[K]) {
     setOverrides((prev) => ({ ...prev, [campo]: valor }));

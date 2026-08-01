@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatCpfCnpj } from "@/lib/format";
+import { BotaoExcluirCliente } from "./botao-excluir-cliente";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,7 @@ export default async function ClientesPage() {
                 <th className="px-4 py-3 font-medium">CPF/CNPJ</th>
                 <th className="px-4 py-3 font-medium">Cidade/UF</th>
                 <th className="px-4 py-3 font-medium">Cadastrado em</th>
+                <th className="px-4 py-3 font-medium"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
@@ -61,6 +63,12 @@ export default async function ClientesPage() {
                   </td>
                   <td className="px-4 py-3 text-neutral-500">
                     {new Intl.DateTimeFormat("pt-BR").format(cliente.criadoEm)}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <BotaoExcluirCliente
+                      clienteId={cliente.id}
+                      nomeCliente={cliente.razaoSocial}
+                    />
                   </td>
                 </tr>
               ))}
