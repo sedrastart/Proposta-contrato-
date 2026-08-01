@@ -1,5 +1,6 @@
 import puppeteer from "puppeteer-core";
 import { classificarLinha } from "./linhas";
+import { carimbarPaginas } from "./marca-dagua";
 
 // Em produção (Vercel/AWS Lambda, Linux) não existe um Chrome instalado nem
 // disco gravável fora de /tmp — usamos o binário do @sparticuz/chromium,
@@ -93,7 +94,7 @@ function paginaCompleta(corpo: string): string {
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { size: A4; margin: 22mm 20mm; }
+  @page { size: A4; margin: 36mm 20mm 28mm; }
   body {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 11.5pt;
@@ -137,7 +138,7 @@ export async function gerarPdf(textoCompleto: string): Promise<Buffer> {
       format: "A4",
       printBackground: true,
     });
-    return Buffer.from(pdf);
+    return await carimbarPaginas(Buffer.from(pdf));
   } finally {
     await browser.close();
   }
