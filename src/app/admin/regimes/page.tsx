@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { criarRegimeAction } from "./actions";
 import { LinhaRegime } from "./linha-regime";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminRegimesPage() {
   const regimes = await prisma.regimeTributario.findMany({
     orderBy: { ordem: "asc" },

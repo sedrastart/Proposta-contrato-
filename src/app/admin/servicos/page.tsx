@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { criarServicoAction } from "./actions";
 import { LinhaServico } from "./linha-servico";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminServicosPage() {
   const [servicos, regimes] = await Promise.all([
     prisma.servico.findMany({

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatCpfCnpj } from "@/lib/format";
 
+export const dynamic = "force-dynamic";
+
 export default async function ClientesPage() {
   const clientes = await prisma.cliente.findMany({
     orderBy: { criadoEm: "desc" },

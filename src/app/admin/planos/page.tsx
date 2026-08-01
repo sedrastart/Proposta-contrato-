@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { criarPlanoAction } from "./actions";
 import { PlanoCard } from "./plano-card";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPlanosPage() {
   const [servicos, regimes, planos] = await Promise.all([
     prisma.servico.findMany({ where: { ativo: true }, orderBy: { ordem: "asc" } }),
