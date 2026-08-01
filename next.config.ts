@@ -8,13 +8,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
-  // O Prisma Client carrega o binario da query engine via require dinamico
-  // (baseado na plataforma detectada em runtime), o que o rastreador de
-  // arquivos do Next nao consegue seguir sozinho — sem isso, o .so.node fica
-  // de fora do bundle da serverless function na Vercel.
-  outputFileTracingIncludes: {
-    "/**/*": ["./src/generated/prisma/**/*"],
-  },
 };
 
 export default nextConfig;
