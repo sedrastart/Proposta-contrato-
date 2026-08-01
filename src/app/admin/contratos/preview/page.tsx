@@ -1,51 +1,8 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
-import { renderContrato, type DadosContrato } from "@/lib/templates";
+import { renderContrato } from "@/lib/templates";
+import { buscarPreviewModelo } from "@/lib/documentos/preview-modelo";
 
 export const dynamic = "force-dynamic";
-
-const DADOS_EXEMPLO_GERAL: DadosContrato = {
-  contratanteNome: "Empresa Exemplo LTDA",
-  contratanteCpfCnpj: "12.345.678/0001-90",
-  contratanteEndereco: "Avenida Paulista, 1000 - Bela Vista, São Paulo/SP",
-  contratanteCidadeUf: "São Paulo/SP",
-  contratanteCep: "01310-100",
-  valor: "R$ 199,90",
-  vigenciaMeses: 12,
-  multaDescricao: "50% do valor das mensalidades vincendas, limitada ao prazo restante do contrato",
-  dataEmissaoExtenso: "1 de agosto de 2026",
-  cidadeEmissao: "São Paulo",
-  servicosSelecionados: ["Contabilidade", "Departamento Pessoal"],
-  limitesUso: [],
-};
-
-const DADOS_EXEMPLO_MEI: DadosContrato = {
-  ...DADOS_EXEMPLO_GERAL,
-  contratanteNome: "João da Silva Comércio (MEI)",
-  contratanteCpfCnpj: "12.345.678/0001-90",
-  valor: "R$ 39,90",
-  servicosSelecionados: ["Contabilidade"],
-  multaDescricao: "50% do valor restante até o término do contrato",
-  limitesUso: [
-    {
-      unidade: "notas fiscais",
-      quantidade: 3,
-      tipoCobranca: "por_unidade",
-      valorPorUnidade: "R$ 5,00",
-      faixas: [],
-    },
-    {
-      unidade: "lançamentos",
-      quantidade: 50,
-      tipoCobranca: "faixa",
-      faixas: [
-        { percentualAte: 33, valorAdicional: "R$ 9,90" },
-        { percentualAte: 66, valorAdicional: "R$ 19,90" },
-        { percentualAte: 999, valorAdicional: "R$ 29,90" },
-      ],
-    },
-  ],
-};
 
 export default async function PreviewModeloContratoPage({
   searchParams,
@@ -53,15 +10,7 @@ export default async function PreviewModeloContratoPage({
   searchParams: Promise<{ modelo?: string }>;
 }) {
   const { modelo = "geral" } = await searchParams;
-  const regimeSlug = modelo === "mei" ? "mei" : "geral";
-
-  const clausulas = await prisma.clausulaModelo.findMany({
-    where: { modeloContrato: { slug: regimeSlug }, ativo: true },
-    orderBy: { ordem: "asc" },
-    select: { tipo: true, titulo: true, corpo: true },
-  });
-
-  const dados = regimeSlug === "mei" ? DADOS_EXEMPLO_MEI : DADOS_EXEMPLO_GERAL;
+  const { regimeSlug, dados, clausulas } = await buscarPreviewModelo(modelo);
   const texto = renderContrato(regimeSlug, dados, clausulas);
 
   return (
@@ -72,12 +21,24 @@ export default async function PreviewModeloContratoPage({
       >
         ← Voltar para edição
       </Link>
-      <h1 className="mt-2 text-2xl font-semibold text-neutral-900">
-        Visualização — {regimeSlug === "mei" ? "Modelo MEI" : "Modelo Geral"}
-      </h1>
+      <div className="mt-2 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-neutral-900">
+          Visualização — {regimeSlug === "mei" ? "Modelo MEI" : "Modelo Geral"}
+        </h1>
+        <a
+          href={`/api/admin/contratos/preview-pdf?modelo=${regimeSlug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+        >
+          Ver como PDF (com logo e marca d&apos;água) →
+        </a>
+      </div>
       <p className="mt-1 text-sm text-neutral-500">
         Gerado com dados de exemplo (não é um cliente real) — só para
-        conferir como o texto fica com as cláusulas atuais.
+        conferir como fica com as cláusulas atuais. O texto abaixo é só o
+        conteúdo bruto; use o botão acima para ver como sai o documento
+        oficial (logo, marca d&apos;água, numeração e rodapé).
       </p>
 
       <div className="mt-6 rounded-lg border border-neutral-200 bg-white p-6">
