@@ -24,6 +24,7 @@ export function PreviaEditor({
   const [isPending, startTransition] = useTransition();
   const [isPendingProposta, startTransitionProposta] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
+  const [propostaGerada, setPropostaGerada] = useState<string | null>(null);
   const [overrides, setOverrides] = useState({
     contratanteNome: dadosIniciais.contratanteNome,
     contratanteCpfCnpj: dadosIniciais.contratanteCpfCnpj,
@@ -61,13 +62,14 @@ export function PreviaEditor({
 
   function baixarProposta() {
     setErro(null);
+    setPropostaGerada(null);
     startTransitionProposta(async () => {
       const resultado = await gerarPropostaAction(clienteId, overrides);
       if (!resultado.sucesso) {
         setErro(resultado.erro);
         return;
       }
-      window.open(`/api/propostas/${resultado.propostaId}`, "_blank");
+      setPropostaGerada(resultado.propostaId);
       router.refresh();
     });
   }
@@ -155,8 +157,18 @@ export function PreviaEditor({
           disabled={isPendingProposta}
           className="w-full rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
         >
-          {isPendingProposta ? "Gerando proposta..." : "Baixar proposta comercial (PDF)"}
+          {isPendingProposta ? "Gerando proposta..." : "Gerar proposta comercial (PDF)"}
         </button>
+        {propostaGerada && (
+          <a
+            href={`/api/propostas/${propostaGerada}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block rounded-md bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-700 hover:underline"
+          >
+            Proposta gerada — clique para baixar o PDF →
+          </a>
+        )}
         <p className="text-xs text-neutral-500">
           Resumo comercial simples (sem cláusulas) para enviar ao cliente
           antes de fechar o contrato. Fica salva no histórico do cliente.
