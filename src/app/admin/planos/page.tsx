@@ -22,9 +22,9 @@ export default async function AdminPlanosPage() {
     <main className="mx-auto w-full max-w-4xl px-6 py-10">
       <h1 className="text-2xl font-semibold text-neutral-900">Planos</h1>
       <p className="mt-1 text-sm text-neutral-500">
-        Valor, vigência, multa e limites de uso com faixas de excedente —
-        exatamente o que os dois contratos reais (MEI e geral) usam para
-        montar as cláusulas dinâmicas.
+        Valor, vigência, multa, condição de pagamento e limites de uso com
+        faixas de excedente — os dados que alimentam as cláusulas dinâmicas
+        de cada um dos 6 modelos de contrato e proposta.
       </p>
 
       <div className="mt-6">
