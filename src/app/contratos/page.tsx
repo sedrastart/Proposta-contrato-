@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { STATUS_CONTRATO_LABEL, type StatusContrato } from "@/lib/contrato-status";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +55,9 @@ export default async function ContratosPage() {
                     {new Intl.DateTimeFormat("pt-BR").format(c.dataEmissao)}
                   </td>
                   <td className="px-4 py-2 text-neutral-600">{c.valorFinal}</td>
-                  <td className="px-4 py-2 text-neutral-600">{c.status}</td>
+                  <td className="px-4 py-2 text-neutral-600">
+                    {STATUS_CONTRATO_LABEL[c.status as StatusContrato] ?? c.status}
+                  </td>
                   <td className="px-4 py-2">
                     <a href={`/api/contratos/${c.id}/pdf`} className="text-neutral-700 hover:underline">
                       PDF

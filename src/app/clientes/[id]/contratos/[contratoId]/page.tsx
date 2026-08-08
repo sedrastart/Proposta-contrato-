@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { ContratoStatusSelector } from "./status-selector";
 
 export default async function ContratoEmitidoPage({
   params,
@@ -9,7 +10,10 @@ export default async function ContratoEmitidoPage({
 }) {
   const { id, contratoId } = await params;
 
-  const contrato = await prisma.contrato.findUnique({ where: { id: contratoId } });
+  const contrato = await prisma.contrato.findUnique({
+    where: { id: contratoId },
+    include: { propostaOrigem: { select: { id: true, numeroSequencial: true } } },
+  });
   if (!contrato || contrato.clienteId !== id) notFound();
 
   const numero = String(contrato.numeroSequencial).padStart(6, "0");
@@ -32,7 +36,9 @@ export default async function ContratoEmitidoPage({
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-neutral-500">Status</dt>
-            <dd className="mt-0.5 text-neutral-900">{contrato.status}</dd>
+            <dd className="mt-0.5">
+              <ContratoStatusSelector contratoId={contrato.id} statusAtual={contrato.status} />
+            </dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-neutral-500">Emitido em</dt>
@@ -70,6 +76,15 @@ export default async function ContratoEmitidoPage({
         >
           Baixar DOCX
         </a>
+        {contrato.propostaOrigem && (
+          <Link
+            href={`/clientes/${id}/propostas/${contrato.propostaOrigem.id}`}
+            className="flex items-center rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          >
+            Gerado a partir da proposta nº{" "}
+            {String(contrato.propostaOrigem.numeroSequencial).padStart(6, "0")} →
+          </Link>
+        )}
       </div>
 
       <div className="mt-8 rounded-lg border border-neutral-200 bg-white p-6">

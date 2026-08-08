@@ -7,6 +7,7 @@ import { RegimeSelector } from "./regime-selector";
 import { ServicoSelector } from "./servico-selector";
 import { PlanoSelector } from "./plano-selector";
 import { STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
+import { STATUS_CONTRATO_LABEL, type StatusContrato } from "@/lib/contrato-status";
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
@@ -264,7 +265,9 @@ export default async function ClienteDetalhePage({
                       {new Intl.DateTimeFormat("pt-BR").format(c.dataEmissao)}
                     </td>
                     <td className="px-4 py-2 text-neutral-600">{c.valorFinal}</td>
-                    <td className="px-4 py-2 text-neutral-600">{c.status}</td>
+                    <td className="px-4 py-2 text-neutral-600">
+                      {STATUS_CONTRATO_LABEL[c.status as StatusContrato] ?? c.status}
+                    </td>
                     <td className="px-4 py-2">
                       <a
                         href={`/api/contratos/${c.id}/pdf`}
