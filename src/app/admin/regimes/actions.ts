@@ -30,15 +30,23 @@ export async function criarRegimeAction(formData: FormData) {
     orderBy: { ordem: "desc" },
   });
 
-  await prisma.regimeTributario.create({
-    data: {
-      nome,
-      slug: slugify(nome),
-      ordem: (ultimo?.ordem ?? 0) + 1,
-    },
-  });
+  const slug = slugify(nome);
+
+  await prisma.$transaction([
+    prisma.regimeTributario.create({
+      data: {
+        nome,
+        slug,
+        ordem: (ultimo?.ordem ?? 0) + 1,
+      },
+    }),
+    prisma.modeloContrato.create({
+      data: { slug, nome },
+    }),
+  ]);
 
   revalidatePath("/admin/regimes");
+  revalidatePath("/admin/contratos");
 }
 
 export async function atualizarRegimeAction(

@@ -41,6 +41,7 @@ export default async function AdminPlanosPage() {
             name="servicoId"
             required
             className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            title="Qual serviço esse plano se aplica (ex.: Contabilidade, Departamento Pessoal)"
           >
             <option value="">Serviço...</option>
             {servicos.map((s) => (
@@ -52,6 +53,7 @@ export default async function AdminPlanosPage() {
           <select
             name="regimeTributarioId"
             className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            title="Deixe em branco se o plano vale para qualquer regime do serviço, ou escolha um regime específico (ex.: MEI) se este plano for exclusivo dele"
           >
             <option value="">Qualquer regime do serviço</option>
             {regimes.map((r) => (
@@ -65,6 +67,7 @@ export default async function AdminPlanosPage() {
             placeholder="Nome do plano"
             required
             className="col-span-2 rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            title="Nome do plano, como aparece para o cliente (ex.: 'Plano Essencial')"
           />
           <input
             name="valor"
@@ -73,6 +76,7 @@ export default async function AdminPlanosPage() {
             placeholder="Valor mensal (R$)"
             required
             className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            title="Valor mensal cobrado do cliente nesse plano"
           />
           <input
             name="vigenciaMeses"
@@ -80,6 +84,7 @@ export default async function AdminPlanosPage() {
             placeholder="Vigência (meses)"
             required
             className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            title="Duração do contrato em meses (ex.: 12 = um ano)"
           />
           <input
             name="multaPercentual"
@@ -87,16 +92,19 @@ export default async function AdminPlanosPage() {
             step="0.01"
             placeholder="Multa (%) — opcional"
             className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            title="Percentual de multa cobrado se o cliente quebrar o contrato antes do fim da vigência (opcional)"
           />
           <input
             name="multaDescricao"
             placeholder='Texto da multa (ex.: "50% do saldo restante")'
             className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            title="Como a multa aparece escrita no contrato"
           />
           <select
             name="condicaoPagamento"
             defaultValue="a_vista"
             className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            title="Se o pagamento desse plano é à vista ou dividido em parcelas — vira o padrão sugerido ao gerar o contrato"
           >
             <option value="a_vista">à vista</option>
             <option value="parcelado">parcelado</option>
@@ -108,6 +116,7 @@ export default async function AdminPlanosPage() {
             defaultValue={1}
             placeholder="Número de parcelas"
             className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+            title="Em quantas vezes o pagamento é dividido (só usado se a condição for 'parcelado')"
           />
         </div>
         <button

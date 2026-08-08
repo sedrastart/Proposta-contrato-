@@ -123,6 +123,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
           value={campos.nome}
           onChange={(e) => setCampos({ ...campos, nome: e.target.value })}
           onBlur={salvar}
+          title="Nome do plano, como aparece para o cliente (ex.: 'Plano Essencial')"
         />
         <label className="text-xs text-neutral-500">
           Valor (R$)
@@ -133,6 +134,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             value={campos.valor}
             onChange={(e) => setCampos({ ...campos, valor: Number(e.target.value) })}
             onBlur={salvar}
+            title="Valor mensal cobrado do cliente nesse plano"
           />
         </label>
         <label className="text-xs text-neutral-500">
@@ -143,6 +145,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             value={campos.vigenciaMeses}
             onChange={(e) => setCampos({ ...campos, vigenciaMeses: Number(e.target.value) })}
             onBlur={salvar}
+            title="Duração do contrato em meses (ex.: 12 = um ano)"
           />
         </label>
         <label className="text-xs text-neutral-500">
@@ -154,6 +157,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             value={campos.multaPercentual}
             onChange={(e) => setCampos({ ...campos, multaPercentual: e.target.value })}
             onBlur={salvar}
+            title="Percentual de multa cobrado se o cliente quebrar o contrato antes do fim da vigência (opcional)"
           />
         </label>
         <label className="text-xs text-neutral-500">
@@ -163,6 +167,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             value={campos.multaDescricao}
             onChange={(e) => setCampos({ ...campos, multaDescricao: e.target.value })}
             onBlur={salvar}
+            title="Como a multa aparece escrita no contrato (ex.: '50% do saldo restante')"
           />
         </label>
         <label className="text-xs text-neutral-500">
@@ -170,6 +175,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
           <select
             className={`${inputClass} mt-0.5 w-full`}
             value={campos.condicaoPagamento}
+            title="Se o pagamento desse plano é à vista ou dividido em parcelas — vira o padrão sugerido ao gerar o contrato (o usuário ainda pode trocar por cliente)"
             onChange={(e) => {
               const condicaoPagamento = e.target.value;
               setCampos({ ...campos, condicaoPagamento });
@@ -200,13 +206,17 @@ export function PlanoCard({ plano }: { plano: Plano }) {
               value={campos.parcelas}
               onChange={(e) => setCampos({ ...campos, parcelas: Number(e.target.value) })}
               onBlur={salvar}
+              title="Em quantas vezes o pagamento é dividido (ex.: 3 = parcelado em 3x)"
             />
           </label>
         )}
       </div>
 
       {plano.limites.length > 0 && (
-        <div className="mt-4 space-y-2">
+        <div
+          className="mt-4 space-y-2"
+          title="Quantidade incluída no plano por mês e como cobrar o que passar disso"
+        >
           <p className="text-xs uppercase tracking-wide text-neutral-500">Limites de uso</p>
           {plano.limites.map((limite) => (
             <LimiteRow key={limite.id} limite={limite} />
@@ -220,6 +230,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
           value={novoLimite.unidade}
           onChange={(e) => setNovoLimite({ ...novoLimite, unidade: e.target.value })}
           className={`${inputClass} w-40`}
+          title="O que você quer limitar/cobrar por excedente (ex.: 'lançamentos', 'notas fiscais', 'colaboradores')"
         />
         <input
           type="number"
@@ -227,6 +238,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
           value={novoLimite.quantidade}
           onChange={(e) => setNovoLimite({ ...novoLimite, quantidade: e.target.value })}
           className={`${inputClass} w-24`}
+          title="Quantidade já incluída no valor mensal do plano — o que passar disso é cobrado à parte"
         />
         <select
           value={novoLimite.tipoCobranca}
@@ -234,6 +246,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             setNovoLimite({ ...novoLimite, tipoCobranca: e.target.value as "por_unidade" | "faixa" })
           }
           className={inputClass}
+          title="Como cobrar o que passar da quantidade incluída: valor fixo por unidade extra, ou faixas por % de excedente"
         >
           <option value="por_unidade">por unidade</option>
           <option value="faixa">faixas (%)</option>
@@ -246,12 +259,14 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             value={novoLimite.valorPorUnidade}
             onChange={(e) => setNovoLimite({ ...novoLimite, valorPorUnidade: e.target.value })}
             className={`${inputClass} w-28`}
+            title="Valor cobrado para cada unidade que passar da quantidade incluída"
           />
         )}
         <button
           type="button"
           onClick={adicionarLimite}
           className="rounded-md border border-neutral-300 px-3 py-1 text-sm text-neutral-700 hover:bg-neutral-50"
+          title="Adiciona este limite de uso ao plano"
         >
           + limite
         </button>
@@ -301,6 +316,7 @@ function LimiteRow({ limite }: { limite: Limite }) {
           onChange={(e) => setQuantidade(Number(e.target.value))}
           onBlur={salvar}
           className={`${inputClass} w-20`}
+          title="Quantidade incluída no plano por mês"
         />
         <span className="text-sm text-neutral-600">{limite.unidade}/mês —</span>
         {limite.tipoCobranca === "por_unidade" ? (
@@ -312,13 +328,19 @@ function LimiteRow({ limite }: { limite: Limite }) {
               onChange={(e) => setValorPorUnidade(Number(e.target.value))}
               onBlur={salvar}
               className={`${inputClass} w-24`}
+              title="Valor cobrado para cada unidade que passar da quantidade incluída"
             />
             <span className="text-sm text-neutral-600">por unidade excedente</span>
           </>
         ) : (
           <span className="text-sm text-neutral-600">faixas por % de excedente</span>
         )}
-        <button type="button" onClick={remover} className="ml-auto text-xs text-red-600 hover:underline">
+        <button
+          type="button"
+          onClick={remover}
+          className="ml-auto text-xs text-red-600 hover:underline"
+          title="Remove este limite de uso do plano"
+        >
           remover limite
         </button>
       </div>
@@ -335,6 +357,7 @@ function LimiteRow({ limite }: { limite: Limite }) {
               value={novaFaixa.percentualAte}
               onChange={(e) => setNovaFaixa({ ...novaFaixa, percentualAte: e.target.value })}
               className={`${inputClass} w-32`}
+              title="Até quantos % de excedente essa faixa vale (ex.: 33 = até 33% acima da quantidade incluída)"
             />
             <input
               type="number"
@@ -343,11 +366,13 @@ function LimiteRow({ limite }: { limite: Limite }) {
               value={novaFaixa.valorAdicional}
               onChange={(e) => setNovaFaixa({ ...novaFaixa, valorAdicional: e.target.value })}
               className={`${inputClass} w-24`}
+              title="Valor extra cobrado quando o excedente cai dentro dessa faixa"
             />
             <button
               type="button"
               onClick={adicionarFaixa}
               className="text-xs text-neutral-600 hover:underline"
+              title="Adiciona esta faixa de excedente ao limite"
             >
               + faixa
             </button>
@@ -384,6 +409,7 @@ function FaixaRow({ faixa }: { faixa: Faixa }) {
         onChange={(e) => setPercentualAte(Number(e.target.value))}
         onBlur={salvar}
         className={`${inputClass} w-20`}
+        title="Até quantos % de excedente essa faixa vale"
       />
       <span className="text-xs text-neutral-500">% =</span>
       <input
@@ -393,8 +419,14 @@ function FaixaRow({ faixa }: { faixa: Faixa }) {
         onChange={(e) => setValorAdicional(Number(e.target.value))}
         onBlur={salvar}
         className={`${inputClass} w-24`}
+        title="Valor extra cobrado quando o excedente cai dentro dessa faixa"
       />
-      <button type="button" onClick={remover} className="text-xs text-red-600 hover:underline">
+      <button
+        type="button"
+        onClick={remover}
+        className="text-xs text-red-600 hover:underline"
+        title="Remove esta faixa"
+      >
         remover
       </button>
     </div>

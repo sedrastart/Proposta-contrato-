@@ -163,6 +163,7 @@ export function PreviaEditor({
                 className={inputClass}
                 value={overrides.contratanteNome}
                 onChange={(e) => set("contratanteNome", e.target.value)}
+                title="Nome que aparece no contrato como contratante — vem do cadastro, mas pode ajustar aqui só para este contrato"
               />
             </div>
             <div>
@@ -171,6 +172,7 @@ export function PreviaEditor({
                 className={inputClass}
                 value={overrides.contratanteCpfCnpj}
                 onChange={(e) => set("contratanteCpfCnpj", e.target.value)}
+                title="CPF ou CNPJ do contratante como aparece no contrato"
               />
             </div>
             <div>
@@ -180,6 +182,7 @@ export function PreviaEditor({
                 rows={2}
                 value={overrides.contratanteEndereco}
                 onChange={(e) => set("contratanteEndereco", e.target.value)}
+                title="Endereço completo do contratante como aparece no contrato"
               />
             </div>
             <div>
@@ -188,6 +191,7 @@ export function PreviaEditor({
                 className={inputClass}
                 value={overrides.valor}
                 onChange={(e) => set("valor", e.target.value)}
+                title="Valor cobrado, como texto pronto para o contrato (ex.: 'R$ 350,00')"
               />
             </div>
             <div>
@@ -198,6 +202,7 @@ export function PreviaEditor({
                 className={inputClass}
                 value={overrides.vigenciaMeses}
                 onChange={(e) => set("vigenciaMeses", Number(e.target.value))}
+                title="Duração do contrato em meses, só para este contrato"
               />
             </div>
             <div>
@@ -206,6 +211,7 @@ export function PreviaEditor({
                 className={inputClass}
                 value={overrides.multaDescricao}
                 onChange={(e) => set("multaDescricao", e.target.value)}
+                title="Texto da multa que aparece no contrato, só para este contrato"
               />
             </div>
             <div>
@@ -215,6 +221,7 @@ export function PreviaEditor({
                 value={overrides.condicaoPagamento}
                 onChange={(e) => set("condicaoPagamento", e.target.value)}
                 placeholder='ex.: "à vista" ou "parcelado em 3x"'
+                title="Vem do plano por padrão, mas pode sobrescrever só para este contrato/cliente"
               />
             </div>
           </div>

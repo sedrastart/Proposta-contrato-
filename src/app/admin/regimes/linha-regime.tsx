@@ -37,6 +37,7 @@ export function LinhaRegime({ regime }: { regime: Regime }) {
           onChange={(e) => setOrdem(Number(e.target.value))}
           onBlur={salvar}
           className="w-16 rounded border border-neutral-200 px-2 py-1 text-sm"
+          title="Posição de exibição desse regime nas listas (menor número aparece primeiro)"
         />
       </td>
       <td className="px-4 py-2">
@@ -45,14 +46,25 @@ export function LinhaRegime({ regime }: { regime: Regime }) {
           onChange={(e) => setNome(e.target.value)}
           onBlur={salvar}
           className="w-full rounded border border-neutral-200 px-2 py-1 text-sm"
+          title="Nome do regime, como aparece para escolha no assistente de cliente"
         />
       </td>
-      <td className="px-4 py-2 font-mono text-xs text-neutral-500">{regime.slug}</td>
+      <td
+        className="px-4 py-2 font-mono text-xs text-neutral-500"
+        title="Identificador técnico usado internamente para ligar este regime ao seu modelo de contrato — não é editável"
+      >
+        {regime.slug}
+      </td>
       <td className="px-4 py-2">
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-medium ${
             regime.ativo ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"
           }`}
+          title={
+            regime.ativo
+              ? "Aparece como opção no assistente de cadastro de cliente"
+              : "Não aparece mais como opção no assistente — clientes já cadastrados não são afetados"
+          }
         >
           {regime.ativo ? "ativo" : "inativo"}
         </span>
@@ -63,6 +75,11 @@ export function LinhaRegime({ regime }: { regime: Regime }) {
           onClick={alternarAtivo}
           disabled={isPending}
           className="text-sm text-neutral-600 hover:underline disabled:opacity-50"
+          title={
+            regime.ativo
+              ? "Esconde este regime do assistente sem apagar nada"
+              : "Volta a mostrar este regime no assistente"
+          }
         >
           {regime.ativo ? "desativar" : "ativar"}
         </button>

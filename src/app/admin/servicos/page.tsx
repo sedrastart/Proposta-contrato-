@@ -38,8 +38,12 @@ export default async function AdminServicosPage() {
           placeholder="Nome do serviço"
           required
           className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
+          title="Nome do serviço, como aparece no catálogo do assistente (ex.: 'Departamento Pessoal')"
         />
-        <div className="mt-3 flex flex-wrap gap-3">
+        <div
+          className="mt-3 flex flex-wrap gap-3"
+          title="Em quais regimes esse serviço aparece na etapa 3 do assistente — marque todos que se aplicam"
+        >
           {regimes.map((regime) => (
             <label key={regime.id} className="flex items-center gap-1.5 text-sm text-neutral-700">
               <input type="checkbox" name="regimeIds" value={regime.id} />

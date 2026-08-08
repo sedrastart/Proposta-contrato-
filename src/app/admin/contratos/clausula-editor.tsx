@@ -58,6 +58,7 @@ export function ClausulaEditor({ clausula }: { clausula: Clausula }) {
           onChange={(e) => setTitulo(e.target.value)}
           onBlur={salvar}
           className="flex-1 rounded border border-neutral-200 px-2 py-1 text-sm font-medium"
+          title="Título da cláusula/anexo, como aparece no documento (ex.: 'CLÁUSULA 1 – DO OBJETO')"
         />
         <div className="flex items-center gap-2 text-xs">
           <span
@@ -66,6 +67,7 @@ export function ClausulaEditor({ clausula }: { clausula: Clausula }) {
                 ? "bg-sky-50 text-sky-700"
                 : "bg-neutral-100 text-neutral-600"
             }`}
+            title="Cláusulas entram no corpo do contrato; anexos entram como seções separadas ao final do documento"
           >
             {clausula.tipo === "anexo" ? "anexo" : "cláusula"}
           </span>
@@ -73,7 +75,7 @@ export function ClausulaEditor({ clausula }: { clausula: Clausula }) {
             type="button"
             onClick={() => mover("cima")}
             disabled={isPending}
-            title="Mover para cima"
+            title="Mover para cima na ordem do documento"
             className="text-neutral-500 hover:text-neutral-900 disabled:opacity-50"
           >
             ↑
@@ -82,7 +84,7 @@ export function ClausulaEditor({ clausula }: { clausula: Clausula }) {
             type="button"
             onClick={() => mover("baixo")}
             disabled={isPending}
-            title="Mover para baixo"
+            title="Mover para baixo na ordem do documento"
             className="text-neutral-500 hover:text-neutral-900 disabled:opacity-50"
           >
             ↓
@@ -92,6 +94,11 @@ export function ClausulaEditor({ clausula }: { clausula: Clausula }) {
             onClick={alternarAtivo}
             disabled={isPending}
             className="text-neutral-600 hover:underline disabled:opacity-50"
+            title={
+              clausula.ativo
+                ? "Some do documento gerado, mas o texto fica salvo e pode ser reativado depois"
+                : "Volta a aparecer no documento gerado"
+            }
           >
             {clausula.ativo ? "desativar" : "ativar"}
           </button>
@@ -100,6 +107,7 @@ export function ClausulaEditor({ clausula }: { clausula: Clausula }) {
             onClick={excluir}
             disabled={isPending}
             className="text-red-600 hover:underline disabled:opacity-50"
+            title="Apaga esta cláusula/anexo definitivamente — não afeta contratos já emitidos"
           >
             excluir
           </button>
@@ -111,6 +119,7 @@ export function ClausulaEditor({ clausula }: { clausula: Clausula }) {
         onBlur={salvar}
         rows={Math.min(20, Math.max(4, corpo.split("\n").length + 1))}
         className="mt-2 w-full rounded border border-neutral-200 px-2 py-2 font-mono text-xs leading-relaxed"
+        title="Texto da cláusula/anexo — pode usar variáveis {{como_essa}} que são substituídas pelos dados reais do cliente ao gerar o contrato"
       />
     </div>
   );

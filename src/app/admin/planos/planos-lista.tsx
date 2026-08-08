@@ -65,6 +65,7 @@ export function PlanosLista({
         onChange={(e) => setBusca(e.target.value)}
         placeholder="Buscar por nome do plano, serviço ou regime..."
         className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
+        title="Filtra a lista abaixo por nome do plano, serviço ou regime tributário"
       />
 
       <div className="mt-4 space-y-8">

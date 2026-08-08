@@ -13,9 +13,9 @@ export default async function AdminRegimesPage() {
     <main className="mx-auto w-full max-w-3xl px-6 py-10">
       <h1 className="text-2xl font-semibold text-neutral-900">Regimes tributários</h1>
       <p className="mt-1 text-sm text-neutral-500">
-        Decidem qual família de contrato carrega e qual catálogo de serviços
-        aparece no assistente. O regime de slug <code>mei</code> é tratado
-        como especial pelo motor de documentos — os demais usam o modelo geral.
+        Cada regime tem seu próprio modelo de contrato (cláusulas
+        independentes, editáveis em Contratos) e decide qual catálogo de
+        serviços aparece no assistente para o cliente.
       </p>
 
       <div className="mt-6">
@@ -28,6 +28,7 @@ export default async function AdminRegimesPage() {
           placeholder="Nome do novo regime"
           required
           className="flex-1 rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
+          title="Nome do novo regime tributário (ex.: 'Regularização Fiscal') — cria automaticamente um modelo de contrato em branco pra ele"
         />
         <button
           type="submit"
