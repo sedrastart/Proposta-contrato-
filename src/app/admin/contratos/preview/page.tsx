@@ -9,8 +9,23 @@ export default async function PreviewModeloContratoPage({
 }: {
   searchParams: Promise<{ modelo?: string }>;
 }) {
-  const { modelo = "geral" } = await searchParams;
-  const { regimeSlug, dados, clausulas } = await buscarPreviewModelo(modelo);
+  const { modelo = "simples-nacional" } = await searchParams;
+  const preview = await buscarPreviewModelo(modelo);
+
+  if (!preview) {
+    return (
+      <main className="mx-auto w-full max-w-4xl px-6 py-10">
+        <Link href="/admin/contratos" className="text-sm text-neutral-500 hover:underline">
+          ← Voltar para edição
+        </Link>
+        <div className="mt-6 rounded-lg border border-dashed border-neutral-300 p-6 text-sm text-neutral-600">
+          Nenhum modelo de contrato encontrado para &quot;{modelo}&quot;.
+        </div>
+      </main>
+    );
+  }
+
+  const { regimeSlug, nome, dados, clausulas } = preview;
   const texto = renderContrato(regimeSlug, dados, clausulas);
 
   return (
@@ -23,7 +38,7 @@ export default async function PreviewModeloContratoPage({
       </Link>
       <div className="mt-2 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-neutral-900">
-          Visualização — {regimeSlug === "mei" ? "Modelo MEI" : "Modelo Geral"}
+          Visualização — {nome}
         </h1>
         <a
           href={`/api/admin/contratos/preview-pdf?modelo=${regimeSlug}`}

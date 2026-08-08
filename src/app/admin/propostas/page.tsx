@@ -65,7 +65,7 @@ export default async function AdminPropostasPage({
           </p>
 
           <div className="mt-4">
-            <ModeloPropostaEditor modelo={modeloAtivo} />
+            <ModeloPropostaEditor key={modeloAtivo.id} modelo={modeloAtivo} />
           </div>
         </section>
       ) : (

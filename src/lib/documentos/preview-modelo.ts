@@ -49,14 +49,23 @@ export const DADOS_EXEMPLO_MEI: DadosContrato = {
 
 export async function buscarPreviewModelo(regimeSlug: string): Promise<{
   regimeSlug: string;
+  nome: string;
   dados: DadosContrato;
   clausulas: ClausulaRenderavel[];
-}> {
-  const clausulas = await prisma.clausulaModelo.findMany({
-    where: { modeloContrato: { slug: regimeSlug }, ativo: true },
-    orderBy: { ordem: "asc" },
-    select: { tipo: true, titulo: true, corpo: true },
+} | null> {
+  const modelo = await prisma.modeloContrato.findUnique({
+    where: { slug: regimeSlug },
+    select: {
+      nome: true,
+      clausulas: {
+        where: { ativo: true },
+        orderBy: { ordem: "asc" },
+        select: { tipo: true, titulo: true, corpo: true },
+      },
+    },
   });
+  if (!modelo) return null;
+
   const dados = regimeSlug === "mei" ? DADOS_EXEMPLO_MEI : DADOS_EXEMPLO_GERAL;
-  return { regimeSlug, dados, clausulas };
+  return { regimeSlug, nome: modelo.nome, dados, clausulas: modelo.clausulas };
 }
