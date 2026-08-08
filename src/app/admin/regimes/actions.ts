@@ -22,6 +22,30 @@ function slugify(nome: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+const MODELO_PROPOSTA_PADRAO = `PROPOSTA DE PRESTAÇÃO DE SERVIÇOS
+Cliente: {{contratanteNome}}
+CNPJ: {{contratanteCpfCnpj}}
+
+[Descreva aqui a situação do cliente, se houver diagnóstico ou pendências identificadas. Apague esta linha se não se aplicar.]
+
+OPÇÃO 1 – {{servicosSelecionados}}
+Investimento: {{valor}}
+Inclui:
+{{servicosLista}}
+
+[Se aplicável, adicione aqui uma OPÇÃO 2 com outro escopo/valor.]
+
+Observações:
+1. Esta proposta considera as informações apresentadas até a presente data.
+2. Caso sejam identificadas novas pendências não relacionadas ao escopo acima, poderá ser apresentado orçamento complementar.
+
+Atenção!
+As condições desta proposta são válidas por 15 dias a partir da emissão.
+
+{{telefoneContratado}}
+{{emailContratado}}
+{{siteContratado}}`;
+
 export async function criarRegimeAction(formData: FormData) {
   const nome = String(formData.get("nome") ?? "").trim();
   if (nome.length < 2) throw new Error("Informe um nome válido");
@@ -43,10 +67,14 @@ export async function criarRegimeAction(formData: FormData) {
     prisma.modeloContrato.create({
       data: { slug, nome },
     }),
+    prisma.modeloProposta.create({
+      data: { slug, nome, corpo: MODELO_PROPOSTA_PADRAO },
+    }),
   ]);
 
   revalidatePath("/admin/regimes");
   revalidatePath("/admin/contratos");
+  revalidatePath("/admin/propostas");
 }
 
 export async function atualizarRegimeAction(

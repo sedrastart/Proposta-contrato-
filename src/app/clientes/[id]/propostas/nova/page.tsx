@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { buscarClienteParaProposta, montarDadosProposta } from "@/lib/contrato-dados";
+import {
+  buscarClienteParaProposta,
+  buscarModeloProposta,
+  montarDadosProposta,
+} from "@/lib/contrato-dados";
+import { renderPropostaDraft } from "@/lib/templates";
 import { NovaPropostaEditor } from "./nova-proposta-editor";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +38,8 @@ export default async function NovaPropostaPage({
   }
 
   const dados = montarDadosProposta(cliente);
+  const modelo = await buscarModeloProposta(cliente.regimeTributario.slug);
+  const textoInicial = modelo ? renderPropostaDraft(modelo.corpo, dados) : "";
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-10">
@@ -53,12 +60,16 @@ export default async function NovaPropostaPage({
         antes de gerar o PDF. Planos ainda não definidos aparecem como
         &quot;a definir&quot; e podem ser ajustados manualmente no texto.
       </p>
+      {!modelo && (
+        <div className="mt-4 rounded-md border border-dashed border-neutral-300 p-4 text-sm text-neutral-600">
+          Nenhum modelo de proposta cadastrado para o regime{" "}
+          <strong>{cliente.regimeTributario.nome}</strong> — edite livremente
+          abaixo, ou cadastre um modelo padrão em Área administrativa →
+          Propostas.
+        </div>
+      )}
 
-      <NovaPropostaEditor
-        clienteId={cliente.id}
-        regimeSlug={cliente.regimeTributario.slug}
-        dadosIniciais={dados}
-      />
+      <NovaPropostaEditor clienteId={cliente.id} textoInicial={textoInicial} />
     </main>
   );
 }

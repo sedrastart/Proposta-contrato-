@@ -2,27 +2,22 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { renderPropostaDraft, type DadosContrato } from "@/lib/templates";
 import { criarPropostaAction } from "../actions";
 
 export function NovaPropostaEditor({
   clienteId,
-  regimeSlug,
-  dadosIniciais,
+  textoInicial,
 }: {
   clienteId: string;
-  regimeSlug: string;
-  dadosIniciais: DadosContrato;
+  textoInicial: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
-  const [propostaTexto, setPropostaTexto] = useState(() =>
-    renderPropostaDraft(regimeSlug, dadosIniciais)
-  );
+  const [propostaTexto, setPropostaTexto] = useState(textoInicial);
 
   function recarregarRascunho() {
-    setPropostaTexto(renderPropostaDraft(regimeSlug, dadosIniciais));
+    setPropostaTexto(textoInicial);
   }
 
   function criar() {
@@ -45,7 +40,7 @@ export function NovaPropostaEditor({
           type="button"
           onClick={recarregarRascunho}
           className="text-xs text-neutral-500 hover:underline"
-          title="Descarta as edições e volta ao texto pré-preenchido com os dados atuais do cliente"
+          title="Descarta as edições e volta ao modelo padrão do regime"
         >
           Recarregar rascunho
         </button>

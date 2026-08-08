@@ -16,6 +16,13 @@ export async function buscarClausulasModelo(
   });
 }
 
+/** Rascunho-base da proposta comercial daquele regime (editável em
+ * /admin/propostas) — um bloco de texto único, ao contrário das cláusulas
+ * do contrato que são uma lista. */
+export async function buscarModeloProposta(regimeSlug: string) {
+  return prisma.modeloProposta.findUnique({ where: { slug: regimeSlug } });
+}
+
 export async function buscarClienteParaContrato(clienteId: string) {
   return prisma.cliente.findUnique({
     where: { id: clienteId },

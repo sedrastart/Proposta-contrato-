@@ -202,6 +202,19 @@ model ClausulaModelo {
   @@map("clausulas_modelo")
 }
 
+// Rascunho-base da proposta comercial de cada regime — um único bloco de
+// texto com placeholders {{chave}}, editável pela área administrativa. Cada
+// proposta de cliente nasce a partir daqui e é depois adaptada livremente.
+model ModeloProposta {
+  id           String   @id @default(uuid())
+  slug         String   @unique // igual ao slug do RegimeTributario
+  nome         String
+  corpo        String
+  atualizadoEm DateTime @updatedAt
+
+  @@map("modelos_proposta")
+}
+
 // Documento efetivamente emitido. Guarda um snapshot completo (texto
 // renderizado, campos editáveis, regime usado) no momento da emissão, para
 // que edições futuras nos modelos/planos não alterem contratos já emitidos.

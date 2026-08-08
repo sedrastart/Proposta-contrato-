@@ -1,4 +1,5 @@
 import type { DadosContrato, FaixaExcedenteTexto } from "./types";
+import { CONTRATADO } from "./contratado";
 
 // Valores prontos para substituição nos placeholders {{chave}} das cláusulas
 // do banco. Cálculos que hoje seriam loops/condicionais (ex.: a lista de
@@ -30,6 +31,24 @@ export function construirContextoMei(dados: DadosContrato): Record<string, strin
     vigenciaMeses: String(dados.vigenciaMeses),
     multaDescricao: dados.multaDescricao,
     condicaoPagamento: dados.condicaoPagamento,
+  };
+}
+
+export function construirContextoProposta(dados: DadosContrato): Record<string, string> {
+  return {
+    contratanteNome: dados.contratanteNome,
+    contratanteCpfCnpj: dados.contratanteCpfCnpj,
+    servicosLista: dados.servicosSelecionados.map((s) => `✔ ${s}`).join("\n"),
+    servicosSelecionados: dados.servicosSelecionados.join(", "),
+    valor: dados.valor,
+    vigenciaTexto:
+      dados.vigenciaMeses > 0
+        ? `${dados.vigenciaMeses} ${dados.vigenciaMeses === 1 ? "mês" : "meses"}`
+        : "a definir",
+    condicaoPagamento: dados.condicaoPagamento,
+    telefoneContratado: CONTRATADO.telefone,
+    emailContratado: CONTRATADO.email,
+    siteContratado: CONTRATADO.site,
   };
 }
 
