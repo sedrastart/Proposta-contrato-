@@ -12,6 +12,7 @@ export function construirContextoGeral(dados: DadosContrato): Record<string, str
     valor: dados.valor,
     vigenciaTexto: vigenciaExtenso(dados.vigenciaMeses),
     multaDescricao: dados.multaDescricao,
+    condicaoPagamento: dados.condicaoPagamento,
   };
 }
 
@@ -28,6 +29,7 @@ export function construirContextoMei(dados: DadosContrato): Record<string, strin
     valor: dados.valor,
     vigenciaMeses: String(dados.vigenciaMeses),
     multaDescricao: dados.multaDescricao,
+    condicaoPagamento: dados.condicaoPagamento,
   };
 }
 

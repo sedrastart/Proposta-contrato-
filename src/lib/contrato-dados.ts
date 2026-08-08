@@ -2,13 +2,15 @@ import { prisma } from "@/lib/prisma";
 import { formatCpfCnpj, currency, dataExtenso } from "@/lib/format";
 import type { DadosContrato, ClausulaRenderavel } from "@/lib/templates";
 
-/** Cláusulas ativas do modelo (geral ou mei), na ordem de exibição no documento. */
+/** Cláusulas ativas do modelo de contrato daquele regime, na ordem de
+ * exibição no documento — cada regime (Simples Nacional, MEI, Lucro
+ * Presumido, Lucro Real, Serviços Avulsos, Consultoria) tem seu próprio
+ * ModeloContrato, com o mesmo slug do regime. */
 export async function buscarClausulasModelo(
   regimeSlug: string
 ): Promise<ClausulaRenderavel[]> {
-  const slugModelo = regimeSlug === "mei" ? "mei" : "geral";
   return prisma.clausulaModelo.findMany({
-    where: { modeloContrato: { slug: slugModelo }, ativo: true },
+    where: { modeloContrato: { slug: regimeSlug }, ativo: true },
     orderBy: { ordem: "asc" },
     select: { tipo: true, titulo: true, corpo: true },
   });
@@ -58,6 +60,7 @@ export function montarDadosContrato(cliente: ClienteParaContrato): DadosContrato
     valor: currency.format(valorTotal),
     vigenciaMeses: planoAncora.vigenciaMeses,
     multaDescricao: planoAncora.multaDescricao ?? "não possui",
+    condicaoPagamento: formatarCondicaoPagamento(planoAncora.condicaoPagamento, planoAncora.parcelas),
     dataEmissaoExtenso: dataExtenso(new Date()),
     cidadeEmissao: "São Paulo",
     servicosSelecionados: cliente.servicos.map((s) => s.servico.nome),
@@ -74,6 +77,10 @@ export function montarDadosContrato(cliente: ClienteParaContrato): DadosContrato
   };
 }
 
+export function formatarCondicaoPagamento(condicao: string, parcelas: number): string {
+  return condicao === "parcelado" ? `parcelado em ${parcelas}x` : "à vista";
+}
+
 export type OverridesEditaveis = {
   contratanteNome: string;
   contratanteCpfCnpj: string;
@@ -81,4 +88,5 @@ export type OverridesEditaveis = {
   valor: string;
   vigenciaMeses: number;
   multaDescricao: string;
+  condicaoPagamento: string;
 };

@@ -15,6 +15,8 @@ export async function criarPlanoAction(formData: FormData) {
   const vigenciaMeses = Number(formData.get("vigenciaMeses"));
   const multaPercentualRaw = String(formData.get("multaPercentual") ?? "");
   const multaDescricao = String(formData.get("multaDescricao") ?? "").trim();
+  const condicaoPagamentoRaw = String(formData.get("condicaoPagamento") ?? "a_vista");
+  const parcelasRaw = String(formData.get("parcelas") ?? "1");
 
   if (!servicoId || nome.length < 2 || !Number.isFinite(valor) || !Number.isFinite(vigenciaMeses)) {
     throw new Error("Preencha serviço, nome, valor e vigência corretamente");
@@ -34,6 +36,8 @@ export async function criarPlanoAction(formData: FormData) {
       vigenciaMeses,
       multaPercentual: multaPercentualRaw ? Number(multaPercentualRaw) : null,
       multaDescricao: multaDescricao || null,
+      condicaoPagamento: condicaoPagamentoRaw === "parcelado" ? "parcelado" : "a_vista",
+      parcelas: Number(parcelasRaw) || 1,
       ordem: (ultimo?.ordem ?? 0) + 1,
     },
   });
@@ -49,6 +53,8 @@ export async function atualizarPlanoAction(
     vigenciaMeses?: number;
     multaPercentual?: number | null;
     multaDescricao?: string;
+    condicaoPagamento?: string;
+    parcelas?: number;
   }
 ) {
   await prisma.plano.update({ where: { id }, data });

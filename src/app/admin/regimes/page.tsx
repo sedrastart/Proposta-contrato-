@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { criarRegimeAction } from "./actions";
-import { LinhaRegime } from "./linha-regime";
+import { RegimesLista } from "./regimes-lista";
 
 export const dynamic = "force-dynamic";
 
@@ -18,23 +18,8 @@ export default async function AdminRegimesPage() {
         como especial pelo motor de documentos — os demais usam o modelo geral.
       </p>
 
-      <div className="mt-6 overflow-hidden rounded-lg border border-neutral-200">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
-            <tr>
-              <th className="px-4 py-2 font-medium">Ordem</th>
-              <th className="px-4 py-2 font-medium">Nome</th>
-              <th className="px-4 py-2 font-medium">Slug</th>
-              <th className="px-4 py-2 font-medium">Status</th>
-              <th className="px-4 py-2 font-medium"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-100">
-            {regimes.map((regime) => (
-              <LinhaRegime key={regime.id} regime={regime} />
-            ))}
-          </tbody>
-        </table>
+      <div className="mt-6">
+        <RegimesLista regimes={regimes} />
       </div>
 
       <form action={criarRegimeAction} className="mt-6 flex gap-3">

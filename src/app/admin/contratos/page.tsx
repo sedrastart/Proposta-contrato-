@@ -1,15 +1,23 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { ClausulaEditor } from "./clausula-editor";
+import { ClausulasLista } from "./clausulas-lista";
 
 export const dynamic = "force-dynamic";
 
+const PLACEHOLDERS_GERAL = [
+  "{{valor}}",
+  "{{vigenciaTexto}}",
+  "{{multaDescricao}}",
+  "{{condicaoPagamento}}",
+  "{{servicosSelecionados}}",
+];
+
 const PLACEHOLDERS_POR_SLUG: Record<string, string[]> = {
-  geral: ["{{valor}}", "{{vigenciaTexto}}", "{{multaDescricao}}", "{{servicosSelecionados}}"],
   mei: [
     "{{valor}}",
     "{{vigenciaMeses}}",
     "{{multaDescricao}}",
+    "{{condicaoPagamento}}",
     "{{servicosSelecionados}}",
     "{{notasQuantidadeTexto}}",
     "{{notasValorAdicional}}",
@@ -23,7 +31,7 @@ export default async function AdminContratosPage({
 }: {
   searchParams: Promise<{ modelo?: string }>;
 }) {
-  const { modelo: modeloSelecionado = "geral" } = await searchParams;
+  const { modelo: modeloSelecionado } = await searchParams;
 
   const modelos = await prisma.modeloContrato.findMany({
     include: { clausulas: { orderBy: { ordem: "asc" } } },
@@ -43,8 +51,8 @@ export default async function AdminContratosPage({
         afetados.
       </p>
 
-      <div className="mt-6 flex items-center justify-between border-b border-neutral-200">
-        <div className="flex gap-1">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200">
+        <div className="flex flex-wrap gap-1">
           {modelos.map((modelo) => (
             <Link
               key={modelo.slug}
@@ -75,14 +83,15 @@ export default async function AdminContratosPage({
           <p className="text-xs uppercase tracking-wide text-neutral-500">
             Variáveis disponíveis:{" "}
             <span className="font-mono normal-case text-neutral-600">
-              {(PLACEHOLDERS_POR_SLUG[modeloAtivo.slug] ?? []).join(" ")}
+              {(PLACEHOLDERS_POR_SLUG[modeloAtivo.slug] ?? PLACEHOLDERS_GERAL).join(" ")}
             </span>
           </p>
 
-          <div className="mt-4 space-y-4">
-            {modeloAtivo.clausulas.map((clausula) => (
-              <ClausulaEditor key={clausula.id} clausula={clausula} />
-            ))}
+          <div className="mt-4">
+            <ClausulasLista
+              modeloContratoId={modeloAtivo.id}
+              clausulas={modeloAtivo.clausulas}
+            />
           </div>
         </section>
       )}

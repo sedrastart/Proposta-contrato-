@@ -22,6 +22,7 @@ export type DadosContrato = {
   valor: string;
   vigenciaMeses: number;
   multaDescricao: string;
+  condicaoPagamento: string;
   dataEmissaoExtenso: string;
   cidadeEmissao: string;
   servicosSelecionados: string[];

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { criarPlanoAction } from "./actions";
-import { PlanoCard } from "./plano-card";
+import { PlanosLista } from "./planos-lista";
 
 export const dynamic = "force-dynamic";
 
@@ -27,10 +27,8 @@ export default async function AdminPlanosPage() {
         montar as cláusulas dinâmicas.
       </p>
 
-      <div className="mt-6 space-y-4">
-        {planos.map((plano) => (
-          <PlanoCard key={plano.id} plano={plano} />
-        ))}
+      <div className="mt-6">
+        <PlanosLista planos={planos} ordemRegimes={regimes.map((r) => r.nome)} />
       </div>
 
       <form
@@ -93,6 +91,22 @@ export default async function AdminPlanosPage() {
           <input
             name="multaDescricao"
             placeholder='Texto da multa (ex.: "50% do saldo restante")'
+            className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          />
+          <select
+            name="condicaoPagamento"
+            defaultValue="a_vista"
+            className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          >
+            <option value="a_vista">à vista</option>
+            <option value="parcelado">parcelado</option>
+          </select>
+          <input
+            name="parcelas"
+            type="number"
+            min={1}
+            defaultValue={1}
+            placeholder="Número de parcelas"
             className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
           />
         </div>

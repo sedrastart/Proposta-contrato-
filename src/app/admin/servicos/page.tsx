@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { criarServicoAction } from "./actions";
-import { LinhaServico } from "./linha-servico";
+import { ServicosLista } from "./servicos-lista";
 
 export const dynamic = "force-dynamic";
 
@@ -24,15 +24,8 @@ export default async function AdminServicosPage() {
         do assistente.
       </p>
 
-      <div className="mt-6 space-y-3">
-        {servicos.map((servico) => (
-          <LinhaServico
-            key={servico.id}
-            servico={servico}
-            regimeIdsAtuais={servico.regimes.map((r) => r.regimeTributarioId)}
-            regimesDisponiveis={regimes}
-          />
-        ))}
+      <div className="mt-6">
+        <ServicosLista servicos={servicos} regimesDisponiveis={regimes} />
       </div>
 
       <form

@@ -48,8 +48,9 @@ model Cliente {
   @@map("clientes")
 }
 
-// MEI, Simples Nacional, Lucro Presumido, Lucro Real — decide qual família de
-// modelo de contrato/proposta carrega e qual catálogo de serviços aparece.
+// Simples Nacional, MEI, Lucro Presumido, Lucro Real, Serviços Avulsos,
+// Consultoria — decide qual modelo de contrato/proposta carrega (slug 1:1
+// com ModeloContrato.slug) e qual catálogo de serviços aparece.
 model RegimeTributario {
   id       String          @id @default(uuid())
   nome     String          @unique
@@ -122,6 +123,8 @@ model Plano {
   vigenciaMeses      Int
   multaPercentual    Float? // ex.: 50 :: nulo/zero = "não possui"
   multaDescricao     String? // ex.: "50% do saldo restante"
+  condicaoPagamento  String            @default("a_vista") // "a_vista" | "parcelado"
+  parcelas           Int               @default(1) // usado quando condicaoPagamento = "parcelado"
   ordem              Int               @default(0)
   ativo              Boolean           @default(true)
   limites            PlanoLimiteUso[]
@@ -168,9 +171,10 @@ model Contador {
   @@map("contadores")
 }
 
-// Um dos dois modelos de contrato ("geral" para Simples/Presumido/Real e
-// "mei" para MEI) — agrupa as cláusulas e anexos editáveis pela área
-// administrativa, para que ajustes de texto jurídico não exijam deploy.
+// Um modelo de contrato por regime tributário (slug igual ao do
+// RegimeTributario correspondente) — agrupa as cláusulas e anexos editáveis
+// pela área administrativa, para que ajustes de texto jurídico não exijam
+// deploy. Cada regime tem seu próprio conjunto de cláusulas, independente.
 model ModeloContrato {
   id        String           @id @default(uuid())
   slug      String           @unique

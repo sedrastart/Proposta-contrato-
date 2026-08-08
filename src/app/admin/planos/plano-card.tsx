@@ -28,6 +28,8 @@ type Plano = {
   vigenciaMeses: number;
   multaPercentual: number | null;
   multaDescricao: string | null;
+  condicaoPagamento: string;
+  parcelas: number;
   ativo: boolean;
   servico: { nome: string };
   regimeTributario: { nome: string } | null;
@@ -43,6 +45,8 @@ export function PlanoCard({ plano }: { plano: Plano }) {
     vigenciaMeses: plano.vigenciaMeses,
     multaPercentual: plano.multaPercentual ?? "",
     multaDescricao: plano.multaDescricao ?? "",
+    condicaoPagamento: plano.condicaoPagamento,
+    parcelas: plano.parcelas,
   });
   const [isPending, startTransition] = useTransition();
   const [novoLimite, setNovoLimite] = useState({
@@ -60,6 +64,8 @@ export function PlanoCard({ plano }: { plano: Plano }) {
         vigenciaMeses: Number(campos.vigenciaMeses),
         multaPercentual: campos.multaPercentual === "" ? null : Number(campos.multaPercentual),
         multaDescricao: campos.multaDescricao,
+        condicaoPagamento: campos.condicaoPagamento,
+        parcelas: Number(campos.parcelas) || 1,
       });
     });
   }
@@ -159,6 +165,44 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             onBlur={salvar}
           />
         </label>
+        <label className="text-xs text-neutral-500">
+          Condição de pagamento
+          <select
+            className={`${inputClass} mt-0.5 w-full`}
+            value={campos.condicaoPagamento}
+            onChange={(e) => {
+              const condicaoPagamento = e.target.value;
+              setCampos({ ...campos, condicaoPagamento });
+              startTransition(() => {
+                atualizarPlanoAction(plano.id, {
+                  nome: campos.nome,
+                  valor: Number(campos.valor),
+                  vigenciaMeses: Number(campos.vigenciaMeses),
+                  multaPercentual: campos.multaPercentual === "" ? null : Number(campos.multaPercentual),
+                  multaDescricao: campos.multaDescricao,
+                  condicaoPagamento,
+                  parcelas: Number(campos.parcelas) || 1,
+                });
+              });
+            }}
+          >
+            <option value="a_vista">à vista</option>
+            <option value="parcelado">parcelado</option>
+          </select>
+        </label>
+        {campos.condicaoPagamento === "parcelado" && (
+          <label className="text-xs text-neutral-500">
+            Número de parcelas
+            <input
+              type="number"
+              min={1}
+              className={`${inputClass} mt-0.5 w-full`}
+              value={campos.parcelas}
+              onChange={(e) => setCampos({ ...campos, parcelas: Number(e.target.value) })}
+              onBlur={salvar}
+            />
+          </label>
+        )}
       </div>
 
       {plano.limites.length > 0 && (

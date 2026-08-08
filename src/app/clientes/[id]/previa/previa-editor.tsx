@@ -38,6 +38,7 @@ export function PreviaEditor({
     valor: dadosIniciais.valor,
     vigenciaMeses: dadosIniciais.vigenciaMeses,
     multaDescricao: dadosIniciais.multaDescricao,
+    condicaoPagamento: dadosIniciais.condicaoPagamento,
   });
   const [propostaTexto, setPropostaTexto] = useState(() =>
     renderPropostaDraft(regimeSlug, dadosIniciais)
@@ -153,7 +154,7 @@ export function PreviaEditor({
       <div className="space-y-4">
         <div className="rounded-lg border border-neutral-200 bg-white p-5">
           <p className="mb-3 text-xs uppercase tracking-wide text-neutral-500">
-            Campos editáveis (únicos 6)
+            Campos editáveis
           </p>
           <div className="space-y-3">
             <div>
@@ -205,6 +206,15 @@ export function PreviaEditor({
                 className={inputClass}
                 value={overrides.multaDescricao}
                 onChange={(e) => set("multaDescricao", e.target.value)}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Condição de pagamento</label>
+              <input
+                className={inputClass}
+                value={overrides.condicaoPagamento}
+                onChange={(e) => set("condicaoPagamento", e.target.value)}
+                placeholder='ex.: "à vista" ou "parcelado em 3x"'
               />
             </div>
           </div>

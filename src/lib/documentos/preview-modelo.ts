@@ -12,6 +12,7 @@ export const DADOS_EXEMPLO_GERAL: DadosContrato = {
   valor: "R$ 199,90",
   vigenciaMeses: 12,
   multaDescricao: "50% do valor das mensalidades vincendas, limitada ao prazo restante do contrato",
+  condicaoPagamento: "à vista",
   dataEmissaoExtenso: "1 de agosto de 2026",
   cidadeEmissao: "São Paulo",
   servicosSelecionados: ["Contabilidade", "Departamento Pessoal"],
@@ -46,12 +47,11 @@ export const DADOS_EXEMPLO_MEI: DadosContrato = {
   ],
 };
 
-export async function buscarPreviewModelo(regimeSlugBruto: string): Promise<{
+export async function buscarPreviewModelo(regimeSlug: string): Promise<{
   regimeSlug: string;
   dados: DadosContrato;
   clausulas: ClausulaRenderavel[];
 }> {
-  const regimeSlug = regimeSlugBruto === "mei" ? "mei" : "geral";
   const clausulas = await prisma.clausulaModelo.findMany({
     where: { modeloContrato: { slug: regimeSlug }, ativo: true },
     orderBy: { ordem: "asc" },

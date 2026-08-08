@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { atualizarClausulaAction, alternarAtivoClausulaAction } from "./actions";
+import {
+  atualizarClausulaAction,
+  alternarAtivoClausulaAction,
+  excluirClausulaAction,
+  moverClausulaAction,
+} from "./actions";
 
 type Clausula = {
   id: string;
@@ -25,6 +30,19 @@ export function ClausulaEditor({ clausula }: { clausula: Clausula }) {
   function alternarAtivo() {
     startTransition(() => {
       alternarAtivoClausulaAction(clausula.id, !clausula.ativo);
+    });
+  }
+
+  function excluir() {
+    if (!confirm(`Excluir "${clausula.titulo}"? Esta ação não pode ser desfeita.`)) return;
+    startTransition(() => {
+      excluirClausulaAction(clausula.id);
+    });
+  }
+
+  function mover(direcao: "cima" | "baixo") {
+    startTransition(() => {
+      moverClausulaAction(clausula.id, direcao);
     });
   }
 
@@ -53,11 +71,37 @@ export function ClausulaEditor({ clausula }: { clausula: Clausula }) {
           </span>
           <button
             type="button"
+            onClick={() => mover("cima")}
+            disabled={isPending}
+            title="Mover para cima"
+            className="text-neutral-500 hover:text-neutral-900 disabled:opacity-50"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            onClick={() => mover("baixo")}
+            disabled={isPending}
+            title="Mover para baixo"
+            className="text-neutral-500 hover:text-neutral-900 disabled:opacity-50"
+          >
+            ↓
+          </button>
+          <button
+            type="button"
             onClick={alternarAtivo}
             disabled={isPending}
             className="text-neutral-600 hover:underline disabled:opacity-50"
           >
             {clausula.ativo ? "desativar" : "ativar"}
+          </button>
+          <button
+            type="button"
+            onClick={excluir}
+            disabled={isPending}
+            className="text-red-600 hover:underline disabled:opacity-50"
+          >
+            excluir
           </button>
         </div>
       </div>
