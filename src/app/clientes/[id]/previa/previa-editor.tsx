@@ -2,35 +2,35 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import {
-  renderContrato,
-  renderPropostaDraft,
-  type DadosContrato,
-  type ClausulaRenderavel,
-} from "@/lib/templates";
-import { gerarContratoAction, gerarPropostaAction } from "./actions";
+import Link from "next/link";
+import { renderContrato, type DadosContrato, type ClausulaRenderavel } from "@/lib/templates";
+import { gerarContratoAction } from "./actions";
+import { STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
 
 const inputClass =
   "w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900";
 const labelClass = "mb-1 block text-xs font-medium uppercase tracking-wide text-neutral-500";
+
+type PropostaResumo = { id: string; numeroSequencial: number; status: string };
 
 export function PreviaEditor({
   clienteId,
   regimeSlug,
   dadosIniciais,
   clausulas,
+  propostaOrigem,
+  propostas,
 }: {
   clienteId: string;
   regimeSlug: string;
   dadosIniciais: DadosContrato;
   clausulas: ClausulaRenderavel[];
+  propostaOrigem: PropostaResumo | null;
+  propostas: PropostaResumo[];
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [isPendingProposta, startTransitionProposta] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
-  const [erroProposta, setErroProposta] = useState<string | null>(null);
-  const [propostaGerada, setPropostaGerada] = useState<string | null>(null);
   const [overrides, setOverrides] = useState({
     contratanteNome: dadosIniciais.contratanteNome,
     contratanteCpfCnpj: dadosIniciais.contratanteCpfCnpj,
@@ -40,9 +40,6 @@ export function PreviaEditor({
     multaDescricao: dadosIniciais.multaDescricao,
     condicaoPagamento: dadosIniciais.condicaoPagamento,
   });
-  const [propostaTexto, setPropostaTexto] = useState(() =>
-    renderPropostaDraft(regimeSlug, dadosIniciais)
-  );
 
   const dados: DadosContrato = useMemo(
     () => ({ ...dadosIniciais, ...overrides }),
@@ -61,29 +58,12 @@ export function PreviaEditor({
   function gerar() {
     setErro(null);
     startTransition(async () => {
-      const resultado = await gerarContratoAction(clienteId, overrides);
+      const resultado = await gerarContratoAction(clienteId, overrides, propostaOrigem?.id);
       if (resultado.sucesso) {
         router.push(`/clientes/${clienteId}/contratos/${resultado.contratoId}`);
       } else {
         setErro(resultado.erro);
       }
-    });
-  }
-
-  function recarregarRascunho() {
-    setPropostaTexto(renderPropostaDraft(regimeSlug, dados));
-  }
-
-  function gerarProposta() {
-    setErroProposta(null);
-    setPropostaGerada(null);
-    startTransitionProposta(async () => {
-      const resultado = await gerarPropostaAction(clienteId, propostaTexto);
-      if (!resultado.sucesso) {
-        setErroProposta(resultado.erro);
-        return;
-      }
-      setPropostaGerada(resultado.propostaId);
     });
   }
 
@@ -100,54 +80,37 @@ export function PreviaEditor({
         </div>
 
         <div className="rounded-lg border border-neutral-200 bg-white p-6">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-xs uppercase tracking-wide text-neutral-500">
-              Proposta comercial (editável)
-            </p>
-            <button
-              type="button"
-              onClick={recarregarRascunho}
-              className="text-xs text-neutral-500 hover:underline"
-            >
-              Recarregar rascunho
-            </button>
-          </div>
-          <p className="mb-3 text-xs text-neutral-500">
-            Rascunho pré-preenchido com os dados do cliente — edite livremente
-            (adicione diagnóstico, opções de pacote, condições específicas)
-            antes de gerar o PDF.
+          <p className="mb-3 text-xs uppercase tracking-wide text-neutral-500">
+            Propostas deste cliente
           </p>
-          <textarea
-            value={propostaTexto}
-            onChange={(e) => setPropostaTexto(e.target.value)}
-            rows={20}
-            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 font-mono text-xs leading-relaxed text-neutral-800 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
-          />
-
-          {erroProposta && (
-            <div className="mt-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-              {erroProposta}
+          {propostaOrigem ? (
+            <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+              Baseado na proposta nº {String(propostaOrigem.numeroSequencial).padStart(6, "0")}{" "}
+              — {STATUS_PROPOSTA_LABEL[propostaOrigem.status as StatusProposta] ?? propostaOrigem.status}
             </div>
+          ) : propostas.length > 0 ? (
+            <ul className="space-y-1 text-sm">
+              {propostas.map((p) => (
+                <li key={p.id}>
+                  <Link
+                    href={`/clientes/${clienteId}/propostas/${p.id}`}
+                    className="text-neutral-700 hover:underline"
+                  >
+                    nº {String(p.numeroSequencial).padStart(6, "0")} —{" "}
+                    {STATUS_PROPOSTA_LABEL[p.status as StatusProposta] ?? p.status}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-neutral-500">Nenhuma proposta ainda para este cliente.</p>
           )}
-
-          <button
-            type="button"
-            onClick={gerarProposta}
-            disabled={isPendingProposta}
-            className="mt-3 w-full rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
+          <Link
+            href={`/clientes/${clienteId}/propostas/nova`}
+            className="mt-3 inline-block text-sm text-neutral-600 hover:underline"
           >
-            {isPendingProposta ? "Gerando proposta..." : "Gerar proposta comercial (PDF)"}
-          </button>
-          {propostaGerada && (
-            <a
-              href={`/api/propostas/${propostaGerada}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 block rounded-md bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-700 hover:underline"
-            >
-              Proposta gerada — clique para baixar o PDF →
-            </a>
-          )}
+            + Nova proposta
+          </Link>
         </div>
       </div>
 

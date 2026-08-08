@@ -26,7 +26,7 @@ ${itens}
 
 INVESTIMENTO:
 ${dados.valor}/mês
-Vigência: ${dados.vigenciaMeses} ${dados.vigenciaMeses === 1 ? "mês" : "meses"}
+Vigência: ${dados.vigenciaMeses > 0 ? `${dados.vigenciaMeses} ${dados.vigenciaMeses === 1 ? "mês" : "meses"}` : "a definir"}
 
 Atendimento via Google Chat dedicado.
 Prazo de resposta: até 1 dia útil.

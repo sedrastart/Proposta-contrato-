@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import {
   buscarClienteParaContrato,
   buscarClausulasModelo,
@@ -7,14 +8,26 @@ import {
 } from "@/lib/contrato-dados";
 import { PreviaEditor } from "./previa-editor";
 
+export const dynamic = "force-dynamic";
+
 export default async function PreviaPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ propostaId?: string }>;
 }) {
   const { id } = await params;
+  const { propostaId } = await searchParams;
 
-  const cliente = await buscarClienteParaContrato(id);
+  const [cliente, propostas] = await Promise.all([
+    buscarClienteParaContrato(id),
+    prisma.proposta.findMany({
+      where: { clienteId: id },
+      orderBy: { numeroSequencial: "desc" },
+      select: { id: true, numeroSequencial: true, status: true },
+    }),
+  ]);
   if (!cliente) notFound();
 
   if (!cliente.regimeTributario) {
@@ -33,6 +46,7 @@ export default async function PreviaPage({
 
   const dados = montarDadosContrato(cliente);
   const clausulas = await buscarClausulasModelo(cliente.regimeTributario.slug);
+  const propostaOrigem = propostaId ? propostas.find((p) => p.id === propostaId) ?? null : null;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-6 py-10">
@@ -49,7 +63,7 @@ export default async function PreviaPage({
         Prévia do contrato
       </h1>
       <p className="mt-1 text-sm text-neutral-500">
-        Apenas os 6 campos abaixo são editáveis — o restante vem do regime,
+        Apenas os 7 campos abaixo são editáveis — o restante vem do regime,
         dos serviços e do plano escolhidos.
       </p>
 
@@ -58,6 +72,8 @@ export default async function PreviaPage({
         regimeSlug={cliente.regimeTributario.slug}
         dadosIniciais={dados}
         clausulas={clausulas}
+        propostaOrigem={propostaOrigem}
+        propostas={propostas}
       />
     </main>
   );

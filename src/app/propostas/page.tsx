@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,7 @@ export default async function PropostasPage() {
                 <th className="px-4 py-2 font-medium">Cliente</th>
                 <th className="px-4 py-2 font-medium">Emitida em</th>
                 <th className="px-4 py-2 font-medium">Valor</th>
+                <th className="px-4 py-2 font-medium">Status</th>
                 <th className="px-4 py-2 font-medium">Download</th>
               </tr>
             </thead>
@@ -37,7 +39,12 @@ export default async function PropostasPage() {
               {propostas.map((p) => (
                 <tr key={p.id} className="hover:bg-neutral-50">
                   <td className="px-4 py-2 font-mono text-neutral-900">
-                    {String(p.numeroSequencial).padStart(6, "0")}
+                    <Link
+                      href={`/clientes/${p.clienteId}/propostas/${p.id}`}
+                      className="hover:underline"
+                    >
+                      {String(p.numeroSequencial).padStart(6, "0")}
+                    </Link>
                   </td>
                   <td className="px-4 py-2">
                     <Link href={`/clientes/${p.clienteId}`} className="hover:underline">
@@ -48,6 +55,9 @@ export default async function PropostasPage() {
                     {new Intl.DateTimeFormat("pt-BR").format(p.dataEmissao)}
                   </td>
                   <td className="px-4 py-2 text-neutral-600">{p.valorFinal}</td>
+                  <td className="px-4 py-2 text-neutral-600">
+                    {STATUS_PROPOSTA_LABEL[p.status as StatusProposta] ?? p.status}
+                  </td>
                   <td className="px-4 py-2">
                     <a href={`/api/propostas/${p.id}`} className="text-neutral-700 hover:underline">
                       PDF

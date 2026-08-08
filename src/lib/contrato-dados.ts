@@ -81,6 +81,72 @@ export function formatarCondicaoPagamento(condicao: string, parcelas: number): s
   return condicao === "parcelado" ? `parcelado em ${parcelas}x` : "à vista";
 }
 
+/** Igual a buscarClienteParaContrato, mas traz todo serviço selecionado —
+ * com ou sem plano. Usado pelo fluxo de proposta, que pode ser criada antes
+ * de o cliente ter plano fechado (diferente do contrato, que exige um). */
+export async function buscarClienteParaProposta(clienteId: string) {
+  return prisma.cliente.findUnique({
+    where: { id: clienteId },
+    include: {
+      regimeTributario: true,
+      servicos: {
+        include: {
+          servico: true,
+          plano: { include: { limites: { include: { faixas: { orderBy: { ordem: "asc" } } } } } },
+        },
+      },
+    },
+  });
+}
+
+export type ClienteParaProposta = NonNullable<
+  Awaited<ReturnType<typeof buscarClienteParaProposta>>
+>;
+
+/** Monta os dados-base da proposta a partir do cliente — resiliente a
+ * serviços sem plano ainda definido (ao contrário de montarDadosContrato). */
+export function montarDadosProposta(cliente: ClienteParaProposta): DadosContrato {
+  const servicosComPlano = cliente.servicos.filter((s) => s.plano);
+  const valorTotal = servicosComPlano.reduce((soma, s) => soma + s.plano!.valor, 0);
+
+  const planoAncora =
+    cliente.servicos.find((s) => s.servico.nome === "Contabilidade")?.plano ??
+    servicosComPlano[0]?.plano ??
+    null;
+
+  return {
+    contratanteNome: cliente.razaoSocial,
+    contratanteCpfCnpj: formatCpfCnpj(cliente.cpfCnpj),
+    contratanteEndereco: `${cliente.enderecoLogradouro}, ${cliente.enderecoNumero}${
+      cliente.enderecoComplemento ? " - " + cliente.enderecoComplemento : ""
+    } - ${cliente.enderecoBairro}, ${cliente.enderecoCidade}/${cliente.enderecoUf}`,
+    contratanteCidadeUf: `${cliente.enderecoCidade}/${cliente.enderecoUf}`,
+    contratanteCep: cliente.enderecoCep.replace(/(\d{5})(\d{3})/, "$1-$2"),
+    responsavelNome: cliente.responsavelNome ?? undefined,
+    responsavelCpf: cliente.responsavelCpf ? formatCpfCnpj(cliente.responsavelCpf) : undefined,
+    valor: planoAncora ? currency.format(valorTotal) : "A definir",
+    vigenciaMeses: planoAncora?.vigenciaMeses ?? 0,
+    multaDescricao: planoAncora?.multaDescricao ?? "não possui",
+    condicaoPagamento: planoAncora
+      ? formatarCondicaoPagamento(planoAncora.condicaoPagamento, planoAncora.parcelas)
+      : "à vista",
+    dataEmissaoExtenso: dataExtenso(new Date()),
+    cidadeEmissao: "São Paulo",
+    servicosSelecionados: cliente.servicos.map((s) => s.servico.nome),
+    limitesUso:
+      planoAncora?.limites.map((l) => ({
+        unidade: l.unidade,
+        quantidade: l.quantidade,
+        tipoCobranca: l.tipoCobranca,
+        valorPorUnidade: l.valorPorUnidade != null ? currency.format(l.valorPorUnidade) : undefined,
+        faixas: l.faixas.map((f) => ({
+          percentualAte: f.percentualAte,
+          valorAdicional: currency.format(f.valorAdicional),
+        })),
+      })) ?? [],
+  };
+}
+
 export type OverridesEditaveis = {
   contratanteNome: string;
   contratanteCpfCnpj: string;

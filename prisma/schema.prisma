@@ -225,17 +225,23 @@ model Contrato {
   dataEmissao                DateTime @default(now())
   criadoEm                   DateTime @default(now())
 
+  propostaOrigemId String?   @unique
+  propostaOrigem   Proposta? @relation(fields: [propostaOrigemId], references: [id])
+
   @@map("contratos")
 }
 
 // Resumo comercial (sem clausulas juridicas) enviado ao cliente antes do
 // contrato. Numeracao sequencial propria (chave "proposta" no Contador),
-// independente da numeracao de Contrato.
+// independente da numeracao de Contrato. Pode ser criada antes de o cliente
+// ter plano definido — ao contrário do Contrato, que exige um plano-âncora.
 model Proposta {
   id                         String   @id @default(uuid())
   clienteId                  String
   cliente                    Cliente  @relation(fields: [clienteId], references: [id])
   numeroSequencial           Int      @unique
+  status                     String   @default("rascunho") // rascunho | enviada | aceita | recusada
+  regimeSlug                 String? // informativo — propostas antigas ficam nulas
   contratanteNomeSnapshot    String
   contratanteCpfCnpjSnapshot String
   enderecoSnapshot           String
@@ -247,6 +253,9 @@ model Proposta {
   arquivoPdf                 String?
   dataEmissao                DateTime @default(now())
   criadoEm                   DateTime @default(now())
+  atualizadoEm               DateTime @updatedAt
+
+  contratoGerado Contrato?
 
   @@map("propostas")
 }

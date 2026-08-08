@@ -6,6 +6,7 @@ import { BotaoExcluirCliente } from "../botao-excluir-cliente";
 import { RegimeSelector } from "./regime-selector";
 import { ServicoSelector } from "./servico-selector";
 import { PlanoSelector } from "./plano-selector";
+import { STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
@@ -160,16 +161,27 @@ export default async function ClienteDetalhePage({
         </div>
       )}
 
-      {cliente.servicos.some((cs) => cs.planoId) && (
-        <div className="mt-6 flex justify-end">
-          <Link
-            href={`/clientes/${cliente.id}/previa`}
-            className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-          >
-            Ver prévia do contrato →
-          </Link>
+      {(cliente.regimeTributarioId && cliente.servicos.length > 0) || cliente.servicos.some((cs) => cs.planoId) ? (
+        <div className="mt-6 flex justify-end gap-3">
+          {cliente.regimeTributarioId && cliente.servicos.length > 0 && (
+            <Link
+              href={`/clientes/${cliente.id}/propostas/nova`}
+              className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+              title="Cria uma proposta comercial — não exige plano definido, pode ser enviada antes de fechar os valores"
+            >
+              + Nova proposta
+            </Link>
+          )}
+          {cliente.servicos.some((cs) => cs.planoId) && (
+            <Link
+              href={`/clientes/${cliente.id}/previa`}
+              className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+            >
+              Ver prévia do contrato →
+            </Link>
+          )}
         </div>
-      )}
+      ) : null}
 
       {propostas.length > 0 && (
         <div className="mt-10">
@@ -183,6 +195,7 @@ export default async function ClienteDetalhePage({
                   <th className="px-4 py-2 font-medium">Número</th>
                   <th className="px-4 py-2 font-medium">Emitida em</th>
                   <th className="px-4 py-2 font-medium">Valor</th>
+                  <th className="px-4 py-2 font-medium">Status</th>
                   <th className="px-4 py-2 font-medium">Download</th>
                 </tr>
               </thead>
@@ -190,12 +203,20 @@ export default async function ClienteDetalhePage({
                 {propostas.map((p) => (
                   <tr key={p.id}>
                     <td className="px-4 py-2 font-mono text-neutral-900">
-                      {String(p.numeroSequencial).padStart(6, "0")}
+                      <Link
+                        href={`/clientes/${cliente.id}/propostas/${p.id}`}
+                        className="hover:underline"
+                      >
+                        {String(p.numeroSequencial).padStart(6, "0")}
+                      </Link>
                     </td>
                     <td className="px-4 py-2 text-neutral-600">
                       {new Intl.DateTimeFormat("pt-BR").format(p.dataEmissao)}
                     </td>
                     <td className="px-4 py-2 text-neutral-600">{p.valorFinal}</td>
+                    <td className="px-4 py-2 text-neutral-600">
+                      {STATUS_PROPOSTA_LABEL[p.status as StatusProposta] ?? p.status}
+                    </td>
                     <td className="px-4 py-2">
                       <a
                         href={`/api/propostas/${p.id}`}

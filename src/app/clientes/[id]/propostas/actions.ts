@@ -1,0 +1,97 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { buscarClienteParaProposta, montarDadosProposta } from "@/lib/contrato-dados";
+import { proximoNumeroSequencial } from "@/lib/numero-sequencial";
+import { gerarPdf } from "@/lib/documentos/pdf";
+import { salvarArquivoProposta } from "@/lib/documentos/armazenamento";
+import { ehStatusProposta } from "@/lib/proposta-status";
+
+export type CriarPropostaResultado =
+  | { sucesso: true; propostaId: string }
+  | { sucesso: false; erro: string };
+
+function revalidar(clienteId: string, propostaId?: string) {
+  revalidatePath(`/clientes/${clienteId}`);
+  revalidatePath("/propostas");
+  if (propostaId) revalidatePath(`/clientes/${clienteId}/propostas/${propostaId}`);
+}
+
+/** Cria uma proposta a partir do cliente — exige só regime + ao menos um
+ * serviço selecionado, sem exigir plano definido (diferente do contrato). */
+export async function criarPropostaAction(
+  clienteId: string,
+  textoCompleto: string
+): Promise<CriarPropostaResultado> {
+  const cliente = await buscarClienteParaProposta(clienteId);
+  if (!cliente || !cliente.regimeTributario || cliente.servicos.length === 0) {
+    return { sucesso: false, erro: "Cliente sem regime ou serviços definidos" };
+  }
+  if (!textoCompleto.trim()) {
+    return { sucesso: false, erro: "O texto da proposta não pode estar vazio" };
+  }
+
+  const dados = montarDadosProposta(cliente);
+
+  const numeroSequencial = await proximoNumeroSequencial("proposta");
+  const pdf = await gerarPdf(textoCompleto);
+  const { arquivoPdf } = await salvarArquivoProposta(numeroSequencial, pdf);
+
+  const proposta = await prisma.proposta.create({
+    data: {
+      clienteId,
+      numeroSequencial,
+      status: "rascunho",
+      regimeSlug: cliente.regimeTributario.slug,
+      contratanteNomeSnapshot: dados.contratanteNome,
+      contratanteCpfCnpjSnapshot: dados.contratanteCpfCnpj,
+      enderecoSnapshot: dados.contratanteEndereco,
+      valorFinal: dados.valor,
+      vigenciaMeses: dados.vigenciaMeses,
+      multaTexto: dados.multaDescricao,
+      servicosSnapshot: dados.servicosSelecionados.join(", "),
+      textoCompleto,
+      arquivoPdf,
+    },
+  });
+
+  revalidar(clienteId, proposta.id);
+  return { sucesso: true, propostaId: proposta.id };
+}
+
+export async function atualizarStatusPropostaAction(propostaId: string, status: string) {
+  if (!ehStatusProposta(status)) throw new Error("Status inválido");
+
+  const proposta = await prisma.proposta.update({
+    where: { id: propostaId },
+    data: { status },
+  });
+
+  revalidar(proposta.clienteId, propostaId);
+}
+
+export type AtualizarTextoResultado = { sucesso: true } | { sucesso: false; erro: string };
+
+/** Regrava o texto da proposta e reemite o PDF (mesmo numeroSequencial —
+ * o arquivo anterior é sobrescrito no storage). Não altera o status. */
+export async function atualizarTextoPropostaAction(
+  propostaId: string,
+  textoCompleto: string
+): Promise<AtualizarTextoResultado> {
+  if (!textoCompleto.trim()) {
+    return { sucesso: false, erro: "O texto da proposta não pode estar vazio" };
+  }
+
+  const proposta = await prisma.proposta.findUniqueOrThrow({ where: { id: propostaId } });
+  const pdf = await gerarPdf(textoCompleto);
+  const { arquivoPdf } = await salvarArquivoProposta(proposta.numeroSequencial, pdf);
+
+  await prisma.proposta.update({
+    where: { id: propostaId },
+    data: { textoCompleto, arquivoPdf },
+  });
+
+  revalidar(proposta.clienteId, propostaId);
+  return { sucesso: true };
+}

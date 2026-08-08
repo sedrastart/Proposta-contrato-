@@ -11,59 +11,16 @@ import { renderContrato } from "@/lib/templates";
 import { proximoNumeroSequencial } from "@/lib/numero-sequencial";
 import { gerarDocx } from "@/lib/documentos/docx";
 import { gerarPdf } from "@/lib/documentos/pdf";
-import { salvarArquivosContrato, salvarArquivoProposta } from "@/lib/documentos/armazenamento";
+import { salvarArquivosContrato } from "@/lib/documentos/armazenamento";
 
 export type GerarContratoResultado =
   | { sucesso: true; contratoId: string }
   | { sucesso: false; erro: string };
 
-export type GerarPropostaResultado =
-  | { sucesso: true; propostaId: string }
-  | { sucesso: false; erro: string };
-
-/** Grava a proposta comercial com o texto já editado pelo usuário (a partir
- * do rascunho inicial) — numeração sequencial e PDF salvo no Storage
- * próprios, independentes do Contrato. */
-export async function gerarPropostaAction(
-  clienteId: string,
-  textoCompleto: string
-): Promise<GerarPropostaResultado> {
-  const cliente = await buscarClienteParaContrato(clienteId);
-  if (!cliente || !cliente.regimeTributario || cliente.servicos.length === 0) {
-    return { sucesso: false, erro: "Cliente sem regime, serviços ou plano definidos" };
-  }
-  if (!textoCompleto.trim()) {
-    return { sucesso: false, erro: "O texto da proposta não pode estar vazio" };
-  }
-
-  const dados = montarDadosContrato(cliente);
-
-  const numeroSequencial = await proximoNumeroSequencial("proposta");
-  const pdf = await gerarPdf(textoCompleto);
-  const { arquivoPdf } = await salvarArquivoProposta(numeroSequencial, pdf);
-
-  const proposta = await prisma.proposta.create({
-    data: {
-      clienteId,
-      numeroSequencial,
-      contratanteNomeSnapshot: dados.contratanteNome,
-      contratanteCpfCnpjSnapshot: dados.contratanteCpfCnpj,
-      enderecoSnapshot: dados.contratanteEndereco,
-      valorFinal: dados.valor,
-      vigenciaMeses: dados.vigenciaMeses,
-      multaTexto: dados.multaDescricao,
-      servicosSnapshot: dados.servicosSelecionados.join(", "),
-      textoCompleto,
-      arquivoPdf,
-    },
-  });
-
-  return { sucesso: true, propostaId: proposta.id };
-}
-
 export async function gerarContratoAction(
   clienteId: string,
-  overrides: OverridesEditaveis
+  overrides: OverridesEditaveis,
+  propostaOrigemId?: string
 ): Promise<GerarContratoResultado> {
   const cliente = await buscarClienteParaContrato(clienteId);
   if (!cliente || !cliente.regimeTributario || cliente.servicos.length === 0) {
@@ -102,6 +59,7 @@ export async function gerarContratoAction(
       textoCompleto,
       arquivoPdf,
       arquivoDocx,
+      propostaOrigemId: propostaOrigemId || null,
     },
   });
 
