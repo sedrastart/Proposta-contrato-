@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ContratoStatusSelector } from "./status-selector";
+import { BotaoExcluirContrato } from "./botao-excluir-contrato";
 
 export default async function ContratoEmitidoPage({
   params,
@@ -61,6 +62,7 @@ export default async function ContratoEmitidoPage({
             <dd className="mt-0.5 text-neutral-900">{contrato.servicosSnapshot}</dd>
           </div>
         </dl>
+        <BotaoExcluirContrato contratoId={contrato.id} clienteId={id} numero={numero} />
       </div>
 
       <div className="mt-4 flex gap-3">

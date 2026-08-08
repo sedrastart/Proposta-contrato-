@@ -2,7 +2,12 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { atualizarStatusPropostaAction, atualizarTextoPropostaAction } from "../actions";
+import { useRouter } from "next/navigation";
+import {
+  atualizarStatusPropostaAction,
+  atualizarTextoPropostaAction,
+  excluirPropostaAction,
+} from "../actions";
 import { STATUS_PROPOSTA, STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
 
 type Proposta = {
@@ -26,13 +31,28 @@ const badgeClass: Record<string, string> = {
 };
 
 export function PropostaEditor({ proposta }: { proposta: Proposta }) {
+  const router = useRouter();
   const numero = String(proposta.numeroSequencial).padStart(6, "0");
   const [status, setStatus] = useState(proposta.status);
   const [textoCompleto, setTextoCompleto] = useState(proposta.textoCompleto);
   const [isPendingStatus, startTransitionStatus] = useTransition();
   const [isPendingTexto, startTransitionTexto] = useTransition();
+  const [isPendingExcluir, startTransitionExcluir] = useTransition();
   const [erroTexto, setErroTexto] = useState<string | null>(null);
   const [salvo, setSalvo] = useState(false);
+
+  function excluir() {
+    if (
+      !confirm(`Excluir a proposta nº ${numero}? Esta ação não pode ser desfeita.`)
+    ) {
+      return;
+    }
+    startTransitionExcluir(async () => {
+      await excluirPropostaAction(proposta.id);
+      router.push(`/clientes/${proposta.clienteId}`);
+      router.refresh();
+    });
+  }
 
   function mudarStatus(novoStatus: string) {
     setStatus(novoStatus);
@@ -104,6 +124,14 @@ export function PropostaEditor({ proposta }: { proposta: Proposta }) {
             <dd className="mt-0.5 text-neutral-900">{proposta.servicosSnapshot}</dd>
           </div>
         </dl>
+        <button
+          type="button"
+          onClick={excluir}
+          disabled={isPendingExcluir}
+          className="mt-4 text-sm text-red-600 hover:underline disabled:opacity-50"
+        >
+          {isPendingExcluir ? "Excluindo..." : "Excluir proposta"}
+        </button>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-3">

@@ -95,3 +95,11 @@ export async function atualizarTextoPropostaAction(
   revalidar(proposta.clienteId, propostaId);
   return { sucesso: true };
 }
+
+/** Exclui a proposta definitivamente. Se um contrato já foi gerado a partir
+ * dela, o contrato continua existindo — só perde a referência de origem
+ * (ON DELETE SET NULL). Não remove o PDF já salvo no Storage. */
+export async function excluirPropostaAction(propostaId: string) {
+  const proposta = await prisma.proposta.delete({ where: { id: propostaId } });
+  revalidar(proposta.clienteId);
+}

@@ -16,3 +16,11 @@ export async function atualizarStatusContratoAction(contratoId: string, status: 
   revalidatePath(`/clientes/${contrato.clienteId}`);
   revalidatePath("/contratos");
 }
+
+/** Exclui o contrato definitivamente. Não remove o PDF/DOCX já salvos no
+ * Storage. Se ele tinha uma proposta de origem, ela continua existindo. */
+export async function excluirContratoAction(contratoId: string) {
+  const contrato = await prisma.contrato.delete({ where: { id: contratoId } });
+  revalidatePath(`/clientes/${contrato.clienteId}`);
+  revalidatePath("/contratos");
+}
