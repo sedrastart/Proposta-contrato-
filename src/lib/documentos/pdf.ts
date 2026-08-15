@@ -116,13 +116,13 @@ function textoParaHtml(textoCompleto: string, suprimirTitulo = false): string {
 
 export type TipoDocumento = "proposta" | "contrato";
 
-// Cor de destaque diferente por tipo — contrato usa o azul-marinho da
-// marca (formal, definitivo); proposta usa um tom terracota (comercial,
-// convidativo) — ajuda a diferenciar os dois de relance, sem precisar ler
+// Cor de destaque diferente por tipo — contrato usa o azul-marinho mais
+// escuro da marca (formal, definitivo); proposta usa o azul claro da
+// mesma paleta — ajuda a diferenciar os dois de relance, sem precisar ler
 // o título, inclusive folheando páginas internas.
 const ACCENT_POR_TIPO: Record<TipoDocumento, string> = {
   contrato: "#10305D",
-  proposta: "#9A5B22",
+  proposta: "#368DCC",
 };
 
 function paginaCompleta(corpo: string, tipo: TipoDocumento): string {
@@ -200,7 +200,7 @@ async function gerarPdfPropostaComCapa(
 }
 
 /** Renderiza o texto do documento em PDF via Chrome headless — `tipo`
- * decide a cor de destaque (contrato = azul da marca, proposta = terracota).
+ * decide a cor de destaque (contrato = azul-marinho escuro, proposta = azul médio).
  * Para proposta, passar `dadosCapa` adiciona capa + página de abertura. */
 export async function gerarPdf(
   textoCompleto: string,

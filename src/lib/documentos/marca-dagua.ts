@@ -6,12 +6,12 @@ import type { TipoDocumento } from "./pdf";
 const MM = 2.834645669; // pontos PDF por milímetro
 
 // Mesmas cores usadas no CSS da página (src/lib/documentos/pdf.ts) —
-// contrato = azul da marca, proposta = terracota — repetidas aqui na
-// barra de topo e no número de página, pra reforçar a diferença em toda
-// página, não só na capa.
+// contrato = azul-marinho escuro da marca, proposta = azul médio da
+// mesma paleta — repetidas aqui na barra de topo e no número de página,
+// pra reforçar a diferença em toda página, não só na capa.
 const ACCENT_RGB: Record<TipoDocumento, ReturnType<typeof rgb>> = {
   contrato: rgb(0.0627, 0.1882, 0.3647),
-  proposta: rgb(0.6039, 0.3569, 0.1333),
+  proposta: rgb(0.2118, 0.5529, 0.8000),
 };
 
 // pdf-lib não tem um helper de alto nível para links clicáveis — a anotação
@@ -142,7 +142,7 @@ export async function carimbarPaginas(
 }
 
 // Variante usada só nas páginas de conteúdo da Proposta com capa — faixa
-// terracota grossa no topo (em vez da linha fina de 3pt) e uma barra de
+// azul grossa no topo (em vez da linha fina de 3pt) e uma barra de
 // destaque na lateral esquerda, ecoando a capa/abertura. Rodapé, marca
 // d'água e numeração reaproveitam a mesma lógica de `carimbarPaginas`.
 export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer> {

@@ -7,8 +7,8 @@ export type DadosCapaProposta = {
   dataEmissao: Date;
 };
 
-const TERRACOTA = "#9A5B22";
-const TERRACOTA_CLARO = "#F1E4D6";
+const ACCENT = "#368DCC";
+const ACCENT_CLARO = "#E9F3FA";
 const NAVY = "#10305D";
 
 function formatarData(data: Date): string {
@@ -63,7 +63,7 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 60%;
-    background: ${TERRACOTA};
+    background: ${ACCENT};
     padding: 18mm 16mm;
   }
   .capa-marca-top {
@@ -89,7 +89,7 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
   .capa-meio {
     position: absolute;
     top: 60%; left: 0; right: 0; bottom: 28mm;
-    background: ${TERRACOTA_CLARO};
+    background: ${ACCENT_CLARO};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -130,7 +130,7 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
   .abertura-montanha {
     position: absolute;
     top: 0; left: 18mm; right: 0; height: 42%;
-    background: ${TERRACOTA_CLARO};
+    background: ${ACCENT_CLARO};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -140,7 +140,7 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
   .abertura-texto {
     position: absolute;
     top: 42%; left: 18mm; right: 0; height: 26%;
-    background: ${TERRACOTA};
+    background: ${ACCENT};
     color: white;
     display: flex;
     align-items: center;
