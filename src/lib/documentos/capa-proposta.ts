@@ -89,7 +89,7 @@ export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
     font-size: 12pt;
     font-weight: 700;
     letter-spacing: 1.5pt;
-    color: ${TINTA};
+    color: white;
   }
   .capa-titulo {
     position: absolute;
