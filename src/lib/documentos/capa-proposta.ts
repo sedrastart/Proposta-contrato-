@@ -174,7 +174,7 @@ export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
   .abertura-rodape {
     position: absolute;
     right: 14mm; bottom: 115mm; width: 70mm;
-    color: white;
+    color: #162A42;
     z-index: 2;
   }
   .abertura-rodape h2 { font-size: 15pt; margin-bottom: 9mm; font-weight: 700; }
