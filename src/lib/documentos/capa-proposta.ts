@@ -1,4 +1,4 @@
-import { LOGO_OFICIAL_PNG_BASE64 } from "./marca-assets";
+import { LOGO_OFICIAL_PNG_BASE64, LOGO_OFICIAL_PRATA_PNG_BASE64 } from "./marca-assets";
 
 export type DadosCapaProposta = {
   clienteNome: string;
@@ -34,6 +34,7 @@ function escapeHtml(texto: string): string {
 // bloco de cor sólida da versão anterior. Sem foto (por enquanto).
 export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
   const marca = `data:image/png;base64,${LOGO_OFICIAL_PNG_BASE64}`;
+  const marcaPrata = `data:image/png;base64,${LOGO_OFICIAL_PRATA_PNG_BASE64}`;
   const clienteNome = escapeHtml(dados.clienteNome);
   const dataFormatada = formatarData(dados.dataEmissao);
   const validadeFormatada = formatarValidade(dados.dataEmissao);
@@ -197,7 +198,7 @@ export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
     <div class="capa-banda"></div>
     <div class="capa-banda-linha"></div>
     <div class="capa-marca-top">
-      <img src="${marca}" alt="">
+      <img src="${marcaPrata}" alt="">
       <span>SEDRA</span>
     </div>
     <div class="capa-titulo">
