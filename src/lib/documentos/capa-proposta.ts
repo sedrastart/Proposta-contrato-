@@ -173,7 +173,7 @@ export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
   }
   .abertura-rodape {
     position: absolute;
-    right: 14mm; bottom: 115mm; width: 70mm;
+    left: 20mm; top: 150mm; width: 80mm;
     color: #162A42;
     z-index: 2;
   }
