@@ -9,7 +9,7 @@ export type DadosCapaProposta = {
 
 const TERRACOTA = "#9A5B22";
 const TERRACOTA_CLARO = "#F1E4D6";
-const NAVY = "#1E3A5F";
+const NAVY = "#10305D";
 
 function formatarData(data: Date): string {
   return new Intl.DateTimeFormat("pt-BR").format(data);

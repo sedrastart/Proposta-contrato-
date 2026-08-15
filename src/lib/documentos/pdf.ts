@@ -121,7 +121,7 @@ export type TipoDocumento = "proposta" | "contrato";
 // convidativo) — ajuda a diferenciar os dois de relance, sem precisar ler
 // o título, inclusive folheando páginas internas.
 const ACCENT_POR_TIPO: Record<TipoDocumento, string> = {
-  contrato: "#1E3A5F",
+  contrato: "#10305D",
   proposta: "#9A5B22",
 };
 

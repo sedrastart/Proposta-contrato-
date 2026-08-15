@@ -10,7 +10,7 @@ const MM = 2.834645669; // pontos PDF por milímetro
 // barra de topo e no número de página, pra reforçar a diferença em toda
 // página, não só na capa.
 const ACCENT_RGB: Record<TipoDocumento, ReturnType<typeof rgb>> = {
-  contrato: rgb(0.1176, 0.2275, 0.3725),
+  contrato: rgb(0.0627, 0.1882, 0.3647),
   proposta: rgb(0.6039, 0.3569, 0.1333),
 };
 
