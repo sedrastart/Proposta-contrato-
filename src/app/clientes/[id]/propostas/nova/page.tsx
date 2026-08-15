@@ -9,6 +9,9 @@ import { renderPropostaDraft } from "@/lib/templates";
 import { NovaPropostaEditor } from "./nova-proposta-editor";
 
 export const dynamic = "force-dynamic";
+// criarPropostaAction gera capa + conteúdo via Chrome headless — mais
+// lento que o limite padrão da função serverless (10s no plano Hobby).
+export const maxDuration = 60;
 
 export default async function NovaPropostaPage({
   params,

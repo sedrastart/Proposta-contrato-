@@ -9,6 +9,8 @@ import {
 import { PreviaEditor } from "./previa-editor";
 
 export const dynamic = "force-dynamic";
+// gerarContratoAction também renderiza via Chrome headless (PDF + DOCX).
+export const maxDuration = 60;
 
 export default async function PreviaPage({
   params,

@@ -4,6 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { PropostaEditor } from "./proposta-editor";
 
 export const dynamic = "force-dynamic";
+// "Salvar e reemitir PDF" (atualizarTextoPropostaAction) roda Chrome
+// headless duas vezes (capa + conteúdo) antes de carimbar — mais lento
+// que o limite padrão da função serverless (10s no plano Hobby), que já
+// causou falha em produção. 60s dá folga.
+export const maxDuration = 60;
 
 export default async function PropostaDetalhePage({
   params,
