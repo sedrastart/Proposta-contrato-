@@ -38,7 +38,7 @@ export default async function ContratosPage() {
             <tbody className="divide-y divide-line">
               {contratos.map((c) => (
                 <tr key={c.id} className="hover:bg-neutral-50">
-                  <td className="px-4 py-2 font-mono text-ink">
+                  <td className="px-4 py-2 tabular-nums text-ink">
                     <Link
                       href={`/clientes/${c.clienteId}/contratos/${c.id}`}
                       className="hover:underline"

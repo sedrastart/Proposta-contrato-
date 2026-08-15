@@ -84,7 +84,7 @@ export function PlanoSelector({
                     <span className="font-medium text-ink">
                       {plano.nome}
                     </span>
-                    <span className="font-mono text-sm text-ink">
+                    <span className="tabular-nums text-sm text-ink">
                       {currency.format(plano.valor)}/mês
                     </span>
                   </div>

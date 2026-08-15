@@ -33,7 +33,7 @@ export default async function ContratoEmitidoPage({
         <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
           <div>
             <dt className="text-xs uppercase tracking-wide text-ink-muted">Número</dt>
-            <dd className="mt-0.5 font-mono text-ink">{numero}</dd>
+            <dd className="mt-0.5 tabular-nums text-ink">{numero}</dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-ink-muted">Status</dt>

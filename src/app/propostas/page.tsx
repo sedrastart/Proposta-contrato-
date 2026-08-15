@@ -38,7 +38,7 @@ export default async function PropostasPage() {
             <tbody className="divide-y divide-line">
               {propostas.map((p) => (
                 <tr key={p.id} className="hover:bg-neutral-50">
-                  <td className="px-4 py-2 font-mono text-ink">
+                  <td className="px-4 py-2 tabular-nums text-ink">
                     <Link
                       href={`/clientes/${p.clienteId}/propostas/${p.id}`}
                       className="hover:underline"

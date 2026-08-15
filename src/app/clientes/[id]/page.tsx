@@ -242,7 +242,7 @@ export default async function ClienteDetalhePage({
               <tbody className="divide-y divide-line">
                 {propostas.map((p) => (
                   <tr key={p.id}>
-                    <td className="px-4 py-2 font-mono text-ink">
+                    <td className="px-4 py-2 tabular-nums text-ink">
                       <Link
                         href={`/clientes/${cliente.id}/propostas/${p.id}`}
                         className="hover:underline"
@@ -292,7 +292,7 @@ export default async function ClienteDetalhePage({
               <tbody className="divide-y divide-line">
                 {contratos.map((c) => (
                   <tr key={c.id}>
-                    <td className="px-4 py-2 font-mono text-ink">
+                    <td className="px-4 py-2 tabular-nums text-ink">
                       <Link
                         href={`/clientes/${cliente.id}/contratos/${c.id}`}
                         className="hover:underline"

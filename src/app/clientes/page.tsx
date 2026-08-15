@@ -86,7 +86,7 @@ export default async function ClientesPage() {
                         {cliente.razaoSocial}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 font-mono text-ink-muted">
+                    <td className="px-4 py-3 tabular-nums text-ink-muted">
                       {formatCpfCnpj(cliente.cpfCnpj)}
                     </td>
                     <td className="px-4 py-3 text-ink-muted">

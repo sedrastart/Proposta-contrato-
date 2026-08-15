@@ -68,14 +68,14 @@ export default async function PainelPage() {
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-line bg-white p-5">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">Clientes</p>
-          <p className="mt-2 font-mono text-2xl font-semibold text-ink">{totalClientes}</p>
+          <p className="mt-2 tabular-nums text-2xl font-semibold text-ink">{totalClientes}</p>
         </div>
 
         <div className="rounded-lg border border-line bg-white p-5">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
             Propostas por status
           </p>
-          <p className="mt-2 font-mono text-2xl font-semibold text-ink">
+          <p className="mt-2 tabular-nums text-2xl font-semibold text-ink">
             {totalPropostas} <span className="text-sm font-normal text-ink-muted">no total</span>
           </p>
           {totalPropostas > 0 && (
@@ -103,7 +103,7 @@ export default async function PainelPage() {
           <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
             Contratos assinados
           </p>
-          <p className="mt-2 font-mono text-2xl font-semibold text-ink">
+          <p className="mt-2 tabular-nums text-2xl font-semibold text-ink">
             {currency.format(faturamentoAssinado)}
             <span className="text-sm font-normal text-ink-muted">/mês</span>
           </p>
@@ -155,7 +155,7 @@ export default async function PainelPage() {
                     >
                       {STATUS_PROPOSTA_LABEL[p.status as StatusProposta] ?? p.status}
                     </span>
-                    <span className="font-mono text-ink-muted">{p.valorFinal}</span>
+                    <span className="tabular-nums text-ink-muted">{p.valorFinal}</span>
                   </li>
                 ))}
               </ul>
@@ -192,7 +192,7 @@ export default async function PainelPage() {
                     >
                       {STATUS_CONTRATO_LABEL[c.status as StatusContrato] ?? c.status}
                     </span>
-                    <span className="font-mono text-ink-muted">{c.valorFinal}</span>
+                    <span className="tabular-nums text-ink-muted">{c.valorFinal}</span>
                   </li>
                 ))}
               </ul>
