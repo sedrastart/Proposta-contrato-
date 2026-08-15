@@ -1,4 +1,4 @@
-import { MARCA_DAGUA_PNG_BASE64 } from "./marca-assets";
+import { LOGO_OFICIAL_PNG_BASE64 } from "./marca-assets";
 
 export type DadosCapaProposta = {
   clienteNome: string;
@@ -33,7 +33,7 @@ function escapeHtml(texto: string): string {
 // claro com uma faixa diagonal em degradê (azul → marinho), no lugar do
 // bloco de cor sólida da versão anterior. Sem foto (por enquanto).
 export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
-  const marca = `data:image/png;base64,${MARCA_DAGUA_PNG_BASE64}`;
+  const marca = `data:image/png;base64,${LOGO_OFICIAL_PNG_BASE64}`;
   const clienteNome = escapeHtml(dados.clienteNome);
   const dataFormatada = formatarData(dados.dataEmissao);
   const validadeFormatada = formatarValidade(dados.dataEmissao);
@@ -82,7 +82,7 @@ export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
     gap: 3mm;
     z-index: 2;
   }
-  .capa-marca-top img { width: 9mm; opacity: 0.85; }
+  .capa-marca-top img { width: 11mm; border-radius: 2mm; }
   .capa-marca-top span {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 12pt;
@@ -147,7 +147,7 @@ export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
     gap: 3mm;
     z-index: 2;
   }
-  .abertura-marca img { width: 9mm; opacity: 0.85; }
+  .abertura-marca img { width: 11mm; border-radius: 2mm; }
   .abertura-marca span {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 12pt;
