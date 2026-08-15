@@ -1,14 +1,38 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { currency, parseValorFinal } from "@/lib/format";
+import { STATUS_PROPOSTA, STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
+import { STATUS_CONTRATO_LABEL, type StatusContrato } from "@/lib/contrato-status";
 
 export const dynamic = "force-dynamic";
 
+const SEG_COR: Record<StatusProposta, string> = {
+  rascunho: "bg-neutral-300",
+  enviada: "bg-sky-500",
+  aceita: "bg-emerald-500",
+  recusada: "bg-red-400",
+};
+
+const CHIP_PROPOSTA: Record<string, string> = {
+  rascunho: "bg-neutral-100 text-neutral-600",
+  enviada: "bg-sky-50 text-sky-700",
+  aceita: "bg-emerald-50 text-emerald-700",
+  recusada: "bg-red-50 text-red-700",
+};
+
+const CHIP_CONTRATO: Record<string, string> = {
+  emitido: "bg-sky-50 text-sky-700",
+  assinado: "bg-emerald-50 text-emerald-700",
+  cancelado: "bg-red-50 text-red-700",
+};
+
 export default async function PainelPage() {
-  const [totalClientes, totalContratos, totalPropostas, ultimosContratos, ultimasPropostas] =
+  const [totalClientes, totalContratos, propostasPorStatus, contratosAssinados, ultimosContratos, ultimasPropostas] =
     await Promise.all([
       prisma.cliente.count(),
       prisma.contrato.count(),
-      prisma.proposta.count(),
+      prisma.proposta.groupBy({ by: ["status"], _count: true }),
+      prisma.contrato.findMany({ where: { status: "assinado" }, select: { valorFinal: true } }),
       prisma.contrato.findMany({
         orderBy: { numeroSequencial: "desc" },
         take: 5,
@@ -21,53 +45,84 @@ export default async function PainelPage() {
       }),
     ]);
 
+  const totalPropostas = propostasPorStatus.reduce((soma, p) => soma + p._count, 0);
+  const contagemPorStatus = Object.fromEntries(
+    STATUS_PROPOSTA.map((s) => [s, propostasPorStatus.find((p) => p.status === s)?._count ?? 0])
+  ) as Record<StatusProposta, number>;
+
+  const faturamentoAssinado = contratosAssinados.reduce(
+    (soma, c) => soma + parseValorFinal(c.valorFinal),
+    0
+  );
+
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-10">
-      <h1 className="text-2xl font-semibold text-neutral-900">
+      <h1 className="font-serif text-2xl font-semibold text-ink">
         Sedra — Propostas e Contratos
       </h1>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-ink-muted">
         Automação de propostas comerciais e contratos de prestação de
         serviços contábeis.
       </p>
 
-      <div className="mt-8 grid grid-cols-3 gap-4">
-        <div className="rounded-lg border border-neutral-200 p-5">
-          <p className="text-3xl font-semibold text-neutral-900">{totalClientes}</p>
-          <p className="mt-1 text-sm text-neutral-500">
-            cliente{totalClientes !== 1 && "s"} cadastrado{totalClientes !== 1 && "s"}
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="rounded-lg border border-line bg-white p-5">
+          <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">Clientes</p>
+          <p className="mt-2 font-mono text-2xl font-semibold text-ink">{totalClientes}</p>
+        </div>
+
+        <div className="rounded-lg border border-line bg-white p-5">
+          <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
+            Propostas por status
+          </p>
+          <p className="mt-2 font-mono text-2xl font-semibold text-ink">
+            {totalPropostas} <span className="text-sm font-normal text-ink-muted">no total</span>
+          </p>
+          {totalPropostas > 0 && (
+            <>
+              <div className="mt-3.5 flex h-1.5 overflow-hidden rounded-full bg-neutral-100">
+                {STATUS_PROPOSTA.map((s) => {
+                  const pct = (contagemPorStatus[s] / totalPropostas) * 100;
+                  if (pct === 0) return null;
+                  return <span key={s} className={SEG_COR[s]} style={{ width: `${pct}%` }} />;
+                })}
+              </div>
+              <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-ink-muted">
+                {STATUS_PROPOSTA.map((s) => (
+                  <span key={s} className="flex items-center gap-1.5">
+                    <span className={`h-1.5 w-1.5 rounded-full ${SEG_COR[s]}`} />
+                    {contagemPorStatus[s]} {STATUS_PROPOSTA_LABEL[s].toLowerCase()}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="rounded-lg border border-line bg-white p-5">
+          <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
+            Contratos assinados
+          </p>
+          <p className="mt-2 font-mono text-2xl font-semibold text-ink">
+            {currency.format(faturamentoAssinado)}
+            <span className="text-sm font-normal text-ink-muted">/mês</span>
+          </p>
+          <p className="mt-2.5 text-[11px] text-ink-muted">
+            {contratosAssinados.length} de {totalContratos} contratos emitidos
           </p>
         </div>
-        <Link
-          href="/propostas"
-          className="rounded-lg border border-neutral-200 p-5 hover:border-neutral-400"
-        >
-          <p className="text-3xl font-semibold text-neutral-900">{totalPropostas}</p>
-          <p className="mt-1 text-sm text-neutral-500">
-            proposta{totalPropostas !== 1 && "s"} emitida{totalPropostas !== 1 && "s"}
-          </p>
-        </Link>
-        <Link
-          href="/contratos"
-          className="rounded-lg border border-neutral-200 p-5 hover:border-neutral-400"
-        >
-          <p className="text-3xl font-semibold text-neutral-900">{totalContratos}</p>
-          <p className="mt-1 text-sm text-neutral-500">
-            contrato{totalContratos !== 1 && "s"} emitido{totalContratos !== 1 && "s"}
-          </p>
-        </Link>
       </div>
 
-      <div className="mt-8 flex gap-3">
+      <div className="mt-6 flex gap-3">
         <Link
           href="/clientes/novo"
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110"
         >
           + Novo cliente
         </Link>
         <Link
           href="/clientes"
-          className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-accent-soft"
         >
           Ver clientes
         </Link>
@@ -76,26 +131,31 @@ export default async function PainelPage() {
       <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2">
         <section>
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-muted">
               Últimas propostas
             </h2>
-            <Link href="/propostas" className="text-xs text-neutral-500 hover:underline">
+            <Link href="/propostas" className="text-xs text-ink-muted hover:underline">
               ver todas →
             </Link>
           </div>
           {ultimasPropostas.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-neutral-300 py-8 text-center text-sm text-neutral-500">
+            <p className="rounded-lg border border-dashed border-line bg-white py-8 text-center text-sm text-ink-muted">
               Nenhuma proposta emitida ainda.
             </p>
           ) : (
-            <div className="overflow-hidden rounded-lg border border-neutral-200">
-              <ul className="divide-y divide-neutral-100">
+            <div className="overflow-hidden rounded-lg border border-line bg-white">
+              <ul className="divide-y divide-line">
                 {ultimasPropostas.map((p) => (
-                  <li key={p.id} className="flex items-center justify-between px-4 py-3 text-sm">
-                    <Link href={`/clientes/${p.clienteId}`} className="hover:underline">
+                  <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                    <Link href={`/clientes/${p.clienteId}`} className="min-w-0 flex-1 truncate hover:underline">
                       {p.cliente.razaoSocial}
                     </Link>
-                    <span className="text-neutral-500">{p.valorFinal}</span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${CHIP_PROPOSTA[p.status] ?? CHIP_PROPOSTA.rascunho}`}
+                    >
+                      {STATUS_PROPOSTA_LABEL[p.status as StatusProposta] ?? p.status}
+                    </span>
+                    <span className="font-mono text-ink-muted">{p.valorFinal}</span>
                   </li>
                 ))}
               </ul>
@@ -105,29 +165,34 @@ export default async function PainelPage() {
 
         <section>
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-muted">
               Últimos contratos
             </h2>
-            <Link href="/contratos" className="text-xs text-neutral-500 hover:underline">
+            <Link href="/contratos" className="text-xs text-ink-muted hover:underline">
               ver todos →
             </Link>
           </div>
           {ultimosContratos.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-neutral-300 py-8 text-center text-sm text-neutral-500">
+            <p className="rounded-lg border border-dashed border-line bg-white py-8 text-center text-sm text-ink-muted">
               Nenhum contrato emitido ainda.
             </p>
           ) : (
-            <div className="overflow-hidden rounded-lg border border-neutral-200">
-              <ul className="divide-y divide-neutral-100">
+            <div className="overflow-hidden rounded-lg border border-line bg-white">
+              <ul className="divide-y divide-line">
                 {ultimosContratos.map((c) => (
-                  <li key={c.id} className="flex items-center justify-between px-4 py-3 text-sm">
+                  <li key={c.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                     <Link
                       href={`/clientes/${c.clienteId}/contratos/${c.id}`}
-                      className="hover:underline"
+                      className="min-w-0 flex-1 truncate hover:underline"
                     >
                       {c.cliente.razaoSocial}
                     </Link>
-                    <span className="text-neutral-500">{c.valorFinal}</span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${CHIP_CONTRATO[c.status] ?? CHIP_CONTRATO.emitido}`}
+                    >
+                      {STATUS_CONTRATO_LABEL[c.status as StatusContrato] ?? c.status}
+                    </span>
+                    <span className="font-mono text-ink-muted">{c.valorFinal}</span>
                   </li>
                 ))}
               </ul>

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { NavPrincipal } from "./nav-principal";
+import { prisma } from "@/lib/prisma";
+import { AppShell } from "./app-shell";
+
+export const dynamic = "force-dynamic";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,19 +21,24 @@ export const metadata: Metadata = {
   description: "Automação de propostas e contratos de prestação de serviços contábeis",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [clientes, propostas, contratos] = await Promise.all([
+    prisma.cliente.count(),
+    prisma.proposta.count(),
+    prisma.contrato.count(),
+  ]);
+
   return (
     <html
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-screen flex flex-col bg-neutral-50 text-neutral-900">
-        <NavPrincipal />
-        {children}
+      <body className="min-h-screen flex flex-col bg-background text-ink">
+        <AppShell contagens={{ clientes, propostas, contratos }}>{children}</AppShell>
       </body>
     </html>
   );

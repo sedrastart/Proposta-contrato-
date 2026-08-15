@@ -8,6 +8,7 @@ import { ServicoSelector } from "./servico-selector";
 import { PlanoSelector } from "./plano-selector";
 import { STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
 import { STATUS_CONTRATO_LABEL, type StatusContrato } from "@/lib/contrato-status";
+import { Stepper, type PassoStepper } from "./stepper";
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
@@ -46,6 +47,42 @@ export default async function ClienteDetalhePage({
     }),
   ]);
   if (!cliente) notFound();
+
+  const passosBrutos = [
+    { titulo: "Cadastro", subtitulo: "Dados completos", feito: true },
+    {
+      titulo: "Regime e serviços",
+      subtitulo: cliente.regimeTributarioId
+        ? `${cliente.servicos.length} serviço${cliente.servicos.length === 1 ? "" : "s"}`
+        : "Não definido",
+      feito: Boolean(cliente.regimeTributarioId) && cliente.servicos.length > 0,
+    },
+    {
+      titulo: "Plano",
+      subtitulo: cliente.servicos.some((cs) => cs.planoId) ? "Definido" : "Não definido",
+      feito: cliente.servicos.some((cs) => cs.planoId),
+    },
+    {
+      titulo: "Proposta",
+      subtitulo: propostas[0]
+        ? (STATUS_PROPOSTA_LABEL[propostas[0].status as StatusProposta] ?? propostas[0].status)
+        : "Ainda não criada",
+      feito: propostas.length > 0,
+    },
+    {
+      titulo: "Contrato",
+      subtitulo: contratos[0]
+        ? (STATUS_CONTRATO_LABEL[contratos[0].status as StatusContrato] ?? contratos[0].status)
+        : "Aguardando",
+      feito: contratos.length > 0,
+    },
+  ];
+  const primeiroPendente = passosBrutos.findIndex((p) => !p.feito);
+  const passos: PassoStepper[] = passosBrutos.map((p, i) => ({
+    titulo: p.titulo,
+    subtitulo: p.subtitulo,
+    estado: p.feito ? "concluida" : i === primeiroPendente ? "atual" : "pendente",
+  }));
 
   const servicosDisponiveis = cliente.regimeTributarioId
     ? await prisma.servico.findMany({
@@ -98,7 +135,9 @@ export default async function ClienteDetalhePage({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-6 divide-y divide-neutral-100 rounded-lg border border-neutral-200 p-5">
+      <Stepper passos={passos} />
+
+      <div className="mt-6 grid grid-cols-2 gap-x-6 divide-y divide-neutral-100 rounded-lg border border-neutral-200 p-5">
         <Row
           label={cliente.tipoPessoa === "PJ" ? "CNPJ" : "CPF"}
           value={formatCpfCnpj(cliente.cpfCnpj)}
