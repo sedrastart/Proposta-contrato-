@@ -1,5 +1,8 @@
 import { renderizarHtmlParaPdf } from "./pdf";
-import { MARCA_DAGUA_PNG_BASE64 } from "./marca-assets";
+import {
+  FOTO_CAPA_PROPOSTA_JPG_BASE64,
+  FOTO_ABERTURA_PROPOSTA_JPG_BASE64,
+} from "./marca-assets";
 
 export type DadosCapaProposta = {
   clienteNome: string;
@@ -8,7 +11,6 @@ export type DadosCapaProposta = {
 };
 
 const ACCENT = "#368DCC";
-const ACCENT_CLARO = "#E9F3FA";
 const NAVY = "#10305D";
 
 function formatarData(data: Date): string {
@@ -31,11 +33,11 @@ function escapeHtml(texto: string): string {
 
 // Duas páginas fixas — capa e "Em favor de" — que abrem a Proposta. O
 // texto institucional é curto e fixo (não editável pelo admin nesta
-// versão). O grafismo reaproveita a silhueta da montanha do logo
-// (MARCA_DAGUA_PNG_BASE64) no lugar da foto do modelo de referência —
-// via filtro CSS, já que aqui é HTML/Chrome, não pdf-lib.
+// versão). Capa e abertura usam fotos reais fornecidas pelo usuário
+// (marca-assets.ts) em vez de um grafismo genérico.
 function montarHtmlCapa(dados: DadosCapaProposta): string {
-  const marcaDagua = `data:image/png;base64,${MARCA_DAGUA_PNG_BASE64}`;
+  const fotoCapa = `data:image/jpeg;base64,${FOTO_CAPA_PROPOSTA_JPG_BASE64}`;
+  const fotoAbertura = `data:image/jpeg;base64,${FOTO_ABERTURA_PROPOSTA_JPG_BASE64}`;
   const clienteNome = escapeHtml(dados.clienteNome);
   const dataFormatada = formatarData(dados.dataEmissao);
   const validadeFormatada = formatarValidade(dados.dataEmissao);
@@ -68,12 +70,21 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
   }
   .capa-marca-top {
     position: absolute;
-    top: 18mm; right: 16mm;
+    top: 16mm; right: 16mm;
+    text-align: right;
     color: white;
-    font-size: 12pt;
+  }
+  .capa-marca-top .nome {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 20pt;
     font-weight: 700;
-    letter-spacing: 2.5pt;
-    opacity: 0.9;
+    letter-spacing: 1pt;
+  }
+  .capa-marca-top .sub {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 10pt;
+    font-weight: 400;
+    margin-top: -1mm;
   }
   .capa-titulo {
     position: absolute;
@@ -83,19 +94,14 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
     line-height: 0.97;
     letter-spacing: 0.5pt;
     text-transform: uppercase;
-    color: transparent;
-    -webkit-text-stroke: 1.3pt white;
+    color: white;
   }
-  .capa-meio {
+  .capa-foto {
     position: absolute;
     top: 60%; left: 0; right: 0; bottom: 28mm;
-    background: ${ACCENT_CLARO};
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
   }
-  .capa-meio img { width: 62%; opacity: 0.5; }
+  .capa-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .capa-rodape {
     position: absolute;
     bottom: 0; left: 0; right: 0; height: 28mm;
@@ -127,16 +133,12 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
     white-space: nowrap;
     transform: rotate(-90deg);
   }
-  .abertura-montanha {
+  .abertura-foto {
     position: absolute;
     top: 0; left: 18mm; right: 0; height: 42%;
-    background: ${ACCENT_CLARO};
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
   }
-  .abertura-montanha img { width: 55%; opacity: 0.55; }
+  .abertura-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .abertura-texto {
     position: absolute;
     top: 42%; left: 18mm; right: 0; height: 26%;
@@ -171,11 +173,14 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
 <body>
   <div class="pagina">
     <div class="capa-topo">
-      <div class="capa-marca-top">SEDRA</div>
+      <div class="capa-marca-top">
+        <div class="nome">SEDRA</div>
+        <div class="sub">Consultoria</div>
+      </div>
       <div class="capa-titulo">Proposta<br>Comercial</div>
     </div>
-    <div class="capa-meio">
-      <img src="${marcaDagua}" alt="">
+    <div class="capa-foto">
+      <img src="${fotoCapa}" alt="">
     </div>
     <div class="capa-rodape">
       <div class="info">
@@ -189,7 +194,7 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
   </div>
   <div class="pagina">
     <div class="abertura-faixa"><span>SEDRA</span></div>
-    <div class="abertura-montanha"><img src="${marcaDagua}" alt=""></div>
+    <div class="abertura-foto"><img src="${fotoAbertura}" alt=""></div>
     <div class="abertura-texto">
       <p>Cuidamos da parte contábil e fiscal do seu negócio com atenção e
       proximidade, para que você possa focar no que só você pode fazer:

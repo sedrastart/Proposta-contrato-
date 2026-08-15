@@ -1,5 +1,9 @@
 import { PDFDocument, PDFName, PDFString, PDFPage, rgb, StandardFonts } from "pdf-lib";
-import { LOGO_SEDRA_PNG_BASE64, MARCA_DAGUA_PNG_BASE64 } from "./marca-assets";
+import {
+  LOGO_SEDRA_PNG_BASE64,
+  MARCA_DAGUA_PNG_BASE64,
+  LOGO_LOCKUP_PROPOSTA_PNG_BASE64,
+} from "./marca-assets";
 import { CONTRATADO } from "../templates/contratado";
 import type { TipoDocumento } from "./pdf";
 
@@ -149,7 +153,9 @@ export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer
   const pdfDoc = await PDFDocument.load(pdfBuffer);
   const accent = ACCENT_RGB.proposta;
 
-  const logoImage = await pdfDoc.embedPng(Buffer.from(LOGO_SEDRA_PNG_BASE64, "base64"));
+  const logoImage = await pdfDoc.embedPng(
+    Buffer.from(LOGO_LOCKUP_PROPOSTA_PNG_BASE64, "base64")
+  );
   const marcaDaguaImage = await pdfDoc.embedPng(
     Buffer.from(MARCA_DAGUA_PNG_BASE64, "base64")
   );
@@ -177,8 +183,8 @@ export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer
     // Barra de destaque na lateral esquerda, full-height.
     pagina.drawRectangle({ x: 0, y: 0, width: larguraRail, height, color: accent });
 
-    // Logo — dentro da faixa, canto superior direito.
-    const larguraLogo = 13 * MM;
+    // Logo (selo + "SEDRA") — dentro da faixa, canto superior direito.
+    const larguraLogo = 34 * MM;
     const alturaLogo = larguraLogo * (logoImage.height / logoImage.width);
     pagina.drawImage(logoImage, {
       x: width - 14 * MM - larguraLogo,
