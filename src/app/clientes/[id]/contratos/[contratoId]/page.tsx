@@ -21,7 +21,7 @@ export default async function ContratoEmitidoPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-10">
-      <Link href={`/clientes/${id}`} className="text-sm text-neutral-500 hover:underline">
+      <Link href={`/clientes/${id}`} className="text-sm text-ink-muted hover:underline">
         ← Voltar ao cliente
       </Link>
 
@@ -29,37 +29,37 @@ export default async function ContratoEmitidoPage({
         Contrato nº {numero} gerado com sucesso.
       </div>
 
-      <div className="mt-6 rounded-lg border border-neutral-200 p-5">
+      <div className="mt-6 rounded-lg border border-line p-5">
         <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
           <div>
-            <dt className="text-xs uppercase tracking-wide text-neutral-500">Número</dt>
-            <dd className="mt-0.5 font-mono text-neutral-900">{numero}</dd>
+            <dt className="text-xs uppercase tracking-wide text-ink-muted">Número</dt>
+            <dd className="mt-0.5 font-mono text-ink">{numero}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-neutral-500">Status</dt>
+            <dt className="text-xs uppercase tracking-wide text-ink-muted">Status</dt>
             <dd className="mt-0.5">
               <ContratoStatusSelector contratoId={contrato.id} statusAtual={contrato.status} />
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-neutral-500">Emitido em</dt>
-            <dd className="mt-0.5 text-neutral-900">
+            <dt className="text-xs uppercase tracking-wide text-ink-muted">Emitido em</dt>
+            <dd className="mt-0.5 text-ink">
               {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(
                 contrato.dataEmissao
               )}
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-neutral-500">Valor</dt>
-            <dd className="mt-0.5 text-neutral-900">{contrato.valorFinal}</dd>
+            <dt className="text-xs uppercase tracking-wide text-ink-muted">Valor</dt>
+            <dd className="mt-0.5 text-ink">{contrato.valorFinal}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-neutral-500">Vigência</dt>
-            <dd className="mt-0.5 text-neutral-900">{contrato.vigenciaMeses} meses</dd>
+            <dt className="text-xs uppercase tracking-wide text-ink-muted">Vigência</dt>
+            <dd className="mt-0.5 text-ink">{contrato.vigenciaMeses} meses</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-neutral-500">Serviços</dt>
-            <dd className="mt-0.5 text-neutral-900">{contrato.servicosSnapshot}</dd>
+            <dt className="text-xs uppercase tracking-wide text-ink-muted">Serviços</dt>
+            <dd className="mt-0.5 text-ink">{contrato.servicosSnapshot}</dd>
           </div>
         </dl>
         <BotaoExcluirContrato contratoId={contrato.id} clienteId={id} numero={numero} />
@@ -68,20 +68,20 @@ export default async function ContratoEmitidoPage({
       <div className="mt-4 flex gap-3">
         <a
           href={`/api/contratos/${contrato.id}/pdf`}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110"
         >
           Baixar PDF
         </a>
         <a
           href={`/api/contratos/${contrato.id}/docx`}
-          className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-neutral-50"
         >
           Baixar DOCX
         </a>
         {contrato.propostaOrigem && (
           <Link
             href={`/clientes/${id}/propostas/${contrato.propostaOrigem.id}`}
-            className="flex items-center rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+            className="flex items-center rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-neutral-50"
           >
             Gerado a partir da proposta nº{" "}
             {String(contrato.propostaOrigem.numeroSequencial).padStart(6, "0")} →
@@ -89,11 +89,11 @@ export default async function ContratoEmitidoPage({
         )}
       </div>
 
-      <div className="mt-8 rounded-lg border border-neutral-200 bg-white p-6">
-        <p className="mb-3 text-xs uppercase tracking-wide text-neutral-500">
+      <div className="mt-8 rounded-lg border border-line bg-white p-6">
+        <p className="mb-3 text-xs uppercase tracking-wide text-ink-muted">
           Texto emitido (snapshot)
         </p>
-        <pre className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-neutral-800">
+        <pre className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-ink">
           {contrato.textoCompleto}
         </pre>
       </div>

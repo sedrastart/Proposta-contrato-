@@ -11,8 +11,8 @@ export default async function AdminRegimesPage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-10">
-      <h1 className="text-2xl font-semibold text-neutral-900">Regimes tributários</h1>
-      <p className="mt-1 text-sm text-neutral-500">
+      <h1 className="text-2xl font-semibold text-ink">Regimes tributários</h1>
+      <p className="mt-1 text-sm text-ink-muted">
         Cada regime tem seu próprio modelo de contrato (cláusulas
         independentes, editáveis em Contratos) e decide qual catálogo de
         serviços aparece no assistente para o cliente.
@@ -27,12 +27,12 @@ export default async function AdminRegimesPage() {
           name="nome"
           placeholder="Nome do novo regime"
           required
-          className="flex-1 rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
+          className="flex-1 rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-accent"
           title="Nome do novo regime tributário (ex.: 'Regularização Fiscal') — cria automaticamente um modelo de contrato em branco pra ele"
         />
         <button
           type="submit"
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110"
         >
           + Novo regime
         </button>

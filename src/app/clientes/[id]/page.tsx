@@ -14,10 +14,10 @@ function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
   return (
     <div className="py-2">
-      <dt className="text-xs uppercase tracking-wide text-neutral-500">
+      <dt className="text-xs uppercase tracking-wide text-ink-muted">
         {label}
       </dt>
-      <dd className="mt-0.5 text-sm text-neutral-900">{value}</dd>
+      <dd className="mt-0.5 text-sm text-ink">{value}</dd>
     </div>
   );
 }
@@ -112,23 +112,23 @@ export default async function ClienteDetalhePage({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-10">
-      <Link href="/clientes" className="text-sm text-neutral-500 hover:underline">
+      <Link href="/clientes" className="text-sm text-ink-muted hover:underline">
         ← Clientes
       </Link>
 
       <div className="mt-2 mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-900">
+          <h1 className="text-2xl font-semibold text-ink">
             {cliente.razaoSocial}
           </h1>
           {cliente.nomeFantasia && (
-            <p className="mt-1 text-sm text-neutral-500">
+            <p className="mt-1 text-sm text-ink-muted">
               {cliente.nomeFantasia}
             </p>
           )}
         </div>
         <div className="flex flex-col items-end gap-2">
-          <span className="rounded-full border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-600">
+          <span className="rounded-full border border-line px-3 py-1 text-xs font-medium text-ink-muted">
             {cliente.tipoPessoa === "PJ" ? "Pessoa Jurídica" : "Pessoa Física"}
           </span>
           <BotaoExcluirCliente clienteId={cliente.id} nomeCliente={cliente.razaoSocial} />
@@ -137,7 +137,7 @@ export default async function ClienteDetalhePage({
 
       <Stepper passos={passos} />
 
-      <div className="mt-6 grid grid-cols-2 gap-x-6 divide-y divide-neutral-100 rounded-lg border border-neutral-200 p-5">
+      <div className="mt-6 grid grid-cols-2 gap-x-6 divide-y divide-line rounded-lg border border-line p-5">
         <Row
           label={cliente.tipoPessoa === "PJ" ? "CNPJ" : "CPF"}
           value={formatCpfCnpj(cliente.cpfCnpj)}
@@ -163,7 +163,7 @@ export default async function ClienteDetalhePage({
         />
       </div>
 
-      <div className="mt-8 rounded-lg border border-neutral-200 p-5">
+      <div className="mt-8 rounded-lg border border-line p-5">
         <RegimeSelector
           clienteId={cliente.id}
           regimes={regimes}
@@ -172,7 +172,7 @@ export default async function ClienteDetalhePage({
       </div>
 
       {cliente.regimeTributarioId && (
-        <div className="mt-4 rounded-lg border border-neutral-200 p-5">
+        <div className="mt-4 rounded-lg border border-line p-5">
           <ServicoSelector
             clienteId={cliente.id}
             servicosDisponiveis={servicosDisponiveis}
@@ -183,7 +183,7 @@ export default async function ClienteDetalhePage({
 
       {cliente.servicos.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-xs uppercase tracking-wide text-neutral-500">
+          <p className="mb-2 text-xs uppercase tracking-wide text-ink-muted">
             Etapa 4 — Planos
           </p>
           <div className="space-y-3">
@@ -206,7 +206,7 @@ export default async function ClienteDetalhePage({
           {cliente.regimeTributarioId && cliente.servicos.length > 0 && (
             <Link
               href={`/clientes/${cliente.id}/propostas/nova`}
-              className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+              className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-neutral-50"
               title="Cria uma proposta comercial — não exige plano definido, pode ser enviada antes de fechar os valores"
             >
               + Nova proposta
@@ -215,7 +215,7 @@ export default async function ClienteDetalhePage({
           {cliente.servicos.some((cs) => cs.planoId) && (
             <Link
               href={`/clientes/${cliente.id}/previa`}
-              className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+              className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110"
             >
               Ver prévia do contrato →
             </Link>
@@ -225,12 +225,12 @@ export default async function ClienteDetalhePage({
 
       {propostas.length > 0 && (
         <div className="mt-10">
-          <p className="mb-2 text-xs uppercase tracking-wide text-neutral-500">
+          <p className="mb-2 text-xs uppercase tracking-wide text-ink-muted">
             Histórico de propostas comerciais
           </p>
-          <div className="overflow-hidden rounded-lg border border-neutral-200">
+          <div className="overflow-hidden rounded-lg border border-line">
             <table className="w-full text-left text-sm">
-              <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
+              <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-ink-muted">
                 <tr>
                   <th className="px-4 py-2 font-medium">Número</th>
                   <th className="px-4 py-2 font-medium">Emitida em</th>
@@ -239,10 +239,10 @@ export default async function ClienteDetalhePage({
                   <th className="px-4 py-2 font-medium">Download</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-line">
                 {propostas.map((p) => (
                   <tr key={p.id}>
-                    <td className="px-4 py-2 font-mono text-neutral-900">
+                    <td className="px-4 py-2 font-mono text-ink">
                       <Link
                         href={`/clientes/${cliente.id}/propostas/${p.id}`}
                         className="hover:underline"
@@ -250,17 +250,17 @@ export default async function ClienteDetalhePage({
                         {String(p.numeroSequencial).padStart(6, "0")}
                       </Link>
                     </td>
-                    <td className="px-4 py-2 text-neutral-600">
+                    <td className="px-4 py-2 text-ink-muted">
                       {new Intl.DateTimeFormat("pt-BR").format(p.dataEmissao)}
                     </td>
-                    <td className="px-4 py-2 text-neutral-600">{p.valorFinal}</td>
-                    <td className="px-4 py-2 text-neutral-600">
+                    <td className="px-4 py-2 text-ink-muted">{p.valorFinal}</td>
+                    <td className="px-4 py-2 text-ink-muted">
                       {STATUS_PROPOSTA_LABEL[p.status as StatusProposta] ?? p.status}
                     </td>
                     <td className="px-4 py-2">
                       <a
                         href={`/api/propostas/${p.id}`}
-                        className="text-neutral-700 hover:underline"
+                        className="text-ink hover:underline"
                       >
                         PDF
                       </a>
@@ -275,12 +275,12 @@ export default async function ClienteDetalhePage({
 
       {contratos.length > 0 && (
         <div className="mt-10">
-          <p className="mb-2 text-xs uppercase tracking-wide text-neutral-500">
+          <p className="mb-2 text-xs uppercase tracking-wide text-ink-muted">
             Histórico de documentos emitidos
           </p>
-          <div className="overflow-hidden rounded-lg border border-neutral-200">
+          <div className="overflow-hidden rounded-lg border border-line">
             <table className="w-full text-left text-sm">
-              <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
+              <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-ink-muted">
                 <tr>
                   <th className="px-4 py-2 font-medium">Número</th>
                   <th className="px-4 py-2 font-medium">Emitido em</th>
@@ -289,10 +289,10 @@ export default async function ClienteDetalhePage({
                   <th className="px-4 py-2 font-medium">Downloads</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-line">
                 {contratos.map((c) => (
                   <tr key={c.id}>
-                    <td className="px-4 py-2 font-mono text-neutral-900">
+                    <td className="px-4 py-2 font-mono text-ink">
                       <Link
                         href={`/clientes/${cliente.id}/contratos/${c.id}`}
                         className="hover:underline"
@@ -300,24 +300,24 @@ export default async function ClienteDetalhePage({
                         {String(c.numeroSequencial).padStart(6, "0")}
                       </Link>
                     </td>
-                    <td className="px-4 py-2 text-neutral-600">
+                    <td className="px-4 py-2 text-ink-muted">
                       {new Intl.DateTimeFormat("pt-BR").format(c.dataEmissao)}
                     </td>
-                    <td className="px-4 py-2 text-neutral-600">{c.valorFinal}</td>
-                    <td className="px-4 py-2 text-neutral-600">
+                    <td className="px-4 py-2 text-ink-muted">{c.valorFinal}</td>
+                    <td className="px-4 py-2 text-ink-muted">
                       {STATUS_CONTRATO_LABEL[c.status as StatusContrato] ?? c.status}
                     </td>
                     <td className="px-4 py-2">
                       <a
                         href={`/api/contratos/${c.id}/pdf`}
-                        className="text-neutral-700 hover:underline"
+                        className="text-ink hover:underline"
                       >
                         PDF
                       </a>
-                      <span className="mx-1.5 text-neutral-300">·</span>
+                      <span className="mx-1.5 text-ink-muted">·</span>
                       <a
                         href={`/api/contratos/${c.id}/docx`}
-                        className="text-neutral-700 hover:underline"
+                        className="text-ink hover:underline"
                       >
                         DOCX
                       </a>

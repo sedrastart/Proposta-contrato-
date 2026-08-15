@@ -31,13 +31,13 @@ export function ServicosLista({
         value={busca}
         onChange={(e) => setBusca(e.target.value)}
         placeholder="Buscar por nome do serviço..."
-        className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
+        className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-accent"
         title="Filtra a lista abaixo por nome do serviço"
       />
 
       <div className="mt-4 space-y-3">
         {filtrados.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-neutral-300 py-8 text-center text-sm text-neutral-500">
+          <p className="rounded-lg border border-dashed border-line py-8 text-center text-sm text-ink-muted">
             Nenhum serviço encontrado para &quot;{busca}&quot;.
           </p>
         ) : (

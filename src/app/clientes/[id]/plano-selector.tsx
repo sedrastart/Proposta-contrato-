@@ -48,16 +48,16 @@ export function PlanoSelector({
 
   if (planos.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-neutral-300 p-4 text-sm text-neutral-500">
-        <span className="font-medium text-neutral-700">{servicoNome}:</span>{" "}
+      <div className="rounded-md border border-dashed border-line p-4 text-sm text-ink-muted">
+        <span className="font-medium text-ink">{servicoNome}:</span>{" "}
         nenhum plano cadastrado ainda para este serviço/regime.
       </div>
     );
   }
 
   return (
-    <div className="rounded-md border border-neutral-200 p-4">
-      <p className="text-sm font-medium text-neutral-900">{servicoNome}</p>
+    <div className="rounded-md border border-line p-4">
+      <p className="text-sm font-medium text-ink">{servicoNome}</p>
       <div className="mt-2 space-y-2">
         {planos.map((plano) => {
           const selecionado = plano.id === planoAtualId;
@@ -66,8 +66,8 @@ export function PlanoSelector({
               key={plano.id}
               className={`block cursor-pointer rounded-md border p-3 text-sm transition ${
                 selecionado
-                  ? "border-neutral-900 bg-neutral-50"
-                  : "border-neutral-200 hover:border-neutral-400"
+                  ? "border-accent bg-neutral-50"
+                  : "border-line hover:border-line"
               }`}
             >
               <div className="flex items-start gap-3">
@@ -81,14 +81,14 @@ export function PlanoSelector({
                 />
                 <div className="flex-1">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="font-medium text-neutral-900">
+                    <span className="font-medium text-ink">
                       {plano.nome}
                     </span>
-                    <span className="font-mono text-sm text-neutral-900">
+                    <span className="font-mono text-sm text-ink">
                       {currency.format(plano.valor)}/mês
                     </span>
                   </div>
-                  <p className="mt-0.5 text-xs text-neutral-500">
+                  <p className="mt-0.5 text-xs text-ink-muted">
                     Vigência: {plano.vigenciaMeses}{" "}
                     {plano.vigenciaMeses === 1 ? "mês" : "meses"} · Multa:{" "}
                     {plano.multaDescricao ?? "não possui"}
@@ -96,7 +96,7 @@ export function PlanoSelector({
                   {plano.limites.map((limite) => (
                     <div
                       key={limite.unidade}
-                      className="mt-1.5 rounded bg-neutral-100 px-2 py-1 text-xs text-neutral-600"
+                      className="mt-1.5 rounded bg-neutral-100 px-2 py-1 text-xs text-ink-muted"
                     >
                       <span className="font-medium">
                         Até {limite.quantidade} {limite.unidade}/mês incluídos.

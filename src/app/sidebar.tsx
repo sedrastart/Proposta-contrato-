@@ -69,7 +69,7 @@ export function Sidebar({ contagens }: { contagens: Contagens }) {
           className="h-8 w-8 object-contain"
         />
         <span className="flex flex-col leading-tight">
-          <strong className="font-serif text-[15px] tracking-wide text-ink">SEDRA</strong>
+          <strong className="text-[15px] font-bold tracking-wide text-ink">SEDRA</strong>
           <span className="text-[10px] tracking-wide text-ink-muted">
             PROPOSTAS &amp; CONTRATOS
           </span>

@@ -12,8 +12,8 @@ import { UF_LIST, onlyDigits } from "@/lib/validation";
 const initialState: CriarClienteState = { errors: {}, values: {} };
 
 const inputClass =
-  "w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900";
-const labelClass = "mb-1 block text-sm font-medium text-neutral-700";
+  "w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-1 focus:ring-accent";
+const labelClass = "mb-1 block text-sm font-medium text-ink";
 const errorClass = "mt-1 text-xs text-red-600";
 
 function Field({
@@ -140,7 +140,7 @@ export function NovoClienteForm() {
   return (
     <form action={formAction} className="space-y-8">
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-neutral-900">
+        <h2 className="text-sm font-semibold text-ink">
           Identificação
         </h2>
         <div>
@@ -151,8 +151,8 @@ export function NovoClienteForm() {
                 key={tipo}
                 className={`cursor-pointer rounded-md border px-3 py-1.5 text-sm ${
                   tipoPessoa === tipo
-                    ? "border-neutral-900 bg-neutral-900 text-white"
-                    : "border-neutral-300 text-neutral-700"
+                    ? "border-accent bg-accent text-white"
+                    : "border-line text-ink"
                 }`}
               >
                 <input
@@ -197,7 +197,7 @@ export function NovoClienteForm() {
               required
             />
             {tipoPessoa === "PJ" && isCnpjPending && (
-              <p className="mt-1 text-xs text-neutral-400">Consultando CNPJ...</p>
+              <p className="mt-1 text-xs text-ink-muted">Consultando CNPJ...</p>
             )}
             {tipoPessoa === "PJ" && cnpjStatus === "not-found" && !isCnpjPending && (
               <p className="mt-1 text-xs text-amber-600">
@@ -226,7 +226,7 @@ export function NovoClienteForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-neutral-900">Endereço</h2>
+        <h2 className="text-sm font-semibold text-ink">Endereço</h2>
         <div className="grid grid-cols-3 gap-4">
           <div className="relative">
             <Field
@@ -240,7 +240,7 @@ export function NovoClienteForm() {
               required
             />
             {isCepPending && (
-              <p className="mt-1 text-xs text-neutral-400">Buscando endereço...</p>
+              <p className="mt-1 text-xs text-ink-muted">Buscando endereço...</p>
             )}
             {cepStatus === "not-found" && !isCepPending && (
               <p className="mt-1 text-xs text-amber-600">
@@ -319,7 +319,7 @@ export function NovoClienteForm() {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-neutral-900">Contato</h2>
+        <h2 className="text-sm font-semibold text-ink">Contato</h2>
         <div className="grid grid-cols-2 gap-4">
           <Field
             name="telefone"
@@ -357,11 +357,11 @@ export function NovoClienteForm() {
         </div>
       </section>
 
-      <div className="flex justify-end gap-3 border-t border-neutral-200 pt-6">
+      <div className="flex justify-end gap-3 border-t border-line pt-6">
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110 disabled:opacity-50"
         >
           {pending ? "Salvando..." : "Salvar e continuar →"}
         </button>

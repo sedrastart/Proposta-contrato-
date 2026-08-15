@@ -36,7 +36,7 @@ type Plano = {
   limites: Limite[];
 };
 
-const inputClass = "rounded-md border border-neutral-200 px-2 py-1 text-sm";
+const inputClass = "rounded-md border border-line px-2 py-1 text-sm";
 
 export function PlanoCard({ plano }: { plano: Plano }) {
   const [campos, setCampos] = useState({
@@ -93,15 +93,15 @@ export function PlanoCard({ plano }: { plano: Plano }) {
   }
 
   return (
-    <div className="rounded-lg border border-neutral-200 p-4">
+    <div className="rounded-lg border border-line p-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs uppercase tracking-wide text-neutral-500">
+        <p className="text-xs uppercase tracking-wide text-ink-muted">
           {plano.servico.nome} · {plano.regimeTributario?.nome ?? "qualquer regime do serviço"}
         </p>
         <div className="flex items-center gap-2">
           <span
             className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-              plano.ativo ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"
+              plano.ativo ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-ink-muted"
             }`}
           >
             {plano.ativo ? "ativo" : "inativo"}
@@ -110,7 +110,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             type="button"
             onClick={alternarAtivo}
             disabled={isPending}
-            className="text-sm text-neutral-600 hover:underline disabled:opacity-50"
+            className="text-sm text-ink-muted hover:underline disabled:opacity-50"
           >
             {plano.ativo ? "desativar" : "ativar"}
           </button>
@@ -125,7 +125,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
           onBlur={salvar}
           title="Nome do plano, como aparece para o cliente (ex.: 'Plano Essencial')"
         />
-        <label className="text-xs text-neutral-500">
+        <label className="text-xs text-ink-muted">
           Valor (R$)
           <input
             type="number"
@@ -137,7 +137,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             title="Valor mensal cobrado do cliente nesse plano"
           />
         </label>
-        <label className="text-xs text-neutral-500">
+        <label className="text-xs text-ink-muted">
           Vigência (meses)
           <input
             type="number"
@@ -148,7 +148,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             title="Duração do contrato em meses (ex.: 12 = um ano)"
           />
         </label>
-        <label className="text-xs text-neutral-500">
+        <label className="text-xs text-ink-muted">
           Multa (%)
           <input
             type="number"
@@ -160,7 +160,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             title="Percentual de multa cobrado se o cliente quebrar o contrato antes do fim da vigência (opcional)"
           />
         </label>
-        <label className="text-xs text-neutral-500">
+        <label className="text-xs text-ink-muted">
           Texto da multa
           <input
             className={`${inputClass} mt-0.5 w-full`}
@@ -170,7 +170,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             title="Como a multa aparece escrita no contrato (ex.: '50% do saldo restante')"
           />
         </label>
-        <label className="text-xs text-neutral-500">
+        <label className="text-xs text-ink-muted">
           Condição de pagamento
           <select
             className={`${inputClass} mt-0.5 w-full`}
@@ -197,7 +197,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
           </select>
         </label>
         {campos.condicaoPagamento === "parcelado" && (
-          <label className="text-xs text-neutral-500">
+          <label className="text-xs text-ink-muted">
             Número de parcelas
             <input
               type="number"
@@ -217,14 +217,14 @@ export function PlanoCard({ plano }: { plano: Plano }) {
           className="mt-4 space-y-2"
           title="Quantidade incluída no plano por mês e como cobrar o que passar disso"
         >
-          <p className="text-xs uppercase tracking-wide text-neutral-500">Limites de uso</p>
+          <p className="text-xs uppercase tracking-wide text-ink-muted">Limites de uso</p>
           {plano.limites.map((limite) => (
             <LimiteRow key={limite.id} limite={limite} />
           ))}
         </div>
       )}
 
-      <div className="mt-3 flex items-end gap-2 border-t border-dashed border-neutral-200 pt-3">
+      <div className="mt-3 flex items-end gap-2 border-t border-dashed border-line pt-3">
         <input
           placeholder="unidade (ex.: lançamentos)"
           value={novoLimite.unidade}
@@ -265,7 +265,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
         <button
           type="button"
           onClick={adicionarLimite}
-          className="rounded-md border border-neutral-300 px-3 py-1 text-sm text-neutral-700 hover:bg-neutral-50"
+          className="rounded-md border border-line px-3 py-1 text-sm text-ink hover:bg-neutral-50"
           title="Adiciona este limite de uso ao plano"
         >
           + limite
@@ -318,7 +318,7 @@ function LimiteRow({ limite }: { limite: Limite }) {
           className={`${inputClass} w-20`}
           title="Quantidade incluída no plano por mês"
         />
-        <span className="text-sm text-neutral-600">{limite.unidade}/mês —</span>
+        <span className="text-sm text-ink-muted">{limite.unidade}/mês —</span>
         {limite.tipoCobranca === "por_unidade" ? (
           <>
             <input
@@ -330,10 +330,10 @@ function LimiteRow({ limite }: { limite: Limite }) {
               className={`${inputClass} w-24`}
               title="Valor cobrado para cada unidade que passar da quantidade incluída"
             />
-            <span className="text-sm text-neutral-600">por unidade excedente</span>
+            <span className="text-sm text-ink-muted">por unidade excedente</span>
           </>
         ) : (
-          <span className="text-sm text-neutral-600">faixas por % de excedente</span>
+          <span className="text-sm text-ink-muted">faixas por % de excedente</span>
         )}
         <button
           type="button"
@@ -371,7 +371,7 @@ function LimiteRow({ limite }: { limite: Limite }) {
             <button
               type="button"
               onClick={adicionarFaixa}
-              className="text-xs text-neutral-600 hover:underline"
+              className="text-xs text-ink-muted hover:underline"
               title="Adiciona esta faixa de excedente ao limite"
             >
               + faixa
@@ -402,7 +402,7 @@ function FaixaRow({ faixa }: { faixa: Faixa }) {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs text-neutral-500">até</span>
+      <span className="text-xs text-ink-muted">até</span>
       <input
         type="number"
         value={percentualAte}
@@ -411,7 +411,7 @@ function FaixaRow({ faixa }: { faixa: Faixa }) {
         className={`${inputClass} w-20`}
         title="Até quantos % de excedente essa faixa vale"
       />
-      <span className="text-xs text-neutral-500">% =</span>
+      <span className="text-xs text-ink-muted">% =</span>
       <input
         type="number"
         step="0.01"

@@ -20,7 +20,7 @@ export default async function TelaInicio() {
       />
       <a
         href="/api/entrar"
-        className="mt-10 rounded-md bg-neutral-900 px-8 py-3 text-sm font-semibold text-white hover:bg-neutral-800"
+        className="mt-10 rounded-md bg-accent px-8 py-3 text-sm font-semibold text-white hover:brightness-110"
       >
         Iniciar
       </a>

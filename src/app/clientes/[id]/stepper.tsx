@@ -18,7 +18,7 @@ export function Stepper({ passos }: { passos: PassoStepper[] }) {
               />
             )}
             <div
-              className={`relative z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full font-serif text-[11px] font-bold ${
+              className={`relative z-10 flex h-[22px] w-[22px] items-center justify-center rounded-full text-[11px] font-bold ${
                 passo.estado === "concluida"
                   ? "bg-emerald-50 text-emerald-700"
                   : passo.estado === "atual"

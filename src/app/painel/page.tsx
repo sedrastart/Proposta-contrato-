@@ -57,7 +57,7 @@ export default async function PainelPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-10">
-      <h1 className="font-serif text-2xl font-semibold text-ink">
+      <h1 className="text-2xl font-semibold tracking-tight text-ink">
         Sedra — Propostas e Contratos
       </h1>
       <p className="mt-1 text-sm text-ink-muted">

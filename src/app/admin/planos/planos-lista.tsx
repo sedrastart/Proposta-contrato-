@@ -64,19 +64,19 @@ export function PlanosLista({
         value={busca}
         onChange={(e) => setBusca(e.target.value)}
         placeholder="Buscar por nome do plano, serviço ou regime..."
-        className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
+        className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-accent"
         title="Filtra a lista abaixo por nome do plano, serviço ou regime tributário"
       />
 
       <div className="mt-4 space-y-8">
         {chavesOrdenadas.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-neutral-300 py-8 text-center text-sm text-neutral-500">
+          <p className="rounded-lg border border-dashed border-line py-8 text-center text-sm text-ink-muted">
             Nenhum plano encontrado para &quot;{busca}&quot;.
           </p>
         ) : (
           chavesOrdenadas.map((chave) => (
             <section key={chave}>
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-muted">
                 {chave}
               </h2>
               <div className="space-y-4">

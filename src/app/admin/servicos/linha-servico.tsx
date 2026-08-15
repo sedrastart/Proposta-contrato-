@@ -48,18 +48,18 @@ export function LinhaServico({
   }
 
   return (
-    <div className="rounded-lg border border-neutral-200 p-4">
+    <div className="rounded-lg border border-line p-4">
       <div className="flex items-center gap-3">
         <input
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           onBlur={salvarNome}
-          className="flex-1 rounded-md border border-neutral-200 px-2 py-1 text-sm font-medium"
+          className="flex-1 rounded-md border border-line px-2 py-1 text-sm font-medium"
           title="Nome do serviço, como aparece no catálogo do assistente"
         />
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-            servico.ativo ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"
+            servico.ativo ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-ink-muted"
           }`}
           title={
             servico.ativo
@@ -73,7 +73,7 @@ export function LinhaServico({
           type="button"
           onClick={alternarAtivo}
           disabled={isPending}
-          className="text-sm text-neutral-600 hover:underline disabled:opacity-50"
+          className="text-sm text-ink-muted hover:underline disabled:opacity-50"
           title={
             servico.ativo
               ? "Esconde este serviço do assistente sem apagar nada"
@@ -88,7 +88,7 @@ export function LinhaServico({
         title="Em quais regimes esse serviço aparece na etapa 3 do assistente — marque/desmarque para ajustar"
       >
         {regimesDisponiveis.map((regime) => (
-          <label key={regime.id} className="flex items-center gap-1.5 text-sm text-neutral-700">
+          <label key={regime.id} className="flex items-center gap-1.5 text-sm text-ink">
             <input
               type="checkbox"
               checked={regimeIds.has(regime.id)}

@@ -39,7 +39,7 @@ export function ServicoSelector({
 
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-neutral-500">
+      <p className="text-xs uppercase tracking-wide text-ink-muted">
         Etapa 3 — Serviços
       </p>
       <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -48,8 +48,8 @@ export function ServicoSelector({
             key={servico.id}
             className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition ${
               selecionados.has(servico.id)
-                ? "border-neutral-900 bg-neutral-900 text-white"
-                : "border-neutral-300 text-neutral-700 hover:border-neutral-400"
+                ? "border-accent bg-accent text-white"
+                : "border-line text-ink hover:border-line"
             }`}
           >
             <input
@@ -63,7 +63,7 @@ export function ServicoSelector({
         ))}
       </div>
       {servicosDisponiveis.length === 0 && (
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm text-ink-muted">
           Nenhum serviço cadastrado para este regime ainda.
         </p>
       )}
@@ -72,7 +72,7 @@ export function ServicoSelector({
           type="button"
           onClick={salvar}
           disabled={isPending}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
+          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110 disabled:opacity-50"
         >
           {isPending ? "Salvando..." : "Salvar serviços"}
         </button>

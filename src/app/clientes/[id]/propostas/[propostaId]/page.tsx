@@ -20,7 +20,7 @@ export default async function PropostaDetalhePage({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-10">
-      <Link href={`/clientes/${id}`} className="text-sm text-neutral-500 hover:underline">
+      <Link href={`/clientes/${id}`} className="text-sm text-ink-muted hover:underline">
         ← Voltar ao cliente
       </Link>
 

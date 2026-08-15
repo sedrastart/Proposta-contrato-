@@ -16,16 +16,16 @@ export function ModeloPropostaEditor({ modelo }: { modelo: Modelo }) {
   }
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4">
+    <div className="rounded-lg border border-line bg-white p-4">
       <textarea
         value={corpo}
         onChange={(e) => setCorpo(e.target.value)}
         onBlur={salvar}
         rows={26}
-        className="w-full rounded border border-neutral-200 px-3 py-2 font-mono text-xs leading-relaxed outline-none focus:border-neutral-900"
+        className="w-full rounded border border-line px-3 py-2 font-mono text-xs leading-relaxed outline-none focus:border-accent"
         title="Texto padrão da proposta para este regime — salvo automaticamente ao sair do campo"
       />
-      {isPending && <p className="mt-2 text-xs text-neutral-400">Salvando...</p>}
+      {isPending && <p className="mt-2 text-xs text-ink-muted">Salvando...</p>}
     </div>
   );
 }

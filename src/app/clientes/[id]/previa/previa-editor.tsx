@@ -8,8 +8,8 @@ import { gerarContratoAction } from "./actions";
 import { STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
 
 const inputClass =
-  "w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900";
-const labelClass = "mb-1 block text-xs font-medium uppercase tracking-wide text-neutral-500";
+  "w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-1 focus:ring-accent";
+const labelClass = "mb-1 block text-xs font-medium uppercase tracking-wide text-ink-muted";
 
 type PropostaResumo = { id: string; numeroSequencial: number; status: string };
 
@@ -70,17 +70,17 @@ export function PreviaEditor({
   return (
     <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
       <div className="space-y-6">
-        <div className="rounded-lg border border-neutral-200 bg-white p-6">
-          <p className="mb-3 text-xs uppercase tracking-wide text-neutral-500">
+        <div className="rounded-lg border border-line bg-white p-6">
+          <p className="mb-3 text-xs uppercase tracking-wide text-ink-muted">
             Documento renderizado (somente leitura)
           </p>
-          <pre className="max-h-[70vh] overflow-y-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-neutral-800">
+          <pre className="max-h-[70vh] overflow-y-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-ink">
             {texto}
           </pre>
         </div>
 
-        <div className="rounded-lg border border-neutral-200 bg-white p-6">
-          <p className="mb-3 text-xs uppercase tracking-wide text-neutral-500">
+        <div className="rounded-lg border border-line bg-white p-6">
+          <p className="mb-3 text-xs uppercase tracking-wide text-ink-muted">
             Propostas deste cliente
           </p>
           {propostaOrigem ? (
@@ -94,7 +94,7 @@ export function PreviaEditor({
                 <li key={p.id}>
                   <Link
                     href={`/clientes/${clienteId}/propostas/${p.id}`}
-                    className="text-neutral-700 hover:underline"
+                    className="text-ink hover:underline"
                   >
                     nº {String(p.numeroSequencial).padStart(6, "0")} —{" "}
                     {STATUS_PROPOSTA_LABEL[p.status as StatusProposta] ?? p.status}
@@ -103,11 +103,11 @@ export function PreviaEditor({
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-neutral-500">Nenhuma proposta ainda para este cliente.</p>
+            <p className="text-sm text-ink-muted">Nenhuma proposta ainda para este cliente.</p>
           )}
           <Link
             href={`/clientes/${clienteId}/propostas/nova`}
-            className="mt-3 inline-block text-sm text-neutral-600 hover:underline"
+            className="mt-3 inline-block text-sm text-ink-muted hover:underline"
           >
             + Nova proposta
           </Link>
@@ -115,8 +115,8 @@ export function PreviaEditor({
       </div>
 
       <div className="space-y-4">
-        <div className="rounded-lg border border-neutral-200 bg-white p-5">
-          <p className="mb-3 text-xs uppercase tracking-wide text-neutral-500">
+        <div className="rounded-lg border border-line bg-white p-5">
+          <p className="mb-3 text-xs uppercase tracking-wide text-ink-muted">
             Campos editáveis
           </p>
           <div className="space-y-3">
@@ -200,7 +200,7 @@ export function PreviaEditor({
           type="button"
           onClick={gerar}
           disabled={isPending}
-          className="w-full rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
+          className="w-full rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110 disabled:opacity-50"
         >
           {isPending ? "Gerando documentos..." : "Gerar Contrato (PDF/DOCX) →"}
         </button>

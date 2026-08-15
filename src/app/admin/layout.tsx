@@ -12,13 +12,13 @@ const ABAS = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div>
-      <div className="border-b border-neutral-200 bg-white">
+      <div className="border-b border-line bg-white">
         <div className="mx-auto flex w-full max-w-5xl items-center gap-1 px-6">
           {ABAS.map((aba) => (
             <Link
               key={aba.href}
               href={aba.href}
-              className="border-b-2 border-transparent px-3 py-3 text-sm font-medium text-neutral-600 hover:border-neutral-300 hover:text-neutral-900"
+              className="border-b-2 border-transparent px-3 py-3 text-sm font-medium text-ink-muted hover:border-line hover:text-ink"
             >
               {aba.label}
             </Link>

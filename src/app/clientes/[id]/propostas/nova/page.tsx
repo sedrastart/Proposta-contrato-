@@ -45,23 +45,23 @@ export default async function NovaPropostaPage({
     <main className="mx-auto w-full max-w-3xl px-6 py-10">
       <Link
         href={`/clientes/${cliente.id}`}
-        className="text-sm text-neutral-500 hover:underline"
+        className="text-sm text-ink-muted hover:underline"
       >
         ← {cliente.razaoSocial}
       </Link>
-      <p className="mt-2 text-xs uppercase tracking-wide text-neutral-500">
+      <p className="mt-2 text-xs uppercase tracking-wide text-ink-muted">
         Nova proposta
       </p>
-      <h1 className="mt-1 text-2xl font-semibold text-neutral-900">
+      <h1 className="mt-1 text-2xl font-semibold text-ink">
         Proposta comercial
       </h1>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-ink-muted">
         Rascunho pré-preenchido com os dados do cliente — edite livremente
         antes de gerar o PDF. Planos ainda não definidos aparecem como
         &quot;a definir&quot; e podem ser ajustados manualmente no texto.
       </p>
       {!modelo && (
-        <div className="mt-4 rounded-md border border-dashed border-neutral-300 p-4 text-sm text-neutral-600">
+        <div className="mt-4 rounded-md border border-dashed border-line p-4 text-sm text-ink-muted">
           Nenhum modelo de proposta cadastrado para o regime{" "}
           <strong>{cliente.regimeTributario.nome}</strong> — edite livremente
           abaixo, ou cadastre um modelo padrão em Área administrativa →
@@ -77,10 +77,10 @@ export default async function NovaPropostaPage({
 function AvisoIncompleto({ clienteId, texto }: { clienteId: string; texto: string }) {
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-10">
-      <Link href={`/clientes/${clienteId}`} className="text-sm text-neutral-500 hover:underline">
+      <Link href={`/clientes/${clienteId}`} className="text-sm text-ink-muted hover:underline">
         ← Voltar
       </Link>
-      <div className="mt-6 rounded-lg border border-dashed border-neutral-300 p-6 text-sm text-neutral-600">
+      <div className="mt-6 rounded-lg border border-dashed border-line p-6 text-sm text-ink-muted">
         {texto}
       </div>
     </main>

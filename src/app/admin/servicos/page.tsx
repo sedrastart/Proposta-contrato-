@@ -18,8 +18,8 @@ export default async function AdminServicosPage() {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-10">
-      <h1 className="text-2xl font-semibold text-neutral-900">Serviços</h1>
-      <p className="mt-1 text-sm text-neutral-500">
+      <h1 className="text-2xl font-semibold text-ink">Serviços</h1>
+      <p className="mt-1 text-sm text-ink-muted">
         Catálogo de serviços e em quais regimes cada um aparece na etapa 3
         do assistente.
       </p>
@@ -30,14 +30,14 @@ export default async function AdminServicosPage() {
 
       <form
         action={criarServicoAction}
-        className="mt-6 rounded-lg border border-dashed border-neutral-300 p-5"
+        className="mt-6 rounded-lg border border-dashed border-line p-5"
       >
-        <p className="mb-3 text-sm font-medium text-neutral-900">Novo serviço</p>
+        <p className="mb-3 text-sm font-medium text-ink">Novo serviço</p>
         <input
           name="nome"
           placeholder="Nome do serviço"
           required
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
+          className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-accent"
           title="Nome do serviço, como aparece no catálogo do assistente (ex.: 'Departamento Pessoal')"
         />
         <div
@@ -45,7 +45,7 @@ export default async function AdminServicosPage() {
           title="Em quais regimes esse serviço aparece na etapa 3 do assistente — marque todos que se aplicam"
         >
           {regimes.map((regime) => (
-            <label key={regime.id} className="flex items-center gap-1.5 text-sm text-neutral-700">
+            <label key={regime.id} className="flex items-center gap-1.5 text-sm text-ink">
               <input type="checkbox" name="regimeIds" value={regime.id} />
               {regime.nome}
             </label>
@@ -53,7 +53,7 @@ export default async function AdminServicosPage() {
         </div>
         <button
           type="submit"
-          className="mt-4 rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+          className="mt-4 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110"
         >
           + Criar serviço
         </button>

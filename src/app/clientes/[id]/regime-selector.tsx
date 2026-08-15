@@ -24,7 +24,7 @@ export function RegimeSelector({
 
   return (
     <div>
-      <p className="text-xs uppercase tracking-wide text-neutral-500">
+      <p className="text-xs uppercase tracking-wide text-ink-muted">
         Etapa 2 — Regime tributário
       </p>
       <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -38,8 +38,8 @@ export function RegimeSelector({
               onClick={() => selecionar(regime.id)}
               className={`rounded-md border px-3 py-2 text-sm font-medium transition disabled:opacity-50 ${
                 selected
-                  ? "border-neutral-900 bg-neutral-900 text-white"
-                  : "border-neutral-300 text-neutral-700 hover:border-neutral-400"
+                  ? "border-accent bg-accent text-white"
+                  : "border-line text-ink hover:border-line"
               }`}
             >
               {regime.nome}
