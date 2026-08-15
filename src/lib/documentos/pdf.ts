@@ -2,7 +2,7 @@ import puppeteer from "puppeteer-core";
 import { PDFDocument } from "pdf-lib";
 import { classificarLinha } from "./linhas";
 import { carimbarPaginas, carimbarPaginasProposta } from "./marca-dagua";
-import { renderizarCapaProposta, type DadosCapaProposta } from "./capa-proposta";
+import { montarHtmlCapaProposta, type DadosCapaProposta } from "./capa-proposta";
 
 export type { DadosCapaProposta } from "./capa-proposta";
 
@@ -32,17 +32,36 @@ async function resolverConfiguracaoBrowser(): Promise<{
   return { executablePath, args: ["--no-sandbox", "--disable-gpu"] };
 }
 
-/** Renderiza um HTML completo em PDF via Chrome headless — usado tanto
- * pelo texto corrido do documento quanto pela capa/abertura da proposta. */
-export async function renderizarHtmlParaPdf(html: string): Promise<Buffer> {
+async function lancarBrowser() {
   const { executablePath, args } = await resolverConfiguracaoBrowser();
-  const browser = await puppeteer.launch({ executablePath, headless: true, args });
+  return puppeteer.launch({ executablePath, headless: true, args });
+}
 
+/** Renderiza um HTML numa página de um browser já aberto — não abre nem
+ * fecha o browser, pra permitir reaproveitá-lo em múltiplos renders
+ * (evita rodar dois Chromium ao mesmo tempo na função serverless, que
+ * já derrubou a geração da proposta com capa por estourar memória). */
+async function renderizarPaginaComBrowser(
+  browser: Awaited<ReturnType<typeof lancarBrowser>>,
+  html: string
+): Promise<Buffer> {
+  const page = await browser.newPage();
   try {
-    const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "load" });
     const pdf = await page.pdf({ format: "A4", printBackground: true });
     return Buffer.from(pdf);
+  } finally {
+    await page.close();
+  }
+}
+
+/** Renderiza um HTML completo em PDF via Chrome headless — abre e fecha
+ * o próprio browser. Usado pelo texto corrido do Contrato/Proposta sem
+ * capa (um único render, não precisa compartilhar browser). */
+export async function renderizarHtmlParaPdf(html: string): Promise<Buffer> {
+  const browser = await lancarBrowser();
+  try {
+    return await renderizarPaginaComBrowser(browser, html);
   } finally {
     await browser.close();
   }
@@ -201,10 +220,19 @@ async function gerarPdfPropostaComCapa(
   textoCompleto: string,
   dadosCapa: DadosCapaProposta
 ): Promise<Buffer> {
-  const [capaBuffer, conteudoBrutoPdf] = await Promise.all([
-    renderizarCapaProposta(dadosCapa),
-    renderizarHtmlParaPdf(paginaCompleta(textoParaHtml(textoCompleto, true), "proposta")),
-  ]);
+  const browser = await lancarBrowser();
+  let capaBuffer: Buffer;
+  let conteudoBrutoPdf: Buffer;
+  try {
+    // Sequencial, não em paralelo — um só Chromium por vez.
+    capaBuffer = await renderizarPaginaComBrowser(browser, montarHtmlCapaProposta(dadosCapa));
+    conteudoBrutoPdf = await renderizarPaginaComBrowser(
+      browser,
+      paginaCompleta(textoParaHtml(textoCompleto, true), "proposta")
+    );
+  } finally {
+    await browser.close();
+  }
   const conteudoCarimbado = await carimbarPaginasProposta(conteudoBrutoPdf);
   return juntarPdfs(capaBuffer, conteudoCarimbado);
 }

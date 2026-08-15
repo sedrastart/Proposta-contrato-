@@ -1,4 +1,3 @@
-import { renderizarHtmlParaPdf } from "./pdf";
 import {
   FOTO_CAPA_PROPOSTA_JPG_BASE64,
   FOTO_ABERTURA_PROPOSTA_JPG_BASE64,
@@ -35,7 +34,7 @@ function escapeHtml(texto: string): string {
 // texto institucional é curto e fixo (não editável pelo admin nesta
 // versão). Capa e abertura usam fotos reais fornecidas pelo usuário
 // (marca-assets.ts) em vez de um grafismo genérico.
-function montarHtmlCapa(dados: DadosCapaProposta): string {
+export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
   const fotoCapa = `data:image/jpeg;base64,${FOTO_CAPA_PROPOSTA_JPG_BASE64}`;
   const fotoAbertura = `data:image/jpeg;base64,${FOTO_ABERTURA_PROPOSTA_JPG_BASE64}`;
   const clienteNome = escapeHtml(dados.clienteNome);
@@ -211,8 +210,3 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
 </html>`;
 }
 
-/** Renderiza as 2 páginas fixas (capa + "Em favor de") que abrem o PDF
- * da Proposta. Não passa por `carimbarPaginas` — o layout já é completo. */
-export async function renderizarCapaProposta(dados: DadosCapaProposta): Promise<Buffer> {
-  return renderizarHtmlParaPdf(montarHtmlCapa(dados));
-}
