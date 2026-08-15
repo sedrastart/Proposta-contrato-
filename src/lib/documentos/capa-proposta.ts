@@ -61,22 +61,11 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
   /* ---- Página 1: capa ---- */
   .capa-topo {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 28mm;
+    top: 0; left: 0; right: 0;
+    height: 60%;
     background: ${ACCENT};
-    overflow: hidden;
+    padding: 18mm 16mm;
   }
-  .capa-montanha-bg {
-    position: absolute;
-    top: 34mm; right: 16mm;
-    width: 64mm; height: 48mm;
-    border-radius: 4mm;
-    background: ${ACCENT_CLARO};
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .capa-montanha-bg img { width: 72%; opacity: 0.55; }
   .capa-marca-top {
     position: absolute;
     top: 18mm; right: 16mm;
@@ -97,6 +86,16 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
     color: transparent;
     -webkit-text-stroke: 1.3pt white;
   }
+  .capa-meio {
+    position: absolute;
+    top: 60%; left: 0; right: 0; bottom: 28mm;
+    background: ${ACCENT_CLARO};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .capa-meio img { width: 62%; opacity: 0.5; }
   .capa-rodape {
     position: absolute;
     bottom: 0; left: 0; right: 0; height: 28mm;
@@ -173,8 +172,10 @@ function montarHtmlCapa(dados: DadosCapaProposta): string {
   <div class="pagina">
     <div class="capa-topo">
       <div class="capa-marca-top">SEDRA</div>
-      <div class="capa-montanha-bg"><img src="${marcaDagua}" alt=""></div>
       <div class="capa-titulo">Proposta<br>Comercial</div>
+    </div>
+    <div class="capa-meio">
+      <img src="${marcaDagua}" alt="">
     </div>
     <div class="capa-rodape">
       <div class="info">

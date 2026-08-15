@@ -125,8 +125,18 @@ const ACCENT_POR_TIPO: Record<TipoDocumento, string> = {
   proposta: "#368DCC",
 };
 
+// Contrato mantém a serifada (documento jurídico, tom formal). Proposta
+// usa uma sem serifa — além de combinar com a capa/abertura (que já são
+// Arial), evita repetir a mesma fonte do texto que o PDF de referência
+// do usuário usava.
+const FONTE_POR_TIPO: Record<TipoDocumento, string> = {
+  contrato: `Georgia, "Times New Roman", serif`,
+  proposta: `Arial, Helvetica, sans-serif`,
+};
+
 function paginaCompleta(corpo: string, tipo: TipoDocumento): string {
   const accent = ACCENT_POR_TIPO[tipo];
+  const fonte = FONTE_POR_TIPO[tipo];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -134,7 +144,7 @@ function paginaCompleta(corpo: string, tipo: TipoDocumento): string {
 <style>
   @page { size: A4; margin: 36mm 20mm 28mm; }
   body {
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: ${fonte};
     font-size: 11.5pt;
     line-height: 1.5;
     color: #1a1a1a;
