@@ -35,13 +35,19 @@ export async function criarPropostaAction(
   const dados = montarDadosProposta(cliente);
 
   const numeroSequencial = await proximoNumeroSequencial("proposta");
-  const pdf = await gerarPdf(textoCompleto, "proposta");
+  const dataEmissao = new Date();
+  const pdf = await gerarPdf(textoCompleto, "proposta", {
+    clienteNome: dados.contratanteNome,
+    numeroSequencial,
+    dataEmissao,
+  });
   const { arquivoPdf } = await salvarArquivoProposta(numeroSequencial, pdf);
 
   const proposta = await prisma.proposta.create({
     data: {
       clienteId,
       numeroSequencial,
+      dataEmissao,
       status: "rascunho",
       regimeSlug: cliente.regimeTributario.slug,
       contratanteNomeSnapshot: dados.contratanteNome,
@@ -84,7 +90,11 @@ export async function atualizarTextoPropostaAction(
   }
 
   const proposta = await prisma.proposta.findUniqueOrThrow({ where: { id: propostaId } });
-  const pdf = await gerarPdf(textoCompleto, "proposta");
+  const pdf = await gerarPdf(textoCompleto, "proposta", {
+    clienteNome: proposta.contratanteNomeSnapshot,
+    numeroSequencial: proposta.numeroSequencial,
+    dataEmissao: proposta.dataEmissao,
+  });
   const { arquivoPdf } = await salvarArquivoProposta(proposta.numeroSequencial, pdf);
 
   await prisma.proposta.update({

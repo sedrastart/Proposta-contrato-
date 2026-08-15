@@ -140,3 +140,96 @@ export async function carimbarPaginas(
 
   return Buffer.from(await pdfDoc.save());
 }
+
+// Variante usada só nas páginas de conteúdo da Proposta com capa — faixa
+// terracota grossa no topo (em vez da linha fina de 3pt) e uma barra de
+// destaque na lateral esquerda, ecoando a capa/abertura. Rodapé, marca
+// d'água e numeração reaproveitam a mesma lógica de `carimbarPaginas`.
+export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer> {
+  const pdfDoc = await PDFDocument.load(pdfBuffer);
+  const accent = ACCENT_RGB.proposta;
+
+  const logoImage = await pdfDoc.embedPng(Buffer.from(LOGO_SEDRA_PNG_BASE64, "base64"));
+  const marcaDaguaImage = await pdfDoc.embedPng(
+    Buffer.from(MARCA_DAGUA_PNG_BASE64, "base64")
+  );
+  const fonte = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fonteNegrito = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  const paginas = pdfDoc.getPages();
+  const total = paginas.length;
+  const alturaFaixa = 14 * MM;
+  const larguraRail = 3 * MM;
+
+  const linhasRodape: { texto: string; url?: string }[] = [
+    { texto: CONTRATADO.telefone },
+    { texto: CONTRATADO.email, url: `mailto:${CONTRATADO.email}` },
+    { texto: CONTRATADO.site, url: `https://${CONTRATADO.site}` },
+  ];
+
+  paginas.forEach((pagina, indice) => {
+    const { width, height } = pagina.getSize();
+
+    // Faixa grossa no topo — mesma função da capa/abertura, agora
+    // repetida nas páginas de conteúdo pra manter a identidade da proposta.
+    pagina.drawRectangle({ x: 0, y: height - alturaFaixa, width, height: alturaFaixa, color: accent });
+
+    // Barra de destaque na lateral esquerda, full-height.
+    pagina.drawRectangle({ x: 0, y: 0, width: larguraRail, height, color: accent });
+
+    // Logo — dentro da faixa, canto superior direito.
+    const larguraLogo = 13 * MM;
+    const alturaLogo = larguraLogo * (logoImage.height / logoImage.width);
+    pagina.drawImage(logoImage, {
+      x: width - 14 * MM - larguraLogo,
+      y: height - alturaFaixa / 2 - alturaLogo / 2,
+      width: larguraLogo,
+      height: alturaLogo,
+    });
+
+    // Marca d'água — canto inferior direito, atrás do texto.
+    const larguraMarca = 110 * MM;
+    const alturaMarca = larguraMarca * (marcaDaguaImage.height / marcaDaguaImage.width);
+    pagina.drawImage(marcaDaguaImage, {
+      x: width - larguraMarca,
+      y: 0,
+      width: larguraMarca,
+      height: alturaMarca,
+    });
+
+    // Numeração — logo abaixo da faixa, canto superior esquerdo.
+    pagina.drawText(`Página ${indice + 1} de ${total}`, {
+      x: 20 * MM,
+      y: height - alturaFaixa - 10 * MM,
+      size: 10.5,
+      font: fonteNegrito,
+      color: accent,
+    });
+
+    // Rodapé de contato — canto inferior esquerdo. E-mail e site são
+    // clicáveis (abrem o app de e-mail / o site direto no PDF).
+    const xTexto = 20 * MM + 6;
+    linhasRodape.forEach(({ texto, url }, i) => {
+      const y = 16 * MM - i * 5 * MM;
+      pagina.drawCircle({
+        x: 20 * MM + 1.5,
+        y: y + 3,
+        size: 1.5,
+        color: rgb(0.15, 0.15, 0.15),
+      });
+      pagina.drawText(texto, {
+        x: xTexto,
+        y,
+        size: 9,
+        font: fonte,
+        color: rgb(0.15, 0.15, 0.15),
+      });
+      if (url) {
+        const largura = fonte.widthOfTextAtSize(texto, 9);
+        adicionarLinkClicavel(pagina, url, [xTexto, y - 2, xTexto + largura, y + 9]);
+      }
+    });
+  });
+
+  return Buffer.from(await pdfDoc.save());
+}

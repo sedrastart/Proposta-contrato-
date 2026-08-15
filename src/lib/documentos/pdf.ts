@@ -1,6 +1,10 @@
 import puppeteer from "puppeteer-core";
+import { PDFDocument } from "pdf-lib";
 import { classificarLinha } from "./linhas";
-import { carimbarPaginas } from "./marca-dagua";
+import { carimbarPaginas, carimbarPaginasProposta } from "./marca-dagua";
+import { renderizarCapaProposta, type DadosCapaProposta } from "./capa-proposta";
+
+export type { DadosCapaProposta } from "./capa-proposta";
 
 // Em produção (Vercel/AWS Lambda, Linux) não existe um Chrome instalado nem
 // disco gravável fora de /tmp — usamos o binário do @sparticuz/chromium,
@@ -28,6 +32,22 @@ async function resolverConfiguracaoBrowser(): Promise<{
   return { executablePath, args: ["--no-sandbox", "--disable-gpu"] };
 }
 
+/** Renderiza um HTML completo em PDF via Chrome headless — usado tanto
+ * pelo texto corrido do documento quanto pela capa/abertura da proposta. */
+export async function renderizarHtmlParaPdf(html: string): Promise<Buffer> {
+  const { executablePath, args } = await resolverConfiguracaoBrowser();
+  const browser = await puppeteer.launch({ executablePath, headless: true, args });
+
+  try {
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: "load" });
+    const pdf = await page.pdf({ format: "A4", printBackground: true });
+    return Buffer.from(pdf);
+  } finally {
+    await browser.close();
+  }
+}
+
 function escapeHtml(texto: string): string {
   return texto
     .replace(/&/g, "&amp;")
@@ -35,7 +55,10 @@ function escapeHtml(texto: string): string {
     .replace(/>/g, "&gt;");
 }
 
-function textoParaHtml(textoCompleto: string): string {
+/** `suprimirTitulo`: quando a proposta já tem capa própria com o título
+ * grande, a primeira linha do texto (que viraria `<h1>`) fica redundante
+ * — é omitida por completo nesse caso. */
+function textoParaHtml(textoCompleto: string, suprimirTitulo = false): string {
   const linhas = textoCompleto.split("\n");
   const partes: string[] = [];
   let primeiraLinhaEncontrada = false;
@@ -43,7 +66,10 @@ function textoParaHtml(textoCompleto: string): string {
   for (const linhaBruta of linhas) {
     const linha = linhaBruta.trim();
     const tipo = classificarLinha(linha, !primeiraLinhaEncontrada && linha !== "");
-    if (tipo === "titulo") primeiraLinhaEncontrada = true;
+    if (tipo === "titulo") {
+      primeiraLinhaEncontrada = true;
+      if (suprimirTitulo) continue;
+    }
 
     switch (tipo) {
       case "vazia":
@@ -145,26 +171,47 @@ ${corpo}
 </html>`;
 }
 
+/** Junta a capa+abertura (2 páginas, sem carimbo) com as páginas de
+ * conteúdo já carimbadas, num único PDF. */
+async function juntarPdfs(capaBuffer: Buffer, conteudoBuffer: Buffer): Promise<Buffer> {
+  const final = await PDFDocument.create();
+  const capaDoc = await PDFDocument.load(capaBuffer);
+  const conteudoDoc = await PDFDocument.load(conteudoBuffer);
+
+  const paginasCapa = await final.copyPages(capaDoc, capaDoc.getPageIndices());
+  paginasCapa.forEach((p) => final.addPage(p));
+
+  const paginasConteudo = await final.copyPages(conteudoDoc, conteudoDoc.getPageIndices());
+  paginasConteudo.forEach((p) => final.addPage(p));
+
+  return Buffer.from(await final.save());
+}
+
+async function gerarPdfPropostaComCapa(
+  textoCompleto: string,
+  dadosCapa: DadosCapaProposta
+): Promise<Buffer> {
+  const [capaBuffer, conteudoBrutoPdf] = await Promise.all([
+    renderizarCapaProposta(dadosCapa),
+    renderizarHtmlParaPdf(paginaCompleta(textoParaHtml(textoCompleto, true), "proposta")),
+  ]);
+  const conteudoCarimbado = await carimbarPaginasProposta(conteudoBrutoPdf);
+  return juntarPdfs(capaBuffer, conteudoCarimbado);
+}
+
 /** Renderiza o texto do documento em PDF via Chrome headless — `tipo`
- * decide a cor de destaque (contrato = azul da marca, proposta = terracota). */
+ * decide a cor de destaque (contrato = azul da marca, proposta = terracota).
+ * Para proposta, passar `dadosCapa` adiciona capa + página de abertura. */
 export async function gerarPdf(
   textoCompleto: string,
-  tipo: TipoDocumento = "contrato"
+  tipo: TipoDocumento = "contrato",
+  dadosCapa?: DadosCapaProposta
 ): Promise<Buffer> {
-  const html = paginaCompleta(textoParaHtml(textoCompleto), tipo);
-  const { executablePath, args } = await resolverConfiguracaoBrowser();
-
-  const browser = await puppeteer.launch({ executablePath, headless: true, args });
-
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "load" });
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-    });
-    return await carimbarPaginas(Buffer.from(pdf), tipo);
-  } finally {
-    await browser.close();
+  if (tipo === "proposta" && dadosCapa) {
+    return gerarPdfPropostaComCapa(textoCompleto, dadosCapa);
   }
+
+  const html = paginaCompleta(textoParaHtml(textoCompleto), tipo);
+  const pdf = await renderizarHtmlParaPdf(html);
+  return carimbarPaginas(pdf, tipo);
 }
