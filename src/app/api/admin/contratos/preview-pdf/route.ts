@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   const { regimeSlug, dados, clausulas } = preview;
   const texto = renderContrato(regimeSlug, dados, clausulas);
-  const pdf = await gerarPdf(texto);
+  const pdf = await gerarPdf(texto, "contrato");
 
   return new Response(new Uint8Array(pdf), {
     headers: {

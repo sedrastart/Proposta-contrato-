@@ -35,7 +35,7 @@ export async function criarPropostaAction(
   const dados = montarDadosProposta(cliente);
 
   const numeroSequencial = await proximoNumeroSequencial("proposta");
-  const pdf = await gerarPdf(textoCompleto);
+  const pdf = await gerarPdf(textoCompleto, "proposta");
   const { arquivoPdf } = await salvarArquivoProposta(numeroSequencial, pdf);
 
   const proposta = await prisma.proposta.create({
@@ -84,7 +84,7 @@ export async function atualizarTextoPropostaAction(
   }
 
   const proposta = await prisma.proposta.findUniqueOrThrow({ where: { id: propostaId } });
-  const pdf = await gerarPdf(textoCompleto);
+  const pdf = await gerarPdf(textoCompleto, "proposta");
   const { arquivoPdf } = await salvarArquivoProposta(proposta.numeroSequencial, pdf);
 
   await prisma.proposta.update({

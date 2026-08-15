@@ -34,7 +34,7 @@ export async function gerarContratoAction(
   const numeroSequencial = await proximoNumeroSequencial("contrato");
 
   const [pdf, docx] = await Promise.all([
-    gerarPdf(textoCompleto),
+    gerarPdf(textoCompleto, "contrato"),
     gerarDocx(textoCompleto),
   ]);
 

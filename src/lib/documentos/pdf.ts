@@ -88,7 +88,19 @@ function textoParaHtml(textoCompleto: string): string {
   return html.join("\n");
 }
 
-function paginaCompleta(corpo: string): string {
+export type TipoDocumento = "proposta" | "contrato";
+
+// Cor de destaque diferente por tipo — contrato usa o azul-marinho da
+// marca (formal, definitivo); proposta usa um tom terracota (comercial,
+// convidativo) — ajuda a diferenciar os dois de relance, sem precisar ler
+// o título, inclusive folheando páginas internas.
+const ACCENT_POR_TIPO: Record<TipoDocumento, string> = {
+  contrato: "#1E3A5F",
+  proposta: "#9A5B22",
+};
+
+function paginaCompleta(corpo: string, tipo: TipoDocumento): string {
+  const accent = ACCENT_POR_TIPO[tipo];
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -104,7 +116,16 @@ function paginaCompleta(corpo: string): string {
   h1 {
     font-size: 15pt;
     text-align: center;
-    margin: 0 0 18pt;
+    margin: 0 0 10pt;
+    color: ${accent};
+  }
+  h1::after {
+    content: "";
+    display: block;
+    width: 32pt;
+    height: 2pt;
+    margin: 8pt auto 0;
+    background: ${accent};
   }
   h2 {
     font-size: 12pt;
@@ -124,9 +145,13 @@ ${corpo}
 </html>`;
 }
 
-/** Renderiza o texto do contrato em PDF via Chrome headless. */
-export async function gerarPdf(textoCompleto: string): Promise<Buffer> {
-  const html = paginaCompleta(textoParaHtml(textoCompleto));
+/** Renderiza o texto do documento em PDF via Chrome headless — `tipo`
+ * decide a cor de destaque (contrato = azul da marca, proposta = terracota). */
+export async function gerarPdf(
+  textoCompleto: string,
+  tipo: TipoDocumento = "contrato"
+): Promise<Buffer> {
+  const html = paginaCompleta(textoParaHtml(textoCompleto), tipo);
   const { executablePath, args } = await resolverConfiguracaoBrowser();
 
   const browser = await puppeteer.launch({ executablePath, headless: true, args });
@@ -138,7 +163,7 @@ export async function gerarPdf(textoCompleto: string): Promise<Buffer> {
       format: "A4",
       printBackground: true,
     });
-    return await carimbarPaginas(Buffer.from(pdf));
+    return await carimbarPaginas(Buffer.from(pdf), tipo);
   } finally {
     await browser.close();
   }

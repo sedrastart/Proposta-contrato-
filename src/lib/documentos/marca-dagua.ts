@@ -1,8 +1,18 @@
 import { PDFDocument, PDFName, PDFString, PDFPage, rgb, StandardFonts } from "pdf-lib";
 import { LOGO_SEDRA_PNG_BASE64, MARCA_DAGUA_PNG_BASE64 } from "./marca-assets";
 import { CONTRATADO } from "../templates/contratado";
+import type { TipoDocumento } from "./pdf";
 
 const MM = 2.834645669; // pontos PDF por milímetro
+
+// Mesmas cores usadas no CSS da página (src/lib/documentos/pdf.ts) —
+// contrato = azul da marca, proposta = terracota — repetidas aqui na
+// barra de topo e no número de página, pra reforçar a diferença em toda
+// página, não só na capa.
+const ACCENT_RGB: Record<TipoDocumento, ReturnType<typeof rgb>> = {
+  contrato: rgb(0.1176, 0.2275, 0.3725),
+  proposta: rgb(0.6039, 0.3569, 0.1333),
+};
 
 // pdf-lib não tem um helper de alto nível para links clicáveis — a anotação
 // precisa ser montada manualmente (padrão documentado pela comunidade do
@@ -37,8 +47,12 @@ function adicionarLinkClicavel(
 // Aplica o mesmo modelo visual da Sedra (logo, marca d'água, numeração de
 // página e rodapé de contato) em todas as páginas de um PDF já gerado —
 // tanto para Contrato quanto para Proposta, garantindo visual consistente.
-export async function carimbarPaginas(pdfBuffer: Buffer): Promise<Buffer> {
+export async function carimbarPaginas(
+  pdfBuffer: Buffer,
+  tipo: TipoDocumento = "contrato"
+): Promise<Buffer> {
   const pdfDoc = await PDFDocument.load(pdfBuffer);
+  const accent = ACCENT_RGB[tipo];
 
   const logoImage = await pdfDoc.embedPng(Buffer.from(LOGO_SEDRA_PNG_BASE64, "base64"));
   const marcaDaguaImage = await pdfDoc.embedPng(
@@ -58,6 +72,17 @@ export async function carimbarPaginas(pdfBuffer: Buffer): Promise<Buffer> {
 
   paginas.forEach((pagina, indice) => {
     const { width, height } = pagina.getSize();
+
+    // Barra de destaque no topo — reforça de relance o tipo de documento
+    // (contrato/proposta) mesmo folheando páginas internas, sem precisar
+    // ler o título.
+    pagina.drawRectangle({
+      x: 0,
+      y: height - 3,
+      width,
+      height: 3,
+      color: accent,
+    });
 
     // Marca d'água — canto inferior direito, atrás do texto.
     const larguraMarca = 110 * MM;
@@ -85,7 +110,7 @@ export async function carimbarPaginas(pdfBuffer: Buffer): Promise<Buffer> {
       y: height - 16 * MM,
       size: 10.5,
       font: fonteNegrito,
-      color: rgb(0.1, 0.1, 0.1),
+      color: accent,
     });
 
     // Rodapé de contato — canto inferior esquerdo. E-mail e site são
