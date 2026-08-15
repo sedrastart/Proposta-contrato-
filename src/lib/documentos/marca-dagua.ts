@@ -1,9 +1,5 @@
 import { PDFDocument, PDFName, PDFString, PDFPage, rgb, StandardFonts } from "pdf-lib";
-import {
-  LOGO_SEDRA_PNG_BASE64,
-  MARCA_DAGUA_PNG_BASE64,
-  LOGO_LOCKUP_PROPOSTA_PNG_BASE64,
-} from "./marca-assets";
+import { LOGO_SEDRA_PNG_BASE64, MARCA_DAGUA_PNG_BASE64 } from "./marca-assets";
 import { CONTRATADO } from "../templates/contratado";
 import type { TipoDocumento } from "./pdf";
 
@@ -153,14 +149,12 @@ export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer
   const pdfDoc = await PDFDocument.load(pdfBuffer);
   const accent = ACCENT_RGB.proposta;
 
-  const logoImage = await pdfDoc.embedPng(
-    Buffer.from(LOGO_LOCKUP_PROPOSTA_PNG_BASE64, "base64")
-  );
   const marcaDaguaImage = await pdfDoc.embedPng(
     Buffer.from(MARCA_DAGUA_PNG_BASE64, "base64")
   );
   const fonte = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fonteNegrito = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const fonteSelo = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
   const paginas = pdfDoc.getPages();
   const total = paginas.length;
@@ -183,14 +177,39 @@ export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer
     // Barra de destaque na lateral esquerda, full-height.
     pagina.drawRectangle({ x: 0, y: 0, width: larguraRail, height, color: accent });
 
-    // Logo (selo + "SEDRA") — dentro da faixa, canto superior direito.
-    const larguraLogo = 34 * MM;
-    const alturaLogo = larguraLogo * (logoImage.height / logoImage.width);
-    pagina.drawImage(logoImage, {
-      x: width - 14 * MM - larguraLogo,
-      y: height - alturaFaixa / 2 - alturaLogo / 2,
-      width: larguraLogo,
-      height: alturaLogo,
+    // Selo (caixa branca + montanha) + "SEDRA" — dentro da faixa, canto
+    // superior direito. Desenhado em vetor (não é mais uma imagem
+    // recortada) pra não deixar nenhuma borda/retângulo residual sobre
+    // a faixa colorida.
+    const tamanhoCaixa = 10 * MM;
+    const yCaixa = height - alturaFaixa / 2 - tamanhoCaixa / 2;
+    const textoSelo = "SEDRA";
+    const tamanhoFonteSelo = 15;
+    const larguraTexto = fonteSelo.widthOfTextAtSize(textoSelo, tamanhoFonteSelo);
+    const gapSeloTexto = 3 * MM;
+    const xTextoSelo = width - 14 * MM - larguraTexto;
+    const xCaixa = xTextoSelo - gapSeloTexto - tamanhoCaixa;
+
+    pagina.drawRectangle({
+      x: xCaixa,
+      y: yCaixa,
+      width: tamanhoCaixa,
+      height: tamanhoCaixa,
+      color: rgb(1, 1, 1),
+    });
+    // Montanha de duas cristas, dentro da caixa (viewBox 0-100).
+    pagina.drawSvgPath("M8 88 L38 32 L50 55 L62 18 L92 88 Z", {
+      x: xCaixa + tamanhoCaixa * 0.09,
+      y: yCaixa + tamanhoCaixa * 0.94,
+      scale: tamanhoCaixa / 100,
+      color: accent,
+    });
+    pagina.drawText(textoSelo, {
+      x: xTextoSelo,
+      y: yCaixa + tamanhoCaixa / 2 - tamanhoFonteSelo * 0.36,
+      size: tamanhoFonteSelo,
+      font: fonteSelo,
+      color: rgb(1, 1, 1),
     });
 
     // Marca d'água — canto inferior direito, atrás do texto.
