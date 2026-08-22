@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { currency, parseValorFinal } from "@/lib/format";
 import { STATUS_PROPOSTA, STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
 import { STATUS_CONTRATO_LABEL, type StatusContrato } from "@/lib/contrato-status";
 
@@ -32,7 +31,7 @@ export default async function PainelPage() {
       prisma.cliente.count(),
       prisma.contrato.count(),
       prisma.proposta.groupBy({ by: ["status"], _count: true }),
-      prisma.contrato.findMany({ where: { status: "assinado" }, select: { valorFinal: true } }),
+      prisma.contrato.count({ where: { status: "assinado" } }),
       prisma.contrato.findMany({
         orderBy: { numeroSequencial: "desc" },
         take: 5,
@@ -49,11 +48,6 @@ export default async function PainelPage() {
   const contagemPorStatus = Object.fromEntries(
     STATUS_PROPOSTA.map((s) => [s, propostasPorStatus.find((p) => p.status === s)?._count ?? 0])
   ) as Record<StatusProposta, number>;
-
-  const faturamentoAssinado = contratosAssinados.reduce(
-    (soma, c) => soma + parseValorFinal(c.valorFinal),
-    0
-  );
 
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-10">
@@ -104,11 +98,8 @@ export default async function PainelPage() {
             Contratos assinados
           </p>
           <p className="mt-2 tabular-nums text-2xl font-semibold text-ink">
-            {contratosAssinados.length}
+            {contratosAssinados}
             <span className="text-sm font-normal text-ink-muted"> de {totalContratos} emitidos</span>
-          </p>
-          <p className="mt-2.5 text-[11px] text-ink-muted">
-            {currency.format(faturamentoAssinado)}/mês em contratos assinados
           </p>
         </div>
       </div>
