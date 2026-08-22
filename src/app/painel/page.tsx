@@ -104,11 +104,11 @@ export default async function PainelPage() {
             Contratos assinados
           </p>
           <p className="mt-2 tabular-nums text-2xl font-semibold text-ink">
-            {currency.format(faturamentoAssinado)}
-            <span className="text-sm font-normal text-ink-muted">/mês</span>
+            {contratosAssinados.length}
+            <span className="text-sm font-normal text-ink-muted"> de {totalContratos} emitidos</span>
           </p>
           <p className="mt-2.5 text-[11px] text-ink-muted">
-            {contratosAssinados.length} de {totalContratos} contratos emitidos
+            {currency.format(faturamentoAssinado)}/mês em contratos assinados
           </p>
         </div>
       </div>
