@@ -101,6 +101,20 @@ export default async function PainelPage() {
             {contratosAssinados}
             <span className="text-sm font-normal text-ink-muted"> de {totalContratos} emitidos</span>
           </p>
+          {totalContratos > 0 && (
+            <>
+              <div className="mt-3.5 h-1.5 overflow-hidden rounded-full bg-neutral-100">
+                <span
+                  className="block h-full rounded-full bg-emerald-500"
+                  style={{ width: `${(contratosAssinados / totalContratos) * 100}%` }}
+                />
+              </div>
+              <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-ink-muted">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                {Math.round((contratosAssinados / totalContratos) * 100)}% assinados
+              </div>
+            </>
+          )}
         </div>
       </div>
 
