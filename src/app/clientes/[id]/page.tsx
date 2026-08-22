@@ -6,8 +6,6 @@ import { BotaoExcluirCliente } from "../botao-excluir-cliente";
 import { RegimeSelector } from "./regime-selector";
 import { ServicoSelector } from "./servico-selector";
 import { PlanoSelector } from "./plano-selector";
-import { STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
-import { STATUS_CONTRATO_LABEL, type StatusContrato } from "@/lib/contrato-status";
 import { Stepper, type PassoStepper } from "./stepper";
 
 function Row({ label, value }: { label: string; value?: string | null }) {
@@ -28,7 +26,7 @@ export default async function ClienteDetalhePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [cliente, regimes, contratos, propostas] = await Promise.all([
+  const [cliente, regimes] = await Promise.all([
     prisma.cliente.findUnique({
       where: { id },
       include: { servicos: { include: { servico: true } } },
@@ -36,14 +34,6 @@ export default async function ClienteDetalhePage({
     prisma.regimeTributario.findMany({
       where: { ativo: true },
       orderBy: { ordem: "asc" },
-    }),
-    prisma.contrato.findMany({
-      where: { clienteId: id },
-      orderBy: { numeroSequencial: "desc" },
-    }),
-    prisma.proposta.findMany({
-      where: { clienteId: id },
-      orderBy: { numeroSequencial: "desc" },
     }),
   ]);
   if (!cliente) notFound();
@@ -61,20 +51,6 @@ export default async function ClienteDetalhePage({
       titulo: "Plano",
       subtitulo: cliente.servicos.some((cs) => cs.planoId) ? "Definido" : "Não definido",
       feito: cliente.servicos.some((cs) => cs.planoId),
-    },
-    {
-      titulo: "Proposta",
-      subtitulo: propostas[0]
-        ? (STATUS_PROPOSTA_LABEL[propostas[0].status as StatusProposta] ?? propostas[0].status)
-        : "Ainda não criada",
-      feito: propostas.length > 0,
-    },
-    {
-      titulo: "Contrato",
-      subtitulo: contratos[0]
-        ? (STATUS_CONTRATO_LABEL[contratos[0].status as StatusContrato] ?? contratos[0].status)
-        : "Aguardando",
-      feito: contratos.length > 0,
     },
   ];
   const primeiroPendente = passosBrutos.findIndex((p) => !p.feito);
@@ -113,7 +89,7 @@ export default async function ClienteDetalhePage({
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-10">
       <Link href="/clientes" className="text-sm text-ink-muted hover:underline">
-        ← Clientes
+        ← Cadastro de Clientes
       </Link>
 
       <div className="mt-2 mb-8 flex items-start justify-between">
@@ -197,135 +173,6 @@ export default async function ClienteDetalhePage({
                 planoAtualId={cs.planoId}
               />
             ))}
-          </div>
-        </div>
-      )}
-
-      {(cliente.regimeTributarioId && cliente.servicos.length > 0) || cliente.servicos.some((cs) => cs.planoId) ? (
-        <div className="mt-6 flex justify-end gap-3">
-          {cliente.regimeTributarioId && cliente.servicos.length > 0 && (
-            <Link
-              href={`/clientes/${cliente.id}/propostas/nova`}
-              className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-neutral-50"
-              title="Cria uma proposta comercial — não exige plano definido, pode ser enviada antes de fechar os valores"
-            >
-              + Nova proposta
-            </Link>
-          )}
-          {cliente.servicos.some((cs) => cs.planoId) && (
-            <Link
-              href={`/clientes/${cliente.id}/previa`}
-              className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110"
-            >
-              Ver prévia do contrato →
-            </Link>
-          )}
-        </div>
-      ) : null}
-
-      {propostas.length > 0 && (
-        <div className="mt-10">
-          <p className="mb-2 text-xs uppercase tracking-wide text-ink-muted">
-            Histórico de propostas comerciais
-          </p>
-          <div className="overflow-hidden rounded-lg border border-line">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-ink-muted">
-                <tr>
-                  <th className="px-4 py-2 font-medium">Número</th>
-                  <th className="px-4 py-2 font-medium">Emitida em</th>
-                  <th className="px-4 py-2 font-medium">Valor</th>
-                  <th className="px-4 py-2 font-medium">Status</th>
-                  <th className="px-4 py-2 font-medium">Download</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {propostas.map((p) => (
-                  <tr key={p.id}>
-                    <td className="px-4 py-2 tabular-nums text-ink">
-                      <Link
-                        href={`/clientes/${cliente.id}/propostas/${p.id}`}
-                        className="hover:underline"
-                      >
-                        {String(p.numeroSequencial).padStart(6, "0")}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2 text-ink-muted">
-                      {new Intl.DateTimeFormat("pt-BR").format(p.dataEmissao)}
-                    </td>
-                    <td className="px-4 py-2 text-ink-muted">{p.valorFinal}</td>
-                    <td className="px-4 py-2 text-ink-muted">
-                      {STATUS_PROPOSTA_LABEL[p.status as StatusProposta] ?? p.status}
-                    </td>
-                    <td className="px-4 py-2">
-                      <a
-                        href={`/api/propostas/${p.id}`}
-                        className="text-ink hover:underline"
-                      >
-                        PDF
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {contratos.length > 0 && (
-        <div className="mt-10">
-          <p className="mb-2 text-xs uppercase tracking-wide text-ink-muted">
-            Histórico de documentos emitidos
-          </p>
-          <div className="overflow-hidden rounded-lg border border-line">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-ink-muted">
-                <tr>
-                  <th className="px-4 py-2 font-medium">Número</th>
-                  <th className="px-4 py-2 font-medium">Emitido em</th>
-                  <th className="px-4 py-2 font-medium">Valor</th>
-                  <th className="px-4 py-2 font-medium">Status</th>
-                  <th className="px-4 py-2 font-medium">Downloads</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {contratos.map((c) => (
-                  <tr key={c.id}>
-                    <td className="px-4 py-2 tabular-nums text-ink">
-                      <Link
-                        href={`/clientes/${cliente.id}/contratos/${c.id}`}
-                        className="hover:underline"
-                      >
-                        {String(c.numeroSequencial).padStart(6, "0")}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2 text-ink-muted">
-                      {new Intl.DateTimeFormat("pt-BR").format(c.dataEmissao)}
-                    </td>
-                    <td className="px-4 py-2 text-ink-muted">{c.valorFinal}</td>
-                    <td className="px-4 py-2 text-ink-muted">
-                      {STATUS_CONTRATO_LABEL[c.status as StatusContrato] ?? c.status}
-                    </td>
-                    <td className="px-4 py-2">
-                      <a
-                        href={`/api/contratos/${c.id}/pdf`}
-                        className="text-ink hover:underline"
-                      >
-                        PDF
-                      </a>
-                      <span className="mx-1.5 text-ink-muted">·</span>
-                      <a
-                        href={`/api/contratos/${c.id}/docx`}
-                        className="text-ink hover:underline"
-                      >
-                        DOCX
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       )}

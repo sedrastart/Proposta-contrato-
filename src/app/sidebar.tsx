@@ -54,7 +54,7 @@ export function Sidebar({ contagens }: { contagens: Contagens }) {
 
   const itens = [
     { href: "/painel", label: "Painel", icone: ICONES.painel, ativo: pathname === "/painel" },
-    { href: "/clientes", label: "Clientes", icone: ICONES.clientes, ativo: pathname.startsWith("/clientes"), contagem: contagens.clientes },
+    { href: "/clientes", label: "Cadastro de Clientes", icone: ICONES.clientes, ativo: pathname.startsWith("/clientes"), contagem: contagens.clientes },
     { href: "/propostas", label: "Propostas", icone: ICONES.propostas, ativo: pathname.startsWith("/propostas"), contagem: contagens.propostas },
     { href: "/contratos", label: "Contratos", icone: ICONES.contratos, ativo: pathname.startsWith("/contratos"), contagem: contagens.contratos },
   ];

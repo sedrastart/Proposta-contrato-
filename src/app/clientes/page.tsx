@@ -5,27 +5,18 @@ import { BotaoExcluirCliente } from "./botao-excluir-cliente";
 
 export const dynamic = "force-dynamic";
 
-function proximaAcao(cliente: {
+function statusCadastro(cliente: {
   id: string;
   regimeTributarioId: string | null;
   servicos: { planoId: string | null }[];
-  propostas: { id: string; status: string }[];
-  contratos: { id: string }[];
 }) {
-  if (cliente.contratos[0]) {
-    return { label: "Ver contrato →", href: `/clientes/${cliente.id}/contratos/${cliente.contratos[0].id}` };
+  if (!cliente.regimeTributarioId || cliente.servicos.length === 0) {
+    return { label: "Completar cadastro →", completo: false, href: `/clientes/${cliente.id}` };
   }
-  const ultimaProposta = cliente.propostas[0];
-  if (ultimaProposta?.status === "aceita") {
-    return { label: "Gerar contrato →", href: `/clientes/${cliente.id}/previa?propostaId=${ultimaProposta.id}` };
+  if (!cliente.servicos.some((cs) => cs.planoId)) {
+    return { label: "Definir plano →", completo: false, href: `/clientes/${cliente.id}` };
   }
-  if (ultimaProposta) {
-    return { label: "Ver proposta →", href: `/clientes/${cliente.id}/propostas/${ultimaProposta.id}` };
-  }
-  if (cliente.regimeTributarioId && cliente.servicos.length > 0) {
-    return { label: "Nova proposta →", href: `/clientes/${cliente.id}/propostas/nova` };
-  }
-  return { label: "Completar cadastro →", href: `/clientes/${cliente.id}` };
+  return { label: "Cadastro completo", completo: true, href: `/clientes/${cliente.id}` };
 }
 
 export default async function ClientesPage() {
@@ -33,8 +24,6 @@ export default async function ClientesPage() {
     orderBy: { criadoEm: "desc" },
     include: {
       servicos: { select: { planoId: true } },
-      propostas: { orderBy: { numeroSequencial: "desc" }, take: 1, select: { id: true, status: true } },
-      contratos: { orderBy: { numeroSequencial: "desc" }, take: 1, select: { id: true } },
     },
   });
 
@@ -42,7 +31,7 @@ export default async function ClientesPage() {
     <main className="mx-auto w-full max-w-5xl px-6 py-10">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Clientes</h1>
+          <h1 className="text-2xl font-semibold text-ink">Cadastro de Clientes</h1>
           <p className="mt-1 text-sm text-ink-muted">
             {clientes.length} cliente{clientes.length !== 1 && "s"} cadastrado
             {clientes.length !== 1 && "s"}
@@ -69,13 +58,13 @@ export default async function ClientesPage() {
                 <th className="px-4 py-3 font-medium">CPF/CNPJ</th>
                 <th className="px-4 py-3 font-medium">Cidade/UF</th>
                 <th className="px-4 py-3 font-medium">Cadastrado em</th>
-                <th className="px-4 py-3 font-medium">Próximo passo</th>
+                <th className="px-4 py-3 font-medium">Status do cadastro</th>
                 <th className="px-4 py-3 font-medium"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {clientes.map((cliente) => {
-                const acao = proximaAcao(cliente);
+                const status = statusCadastro(cliente);
                 return (
                   <tr key={cliente.id} className="hover:bg-neutral-50">
                     <td className="px-4 py-3">
@@ -96,12 +85,18 @@ export default async function ClientesPage() {
                       {new Intl.DateTimeFormat("pt-BR").format(cliente.criadoEm)}
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        href={acao.href}
-                        className="rounded-md border border-accent-soft bg-accent-soft px-2.5 py-1 text-xs font-medium text-accent hover:brightness-95"
-                      >
-                        {acao.label}
-                      </Link>
+                      {status.completo ? (
+                        <span className="rounded-md border border-line bg-neutral-50 px-2.5 py-1 text-xs font-medium text-ink-muted">
+                          {status.label}
+                        </span>
+                      ) : (
+                        <Link
+                          href={status.href}
+                          className="rounded-md border border-accent-soft bg-accent-soft px-2.5 py-1 text-xs font-medium text-accent hover:brightness-95"
+                        >
+                          {status.label}
+                        </Link>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <BotaoExcluirCliente
