@@ -114,6 +114,7 @@ export async function definirRegimeAction(
   });
 
   revalidatePath(`/clientes/${clienteId}`);
+  revalidatePath(`/clientes/${clienteId}/comercial`);
 }
 
 export async function atualizarServicosAction(
@@ -153,6 +154,7 @@ export async function atualizarServicosAction(
   ]);
 
   revalidatePath(`/clientes/${clienteId}`);
+  revalidatePath(`/clientes/${clienteId}/comercial`);
 }
 
 export type ExcluirClienteResultado =
@@ -212,4 +214,5 @@ export async function definirPlanoAction(
   });
 
   revalidatePath(`/clientes/${clienteId}`);
+  revalidatePath(`/clientes/${clienteId}/comercial`);
 }

@@ -85,6 +85,10 @@ function AvisoIncompleto({ clienteId, texto }: { clienteId: string; texto: strin
       </Link>
       <div className="mt-6 rounded-lg border border-dashed border-line p-6 text-sm text-ink-muted">
         {texto}
+        <br />
+        <Link href={`/clientes/${clienteId}/comercial`} className="text-accent hover:underline">
+          Ir para a configuração comercial →
+        </Link>
       </div>
     </main>
   );

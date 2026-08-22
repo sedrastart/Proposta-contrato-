@@ -3,10 +3,6 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatCpfCnpj } from "@/lib/format";
 import { BotaoExcluirCliente } from "../botao-excluir-cliente";
-import { RegimeSelector } from "./regime-selector";
-import { ServicoSelector } from "./servico-selector";
-import { PlanoSelector } from "./plano-selector";
-import { Stepper, type PassoStepper } from "./stepper";
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
@@ -26,65 +22,19 @@ export default async function ClienteDetalhePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [cliente, regimes] = await Promise.all([
-    prisma.cliente.findUnique({
-      where: { id },
-      include: { servicos: { include: { servico: true } } },
-    }),
-    prisma.regimeTributario.findMany({
-      where: { ativo: true },
-      orderBy: { ordem: "asc" },
-    }),
-  ]);
+  const cliente = await prisma.cliente.findUnique({
+    where: { id },
+    include: { servicos: { select: { planoId: true } } },
+  });
   if (!cliente) notFound();
 
-  const passosBrutos = [
-    { titulo: "Cadastro", subtitulo: "Dados completos", feito: true },
-    {
-      titulo: "Regime e serviços",
-      subtitulo: cliente.regimeTributarioId
-        ? `${cliente.servicos.length} serviço${cliente.servicos.length === 1 ? "" : "s"}`
-        : "Não definido",
-      feito: Boolean(cliente.regimeTributarioId) && cliente.servicos.length > 0,
-    },
-    {
-      titulo: "Plano",
-      subtitulo: cliente.servicos.some((cs) => cs.planoId) ? "Definido" : "Não definido",
-      feito: cliente.servicos.some((cs) => cs.planoId),
-    },
-  ];
-  const primeiroPendente = passosBrutos.findIndex((p) => !p.feito);
-  const passos: PassoStepper[] = passosBrutos.map((p, i) => ({
-    titulo: p.titulo,
-    subtitulo: p.subtitulo,
-    estado: p.feito ? "concluida" : i === primeiroPendente ? "atual" : "pendente",
-  }));
-
-  const servicosDisponiveis = cliente.regimeTributarioId
-    ? await prisma.servico.findMany({
-        where: {
-          ativo: true,
-          regimes: { some: { regimeTributarioId: cliente.regimeTributarioId } },
-        },
-        orderBy: { ordem: "asc" },
-      })
-    : [];
-
-  const servicoIdsSelecionados = cliente.servicos.map((s) => s.servicoId);
-  const planosPorServico = servicoIdsSelecionados.length
-    ? await prisma.plano.findMany({
-        where: {
-          ativo: true,
-          servicoId: { in: servicoIdsSelecionados },
-          OR: [
-            { regimeTributarioId: null },
-            { regimeTributarioId: cliente.regimeTributarioId },
-          ],
-        },
-        orderBy: { ordem: "asc" },
-        include: { limites: { include: { faixas: { orderBy: { ordem: "asc" } } } } },
-      })
-    : [];
+  const regimeDefinido = Boolean(cliente.regimeTributarioId) && cliente.servicos.length > 0;
+  const planoDefinido = cliente.servicos.some((cs) => cs.planoId);
+  const statusComercial = planoDefinido
+    ? "Regime, serviços e plano definidos"
+    : regimeDefinido
+    ? "Falta definir o plano"
+    : "Regime e serviços ainda não definidos";
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-10">
@@ -111,9 +61,7 @@ export default async function ClienteDetalhePage({
         </div>
       </div>
 
-      <Stepper passos={passos} />
-
-      <div className="mt-6 grid grid-cols-2 gap-x-6 divide-y divide-line rounded-lg border border-line p-5">
+      <div className="grid grid-cols-2 gap-x-6 divide-y divide-line rounded-lg border border-line p-5">
         <Row
           label={cliente.tipoPessoa === "PJ" ? "CNPJ" : "CPF"}
           value={formatCpfCnpj(cliente.cpfCnpj)}
@@ -139,43 +87,18 @@ export default async function ClienteDetalhePage({
         />
       </div>
 
-      <div className="mt-8 rounded-lg border border-line p-5">
-        <RegimeSelector
-          clienteId={cliente.id}
-          regimes={regimes}
-          regimeAtualId={cliente.regimeTributarioId}
-        />
-      </div>
-
-      {cliente.regimeTributarioId && (
-        <div className="mt-4 rounded-lg border border-line p-5">
-          <ServicoSelector
-            clienteId={cliente.id}
-            servicosDisponiveis={servicosDisponiveis}
-            servicosSelecionadosIds={servicoIdsSelecionados}
-          />
+      <Link
+        href={`/clientes/${cliente.id}/comercial`}
+        className="mt-4 flex items-center justify-between rounded-lg border border-line p-5 hover:bg-accent-soft"
+      >
+        <div>
+          <p className="text-sm font-medium text-ink">Configuração comercial</p>
+          <p className="mt-0.5 text-xs text-ink-muted">{statusComercial}</p>
         </div>
-      )}
-
-      {cliente.servicos.length > 0 && (
-        <div className="mt-4">
-          <p className="mb-2 text-xs uppercase tracking-wide text-ink-muted">
-            Etapa 4 — Planos
-          </p>
-          <div className="space-y-3">
-            {cliente.servicos.map((cs) => (
-              <PlanoSelector
-                key={cs.servicoId}
-                clienteId={cliente.id}
-                servicoId={cs.servicoId}
-                servicoNome={cs.servico.nome}
-                planos={planosPorServico.filter((p) => p.servicoId === cs.servicoId)}
-                planoAtualId={cs.planoId}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+        <span className="text-sm text-accent">
+          {planoDefinido ? "Editar" : "Configurar"} →
+        </span>
+      </Link>
     </main>
   );
 }
