@@ -106,6 +106,45 @@ export async function atualizarTextoPropostaAction(
   return { sucesso: true };
 }
 
+/** Cria uma nova proposta (rascunho) pro mesmo cliente, copiando texto e
+ * dados comerciais da proposta de origem — agiliza quando o mesmo tipo
+ * de proposta se repete pra clientes com perfil parecido. Gera um novo
+ * número sequencial e um novo PDF (não reaproveita o arquivo antigo). */
+export async function duplicarPropostaAction(propostaId: string): Promise<CriarPropostaResultado> {
+  const origem = await prisma.proposta.findUniqueOrThrow({ where: { id: propostaId } });
+
+  const numeroSequencial = await proximoNumeroSequencial("proposta");
+  const dataEmissao = new Date();
+  const pdf = await gerarPdf(origem.textoCompleto, "proposta", {
+    clienteNome: origem.contratanteNomeSnapshot,
+    numeroSequencial,
+    dataEmissao,
+  });
+  const { arquivoPdf } = await salvarArquivoProposta(numeroSequencial, pdf);
+
+  const nova = await prisma.proposta.create({
+    data: {
+      clienteId: origem.clienteId,
+      numeroSequencial,
+      dataEmissao,
+      status: "rascunho",
+      regimeSlug: origem.regimeSlug,
+      contratanteNomeSnapshot: origem.contratanteNomeSnapshot,
+      contratanteCpfCnpjSnapshot: origem.contratanteCpfCnpjSnapshot,
+      enderecoSnapshot: origem.enderecoSnapshot,
+      valorFinal: origem.valorFinal,
+      vigenciaMeses: origem.vigenciaMeses,
+      multaTexto: origem.multaTexto,
+      servicosSnapshot: origem.servicosSnapshot,
+      textoCompleto: origem.textoCompleto,
+      arquivoPdf,
+    },
+  });
+
+  revalidar(nova.clienteId, nova.id);
+  return { sucesso: true, propostaId: nova.id };
+}
+
 /** Exclui a proposta definitivamente. Se um contrato já foi gerado a partir
  * dela, o contrato continua existindo — só perde a referência de origem
  * (ON DELETE SET NULL). Não remove o PDF já salvo no Storage. */
