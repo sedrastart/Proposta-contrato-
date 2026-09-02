@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatCpfCnpj } from "@/lib/format";
-import { BotaoExcluirCliente } from "./botao-excluir-cliente";
+import { ClientesLista } from "./clientes-lista";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +27,15 @@ export default async function ClientesPage() {
     },
   });
 
+  const clientesFormatados = clientes.map((cliente) => ({
+    id: cliente.id,
+    razaoSocial: cliente.razaoSocial,
+    cpfCnpjFormatado: formatCpfCnpj(cliente.cpfCnpj),
+    cidadeUf: `${cliente.enderecoCidade}/${cliente.enderecoUf}`,
+    cadastradoEmFormatado: new Intl.DateTimeFormat("pt-BR").format(cliente.criadoEm),
+    status: statusCadastro(cliente),
+  }));
+
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-10">
       <div className="mb-8 flex items-center justify-between">
@@ -50,66 +59,7 @@ export default async function ClientesPage() {
           Nenhum cliente cadastrado ainda.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-line">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-ink-muted">
-              <tr>
-                <th className="px-4 py-3 font-medium">Nome / Razão Social</th>
-                <th className="px-4 py-3 font-medium">CPF/CNPJ</th>
-                <th className="px-4 py-3 font-medium">Cidade/UF</th>
-                <th className="px-4 py-3 font-medium">Cadastrado em</th>
-                <th className="px-4 py-3 font-medium">Status do cadastro</th>
-                <th className="px-4 py-3 font-medium"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {clientes.map((cliente) => {
-                const status = statusCadastro(cliente);
-                return (
-                  <tr key={cliente.id} className="hover:bg-neutral-50">
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/clientes/${cliente.id}`}
-                        className="font-medium text-ink hover:underline"
-                      >
-                        {cliente.razaoSocial}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 tabular-nums text-ink-muted">
-                      {formatCpfCnpj(cliente.cpfCnpj)}
-                    </td>
-                    <td className="px-4 py-3 text-ink-muted">
-                      {cliente.enderecoCidade}/{cliente.enderecoUf}
-                    </td>
-                    <td className="px-4 py-3 text-ink-muted">
-                      {new Intl.DateTimeFormat("pt-BR").format(cliente.criadoEm)}
-                    </td>
-                    <td className="px-4 py-3">
-                      {status.completo ? (
-                        <span className="rounded-md border border-line bg-neutral-50 px-2.5 py-1 text-xs font-medium text-ink-muted">
-                          {status.label}
-                        </span>
-                      ) : (
-                        <Link
-                          href={status.href}
-                          className="rounded-md border border-accent-soft bg-accent-soft px-2.5 py-1 text-xs font-medium text-accent hover:brightness-95"
-                        >
-                          {status.label}
-                        </Link>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <BotaoExcluirCliente
-                        clienteId={cliente.id}
-                        nomeCliente={cliente.razaoSocial}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <ClientesLista clientes={clientesFormatados} />
       )}
     </main>
   );
