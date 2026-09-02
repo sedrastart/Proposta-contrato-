@@ -27,14 +27,19 @@ export default async function ClientesPage() {
     },
   });
 
-  const clientesFormatados = clientes.map((cliente) => ({
-    id: cliente.id,
-    razaoSocial: cliente.razaoSocial,
-    cpfCnpjFormatado: formatCpfCnpj(cliente.cpfCnpj),
-    cidadeUf: `${cliente.enderecoCidade}/${cliente.enderecoUf}`,
-    cadastradoEmFormatado: new Intl.DateTimeFormat("pt-BR").format(cliente.criadoEm),
-    status: statusCadastro(cliente),
-  }));
+  const clientesFormatados = clientes.map((cliente) => {
+    const status = statusCadastro(cliente);
+    return {
+      id: cliente.id,
+      razaoSocial: cliente.razaoSocial,
+      cpfCnpjFormatado: formatCpfCnpj(cliente.cpfCnpj),
+      cidadeUf: `${cliente.enderecoCidade}/${cliente.enderecoUf}`,
+      cadastradoEmFormatado: new Intl.DateTimeFormat("pt-BR").format(cliente.criadoEm),
+      cadastradoEmTimestamp: cliente.criadoEm.getTime(),
+      statusLabel: status.label,
+      status,
+    };
+  });
 
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-10">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
+import { parseValorFinal } from "@/lib/format";
 import { PropostasLista } from "./propostas-lista";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,9 @@ export default async function PropostasPage() {
     numero: String(p.numeroSequencial).padStart(6, "0"),
     clienteNome: p.cliente.razaoSocial,
     dataFormatada: new Intl.DateTimeFormat("pt-BR").format(p.dataEmissao),
+    dataTimestamp: p.dataEmissao.getTime(),
     valorFinal: p.valorFinal,
+    valorNumerico: parseValorFinal(p.valorFinal),
     statusLabel: STATUS_PROPOSTA_LABEL[p.status as StatusProposta] ?? p.status,
   }));
 

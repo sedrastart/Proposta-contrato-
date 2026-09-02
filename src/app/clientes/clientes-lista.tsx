@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { BotaoExcluirCliente } from "./botao-excluir-cliente";
+import { useOrdenacao } from "@/lib/use-ordenacao";
 
 type Cliente = {
   id: string;
@@ -10,8 +11,35 @@ type Cliente = {
   cpfCnpjFormatado: string;
   cidadeUf: string;
   cadastradoEmFormatado: string;
+  cadastradoEmTimestamp: number;
+  statusLabel: string;
   status: { label: string; completo: boolean; href: string };
 };
+
+function ThOrdenavel({
+  label,
+  campo,
+  colunaAtiva,
+  direcao,
+  onClick,
+}: {
+  label: string;
+  campo: keyof Cliente;
+  colunaAtiva: keyof Cliente | null;
+  direcao: "asc" | "desc";
+  onClick: (campo: keyof Cliente) => void;
+}) {
+  const ativo = colunaAtiva === campo;
+  return (
+    <th
+      className="cursor-pointer select-none px-4 py-3 font-medium hover:text-ink"
+      onClick={() => onClick(campo)}
+    >
+      {label}
+      {ativo && <span className="ml-1 text-accent">{direcao === "asc" ? "▲" : "▼"}</span>}
+    </th>
+  );
+}
 
 export function ClientesLista({ clientes }: { clientes: Cliente[] }) {
   const [busca, setBusca] = useState("");
@@ -25,6 +53,8 @@ export function ClientesLista({ clientes }: { clientes: Cliente[] }) {
       )
     : clientes;
 
+  const { ordenados, coluna, direcao, ordenarPor } = useOrdenacao(filtrados, "cadastradoEmTimestamp");
+
   return (
     <div>
       <input
@@ -34,7 +64,7 @@ export function ClientesLista({ clientes }: { clientes: Cliente[] }) {
         className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-accent"
       />
 
-      {filtrados.length === 0 ? (
+      {ordenados.length === 0 ? (
         <div className="mt-4 rounded-lg border border-dashed border-line py-16 text-center text-sm text-ink-muted">
           Nenhum cliente encontrado.
         </div>
@@ -43,16 +73,16 @@ export function ClientesLista({ clientes }: { clientes: Cliente[] }) {
           <table className="w-full text-left text-sm">
             <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-ink-muted">
               <tr>
-                <th className="px-4 py-3 font-medium">Nome / Razão Social</th>
-                <th className="px-4 py-3 font-medium">CPF/CNPJ</th>
-                <th className="px-4 py-3 font-medium">Cidade/UF</th>
-                <th className="px-4 py-3 font-medium">Cadastrado em</th>
-                <th className="px-4 py-3 font-medium">Status do cadastro</th>
+                <ThOrdenavel label="Nome / Razão Social" campo="razaoSocial" colunaAtiva={coluna} direcao={direcao} onClick={ordenarPor} />
+                <ThOrdenavel label="CPF/CNPJ" campo="cpfCnpjFormatado" colunaAtiva={coluna} direcao={direcao} onClick={ordenarPor} />
+                <ThOrdenavel label="Cidade/UF" campo="cidadeUf" colunaAtiva={coluna} direcao={direcao} onClick={ordenarPor} />
+                <ThOrdenavel label="Cadastrado em" campo="cadastradoEmTimestamp" colunaAtiva={coluna} direcao={direcao} onClick={ordenarPor} />
+                <ThOrdenavel label="Status do cadastro" campo="statusLabel" colunaAtiva={coluna} direcao={direcao} onClick={ordenarPor} />
                 <th className="px-4 py-3 font-medium"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {filtrados.map((cliente) => (
+              {ordenados.map((cliente) => (
                 <tr key={cliente.id} className="hover:bg-neutral-50">
                   <td className="px-4 py-3">
                     <Link

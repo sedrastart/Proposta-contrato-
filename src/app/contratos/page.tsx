@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { STATUS_CONTRATO_LABEL, type StatusContrato } from "@/lib/contrato-status";
+import { parseValorFinal } from "@/lib/format";
 import { ContratosLista } from "./contratos-lista";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +17,9 @@ export default async function ContratosPage() {
     numero: String(c.numeroSequencial).padStart(6, "0"),
     clienteNome: c.cliente.razaoSocial,
     dataFormatada: new Intl.DateTimeFormat("pt-BR").format(c.dataEmissao),
+    dataTimestamp: c.dataEmissao.getTime(),
     valorFinal: c.valorFinal,
+    valorNumerico: parseValorFinal(c.valorFinal),
     statusLabel: STATUS_CONTRATO_LABEL[c.status as StatusContrato] ?? c.status,
   }));
 
