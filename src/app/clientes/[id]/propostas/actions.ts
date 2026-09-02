@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { buscarClienteParaProposta, montarDadosProposta } from "@/lib/contrato-dados";
+import {
+  buscarClienteParaProposta,
+  montarDadosProposta,
+} from "@/lib/contrato-dados";
 import { proximoNumeroSequencial } from "@/lib/numero-sequencial";
 import { gerarPdf } from "@/lib/documentos/pdf";
 import { salvarArquivoProposta } from "@/lib/documentos/armazenamento";
@@ -106,17 +109,40 @@ export async function atualizarTextoPropostaAction(
   return { sucesso: true };
 }
 
-/** Cria uma nova proposta (rascunho) pro mesmo cliente, copiando texto e
- * dados comerciais da proposta de origem — agiliza quando o mesmo tipo
- * de proposta se repete pra clientes com perfil parecido. Gera um novo
- * número sequencial e um novo PDF (não reaproveita o arquivo antigo). */
-export async function duplicarPropostaAction(propostaId: string): Promise<CriarPropostaResultado> {
+/** Cria uma nova proposta (rascunho) copiando texto e dados comerciais da
+ * proposta de origem — agiliza quando o mesmo tipo de proposta se repete.
+ * `clienteDestinoId` permite duplicar pra outro cliente (perfil parecido);
+ * quando omitido, duplica pro mesmo cliente da origem. Ao trocar de
+ * cliente, troca também o nome/CNPJ que aparecem dentro do texto (a
+ * ocorrência literal do nome/CNPJ antigo é substituída pelo novo — revise
+ * o texto se a proposta original tiver sido editada de forma incomum).
+ * Gera um novo número sequencial e um novo PDF. */
+export async function duplicarPropostaAction(
+  propostaId: string,
+  clienteDestinoId?: string
+): Promise<CriarPropostaResultado> {
   const origem = await prisma.proposta.findUniqueOrThrow({ where: { id: propostaId } });
+
+  const destinoId = clienteDestinoId ?? origem.clienteId;
+  const clienteDestino = await buscarClienteParaProposta(destinoId);
+  if (!clienteDestino || !clienteDestino.regimeTributario || clienteDestino.servicos.length === 0) {
+    return { sucesso: false, erro: "Cliente de destino sem regime ou serviços definidos" };
+  }
+
+  const dados = montarDadosProposta(clienteDestino);
+  const mudouCliente = destinoId !== origem.clienteId;
+  const textoCompleto = mudouCliente
+    ? origem.textoCompleto
+        .split(origem.contratanteNomeSnapshot)
+        .join(dados.contratanteNome)
+        .split(origem.contratanteCpfCnpjSnapshot)
+        .join(dados.contratanteCpfCnpj)
+    : origem.textoCompleto;
 
   const numeroSequencial = await proximoNumeroSequencial("proposta");
   const dataEmissao = new Date();
-  const pdf = await gerarPdf(origem.textoCompleto, "proposta", {
-    clienteNome: origem.contratanteNomeSnapshot,
+  const pdf = await gerarPdf(textoCompleto, "proposta", {
+    clienteNome: dados.contratanteNome,
     numeroSequencial,
     dataEmissao,
   });
@@ -124,19 +150,19 @@ export async function duplicarPropostaAction(propostaId: string): Promise<CriarP
 
   const nova = await prisma.proposta.create({
     data: {
-      clienteId: origem.clienteId,
+      clienteId: destinoId,
       numeroSequencial,
       dataEmissao,
       status: "rascunho",
-      regimeSlug: origem.regimeSlug,
-      contratanteNomeSnapshot: origem.contratanteNomeSnapshot,
-      contratanteCpfCnpjSnapshot: origem.contratanteCpfCnpjSnapshot,
-      enderecoSnapshot: origem.enderecoSnapshot,
+      regimeSlug: clienteDestino.regimeTributario.slug,
+      contratanteNomeSnapshot: dados.contratanteNome,
+      contratanteCpfCnpjSnapshot: dados.contratanteCpfCnpj,
+      enderecoSnapshot: dados.contratanteEndereco,
       valorFinal: origem.valorFinal,
       vigenciaMeses: origem.vigenciaMeses,
       multaTexto: origem.multaTexto,
       servicosSnapshot: origem.servicosSnapshot,
-      textoCompleto: origem.textoCompleto,
+      textoCompleto,
       arquivoPdf,
     },
   });

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   atualizarStatusPropostaAction,
   atualizarTextoPropostaAction,
-  duplicarPropostaAction,
   excluirPropostaAction,
 } from "../actions";
 import { STATUS_PROPOSTA, STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
@@ -39,22 +38,8 @@ export function PropostaEditor({ proposta }: { proposta: Proposta }) {
   const [isPendingStatus, startTransitionStatus] = useTransition();
   const [isPendingTexto, startTransitionTexto] = useTransition();
   const [isPendingExcluir, startTransitionExcluir] = useTransition();
-  const [isPendingDuplicar, startTransitionDuplicar] = useTransition();
   const [erroTexto, setErroTexto] = useState<string | null>(null);
-  const [erroDuplicar, setErroDuplicar] = useState<string | null>(null);
   const [salvo, setSalvo] = useState(false);
-
-  function duplicar() {
-    setErroDuplicar(null);
-    startTransitionDuplicar(async () => {
-      const resultado = await duplicarPropostaAction(proposta.id);
-      if (resultado.sucesso) {
-        router.push(`/clientes/${proposta.clienteId}/propostas/${resultado.propostaId}`);
-      } else {
-        setErroDuplicar(resultado.erro);
-      }
-    });
-  }
 
   function excluir() {
     if (
@@ -157,15 +142,13 @@ export function PropostaEditor({ proposta }: { proposta: Proposta }) {
         >
           Baixar PDF
         </a>
-        <button
-          type="button"
-          onClick={duplicar}
-          disabled={isPendingDuplicar}
-          className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-neutral-50 disabled:opacity-50"
-          title="Cria uma nova proposta (rascunho) pro mesmo cliente, copiando este texto"
+        <Link
+          href={`/clientes/${proposta.clienteId}/propostas/${proposta.id}/duplicar`}
+          className="rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:bg-neutral-50"
+          title="Cria uma nova proposta (rascunho) copiando este texto — escolhendo o cliente de destino"
         >
-          {isPendingDuplicar ? "Duplicando..." : "Duplicar proposta"}
-        </button>
+          Duplicar proposta
+        </Link>
         {proposta.contratoGerado ? (
           <Link
             href={`/clientes/${proposta.clienteId}/contratos/${proposta.contratoGerado.id}`}
@@ -183,12 +166,6 @@ export function PropostaEditor({ proposta }: { proposta: Proposta }) {
           </Link>
         ) : null}
       </div>
-
-      {erroDuplicar && (
-        <div className="mt-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {erroDuplicar}
-        </div>
-      )}
 
       <div className="mt-8 rounded-lg border border-line bg-white p-6">
         <p className="mb-3 text-xs uppercase tracking-wide text-ink-muted">
