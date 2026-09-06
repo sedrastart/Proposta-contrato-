@@ -30,17 +30,22 @@ CONTRATADO`;
     )
     .join("\n\n\n");
 
+  const qualificacaoContratante =
+    dados.contratanteTipoPessoa === "PJ"
+      ? `${dados.contratanteNome}, pessoa jurídica inscrita no CNPJ sob nº ${dados.contratanteCpfCnpj}, com sede na ${dados.contratanteEndereco}, CEP ${dados.contratanteCep}`
+      : `${dados.contratanteNome}, portador(a) do CPF sob nº ${dados.contratanteCpfCnpj}, residente e domiciliado(a) na ${dados.contratanteEndereco}, CEP ${dados.contratanteCep}`;
+
   return `CONTRATO DE PRESTAÇÃO DE SERVIÇOS CONTÁBEIS
 
 Pelo presente instrumento particular de prestação de serviços contábeis, de um lado:
 
-${dados.contratanteNome}, inscrito no CNPJ/CPF sob nº ${dados.contratanteCpfCnpj}, com sede na ${dados.contratanteEndereco}, CEP ${dados.contratanteCep}${
+${qualificacaoContratante}${
     dados.responsavelNome
       ? `, neste ato representado por seu titular:\n\n${dados.responsavelNome}, inscrito no CPF nº ${dados.responsavelCpf ?? ""}, doravante denominado CONTRATANTE.`
       : ", doravante denominado CONTRATANTE."
   }
 
-${CONTRATADO.nome}, contador autônomo, inscrito no CPF nº ${CONTRATADO.cpf}, registrado no Cadastro de Contribuintes Mobiliários da Prefeitura de São Paulo sob nº ${CONTRATADO.cmcSp}, com endereço profissional na ${CONTRATADO.enderecoProfissional}, doravante denominado CONTRATADO.
+${CONTRATADO.nome}, contador autônomo, inscrito no CPF nº ${CONTRATADO.cpf} e no ${CONTRATADO.crc}, registrado no Cadastro de Contribuintes Mobiliários da Prefeitura de São Paulo sob nº ${CONTRATADO.cmcSp}, com endereço profissional na ${CONTRATADO.enderecoProfissional}, doravante denominado CONTRATADO.
 
 ${renderClausulas(corpoClausulas, contexto)}
 

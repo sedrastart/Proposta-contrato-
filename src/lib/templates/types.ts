@@ -13,6 +13,7 @@ export type LimiteUsoTexto = {
 
 export type DadosContrato = {
   contratanteNome: string;
+  contratanteTipoPessoa: string; // "PF" | "PJ" — define a concordância de gênero no cabeçalho
   contratanteCpfCnpj: string;
   contratanteEndereco: string;
   contratanteCidadeUf: string;

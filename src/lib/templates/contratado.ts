@@ -4,6 +4,7 @@
 export const CONTRATADO = {
   nome: "Fernando Soares Matos da Silva",
   cpf: "350.631.338-00",
+  crc: "CRC/SP 1SP298429",
   cmcSp: "0.222.785-1",
   enderecoProfissional: "Rua Apóstolo Judas Tadeu, nº 33, Cidade Tiradentes, São Paulo – SP",
   telefone: "(11) 92209-5007",

@@ -15,17 +15,22 @@ export function renderContratoMei(
 ): string {
   const contexto = construirContextoMei(dados);
 
+  const qualificacaoContratante =
+    dados.contratanteTipoPessoa === "PJ"
+      ? `${dados.contratanteNome}, pessoa jurídica inscrita no CNPJ nº ${dados.contratanteCpfCnpj}, com sede na ${dados.contratanteEndereco}, CEP ${dados.contratanteCep}`
+      : `${dados.contratanteNome}, portador(a) do CPF nº ${dados.contratanteCpfCnpj}, residente e domiciliado(a) na ${dados.contratanteEndereco}, CEP ${dados.contratanteCep}`;
+
   return `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
 
 CONTRATANTE:
-${dados.contratanteNome}, inscrito no CNPJ/CPF nº ${dados.contratanteCpfCnpj}, com sede na ${dados.contratanteEndereco}, CEP ${dados.contratanteCep}${
+${qualificacaoContratante}${
     dados.responsavelNome
       ? `, neste ato representado por seu titular ${dados.responsavelNome}, inscrito no CPF nº ${dados.responsavelCpf ?? ""}`
       : ""
   }.
 
 CONTRATADO:
-${CONTRATADO.nome}, inscrito no CPF nº ${CONTRATADO.cpf}, residente na ${CONTRATADO_ENDERECO_MEI}.
+${CONTRATADO.nome}, contador, inscrito no CPF nº ${CONTRATADO.cpf} e no ${CONTRATADO.crc}, residente na ${CONTRATADO_ENDERECO_MEI}.
 
 O presente contrato é regido pelos arts. 593 a 609 do Código Civil, pela legislação do Microempreendedor Individual (Lei Complementar 123/2006) e demais normas aplicáveis.
 

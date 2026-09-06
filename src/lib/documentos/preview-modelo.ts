@@ -5,6 +5,7 @@ import type { DadosContrato, ClausulaRenderavel } from "@/lib/templates";
 // correspondem a nenhum cliente real.
 export const DADOS_EXEMPLO_GERAL: DadosContrato = {
   contratanteNome: "Empresa Exemplo LTDA",
+  contratanteTipoPessoa: "PJ",
   contratanteCpfCnpj: "12.345.678/0001-90",
   contratanteEndereco: "Avenida Paulista, 1000 - Bela Vista, São Paulo/SP",
   contratanteCidadeUf: "São Paulo/SP",

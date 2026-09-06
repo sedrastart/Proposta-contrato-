@@ -56,6 +56,7 @@ export function montarDadosContrato(cliente: ClienteParaContrato): DadosContrato
 
   return {
     contratanteNome: cliente.razaoSocial,
+    contratanteTipoPessoa: cliente.tipoPessoa,
     contratanteCpfCnpj: formatCpfCnpj(cliente.cpfCnpj),
     contratanteEndereco: `${cliente.enderecoLogradouro}, ${cliente.enderecoNumero}${
       cliente.enderecoComplemento ? " - " + cliente.enderecoComplemento : ""
@@ -123,6 +124,7 @@ export function montarDadosProposta(cliente: ClienteParaProposta): DadosContrato
 
   return {
     contratanteNome: cliente.razaoSocial,
+    contratanteTipoPessoa: cliente.tipoPessoa,
     contratanteCpfCnpj: formatCpfCnpj(cliente.cpfCnpj),
     contratanteEndereco: `${cliente.enderecoLogradouro}, ${cliente.enderecoNumero}${
       cliente.enderecoComplemento ? " - " + cliente.enderecoComplemento : ""
