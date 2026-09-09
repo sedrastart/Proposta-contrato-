@@ -66,6 +66,25 @@ export async function alternarAtivoPlanoAction(id: string, ativo: boolean) {
   revalidar();
 }
 
+export type ExcluirPlanoResultado = { sucesso: true } | { sucesso: false; erro: string };
+
+/** Bloqueia a exclusão se algum cliente estiver usando este plano — o FK
+ * (ClienteServico.planoId) é onDelete: SetNull, então excluir sem checar
+ * reverteria o cliente para "plano indefinido" sem aviso. */
+export async function excluirPlanoAction(id: string): Promise<ExcluirPlanoResultado> {
+  const totalClientes = await prisma.clienteServico.count({ where: { planoId: id } });
+  if (totalClientes > 0) {
+    return {
+      sucesso: false,
+      erro: `Não é possível excluir: ${totalClientes} cliente${totalClientes !== 1 ? "s estão" : " está"} neste plano.`,
+    };
+  }
+
+  await prisma.plano.delete({ where: { id } });
+  revalidar();
+  return { sucesso: true };
+}
+
 export async function criarLimiteAction(
   planoId: string,
   data: {

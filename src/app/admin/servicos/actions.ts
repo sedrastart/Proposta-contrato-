@@ -37,6 +37,26 @@ export async function alternarAtivoServicoAction(id: string, ativo: boolean) {
   revalidatePath("/admin/servicos");
 }
 
+export type ExcluirServicoResultado = { sucesso: true } | { sucesso: false; erro: string };
+
+/** Bloqueia a exclusão se algum cliente já tiver este serviço contratado —
+ * o FK é onDelete: Cascade em ClienteServico, então excluir sem essa
+ * checagem apagaria silenciosamente o vínculo desses clientes. */
+export async function excluirServicoAction(id: string): Promise<ExcluirServicoResultado> {
+  const totalClientes = await prisma.clienteServico.count({ where: { servicoId: id } });
+  if (totalClientes > 0) {
+    return {
+      sucesso: false,
+      erro: `Não é possível excluir: ${totalClientes} cliente${totalClientes !== 1 ? "s têm" : " tem"} este serviço contratado.`,
+    };
+  }
+
+  await prisma.servico.delete({ where: { id } });
+  revalidatePath("/admin/servicos");
+  revalidatePath("/admin/planos");
+  return { sucesso: true };
+}
+
 export async function atualizarRegimesServicoAction(
   servicoId: string,
   regimeIds: string[]

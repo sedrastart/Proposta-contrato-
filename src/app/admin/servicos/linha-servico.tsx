@@ -5,6 +5,7 @@ import {
   atualizarServicoAction,
   alternarAtivoServicoAction,
   atualizarRegimesServicoAction,
+  excluirServicoAction,
 } from "./actions";
 
 type Regime = { id: string; nome: string };
@@ -22,6 +23,18 @@ export function LinhaServico({
   const [nome, setNome] = useState(servico.nome);
   const [regimeIds, setRegimeIds] = useState(new Set(regimeIdsAtuais));
   const [isPending, startTransition] = useTransition();
+  const [erro, setErro] = useState<string | null>(null);
+
+  function excluir() {
+    if (!confirm(`Excluir o serviço "${servico.nome}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    setErro(null);
+    startTransition(async () => {
+      const resultado = await excluirServicoAction(servico.id);
+      if (!resultado.sucesso) setErro(resultado.erro);
+    });
+  }
 
   function salvarNome() {
     if (nome !== servico.nome) {
@@ -82,7 +95,17 @@ export function LinhaServico({
         >
           {servico.ativo ? "desativar" : "ativar"}
         </button>
+        <button
+          type="button"
+          onClick={excluir}
+          disabled={isPending}
+          className="text-sm text-red-600 hover:underline disabled:opacity-50"
+          title="Apaga este serviço definitivamente"
+        >
+          excluir
+        </button>
       </div>
+      {erro && <p className="mt-1 text-xs text-red-600">{erro}</p>}
       <div
         className="mt-3 flex flex-wrap gap-3"
         title="Em quais regimes esse serviço aparece na etapa 3 do assistente — marque/desmarque para ajustar"

@@ -89,3 +89,33 @@ export async function alternarAtivoRegimeAction(id: string, ativo: boolean) {
   await prisma.regimeTributario.update({ where: { id }, data: { ativo } });
   revalidatePath("/admin/regimes");
 }
+
+export type ExcluirRegimeResultado = { sucesso: true } | { sucesso: false; erro: string };
+
+/** Exclui o regime e, por simetria com a criação, seu modelo de contrato e
+ * de proposta (mesmo slug). Bloqueia se houver cliente cadastrado nesse
+ * regime — evita órfãos silenciosos (o FK permitiria, virando null). */
+export async function excluirRegimeAction(id: string): Promise<ExcluirRegimeResultado> {
+  const regime = await prisma.regimeTributario.findUniqueOrThrow({ where: { id } });
+
+  const totalClientes = await prisma.cliente.count({ where: { regimeTributarioId: id } });
+  if (totalClientes > 0) {
+    return {
+      sucesso: false,
+      erro: `Não é possível excluir: existem ${totalClientes} cliente${totalClientes !== 1 ? "s" : ""} cadastrado${totalClientes !== 1 ? "s" : ""} neste regime.`,
+    };
+  }
+
+  await prisma.$transaction([
+    prisma.modeloContrato.deleteMany({ where: { slug: regime.slug } }),
+    prisma.modeloProposta.deleteMany({ where: { slug: regime.slug } }),
+    prisma.regimeTributario.delete({ where: { id } }),
+  ]);
+
+  revalidatePath("/admin/regimes");
+  revalidatePath("/admin/contratos");
+  revalidatePath("/admin/propostas");
+  revalidatePath("/admin/servicos");
+  revalidatePath("/admin/planos");
+  return { sucesso: true };
+}

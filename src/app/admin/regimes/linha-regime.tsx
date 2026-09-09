@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { atualizarRegimeAction, alternarAtivoRegimeAction } from "./actions";
+import { atualizarRegimeAction, alternarAtivoRegimeAction, excluirRegimeAction } from "./actions";
 
 type Regime = {
   id: string;
@@ -15,6 +15,7 @@ export function LinhaRegime({ regime }: { regime: Regime }) {
   const [nome, setNome] = useState(regime.nome);
   const [ordem, setOrdem] = useState(regime.ordem);
   const [isPending, startTransition] = useTransition();
+  const [erro, setErro] = useState<string | null>(null);
 
   function salvar() {
     startTransition(() => {
@@ -25,6 +26,17 @@ export function LinhaRegime({ regime }: { regime: Regime }) {
   function alternarAtivo() {
     startTransition(() => {
       alternarAtivoRegimeAction(regime.id, !regime.ativo);
+    });
+  }
+
+  function excluir() {
+    if (!confirm(`Excluir o regime "${regime.nome}"? Isso também apaga o modelo de contrato e de proposta dele. Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    setErro(null);
+    startTransition(async () => {
+      const resultado = await excluirRegimeAction(regime.id);
+      if (!resultado.sucesso) setErro(resultado.erro);
     });
   }
 
@@ -70,19 +82,31 @@ export function LinhaRegime({ regime }: { regime: Regime }) {
         </span>
       </td>
       <td className="px-4 py-2 text-right">
-        <button
-          type="button"
-          onClick={alternarAtivo}
-          disabled={isPending}
-          className="text-sm text-ink-muted hover:underline disabled:opacity-50"
-          title={
-            regime.ativo
-              ? "Esconde este regime do assistente sem apagar nada"
-              : "Volta a mostrar este regime no assistente"
-          }
-        >
-          {regime.ativo ? "desativar" : "ativar"}
-        </button>
+        <div className="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={alternarAtivo}
+            disabled={isPending}
+            className="text-sm text-ink-muted hover:underline disabled:opacity-50"
+            title={
+              regime.ativo
+                ? "Esconde este regime do assistente sem apagar nada"
+                : "Volta a mostrar este regime no assistente"
+            }
+          >
+            {regime.ativo ? "desativar" : "ativar"}
+          </button>
+          <button
+            type="button"
+            onClick={excluir}
+            disabled={isPending}
+            className="text-sm text-red-600 hover:underline disabled:opacity-50"
+            title="Apaga este regime, seu modelo de contrato e de proposta definitivamente"
+          >
+            excluir
+          </button>
+        </div>
+        {erro && <p className="mt-1 text-xs text-red-600">{erro}</p>}
       </td>
     </tr>
   );

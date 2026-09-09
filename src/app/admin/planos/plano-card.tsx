@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import {
   atualizarPlanoAction,
   alternarAtivoPlanoAction,
+  excluirPlanoAction,
   criarLimiteAction,
   removerLimiteAction,
   atualizarLimiteAction,
@@ -49,12 +50,24 @@ export function PlanoCard({ plano }: { plano: Plano }) {
     parcelas: plano.parcelas,
   });
   const [isPending, startTransition] = useTransition();
+  const [erroExcluir, setErroExcluir] = useState<string | null>(null);
   const [novoLimite, setNovoLimite] = useState({
     unidade: "",
     quantidade: "",
     tipoCobranca: "por_unidade" as "por_unidade" | "faixa",
     valorPorUnidade: "",
   });
+
+  function excluir() {
+    if (!confirm(`Excluir o plano "${plano.nome}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    setErroExcluir(null);
+    startTransition(async () => {
+      const resultado = await excluirPlanoAction(plano.id);
+      if (!resultado.sucesso) setErroExcluir(resultado.erro);
+    });
+  }
 
   function salvar() {
     startTransition(() => {
@@ -114,8 +127,18 @@ export function PlanoCard({ plano }: { plano: Plano }) {
           >
             {plano.ativo ? "desativar" : "ativar"}
           </button>
+          <button
+            type="button"
+            onClick={excluir}
+            disabled={isPending}
+            className="text-sm text-red-600 hover:underline disabled:opacity-50"
+            title="Apaga este plano definitivamente"
+          >
+            excluir
+          </button>
         </div>
       </div>
+      {erroExcluir && <p className="mt-1 text-xs text-red-600">{erroExcluir}</p>}
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <input
