@@ -109,6 +109,18 @@ export async function atualizarTextoPropostaAction(
   return { sucesso: true };
 }
 
+/** Atualiza só o valor exibido no card da proposta (o "Investimento" dentro
+ * do texto é editado livremente e não é lido automaticamente daqui — o
+ * admin ajusta os dois quando muda o preço). Não mexe no PDF/texto. */
+export async function atualizarValorPropostaAction(propostaId: string, valorFinal: string) {
+  if (!valorFinal.trim()) return;
+  const proposta = await prisma.proposta.update({
+    where: { id: propostaId },
+    data: { valorFinal },
+  });
+  revalidar(proposta.clienteId, propostaId);
+}
+
 /** Cria uma nova proposta (rascunho) copiando texto e dados comerciais da
  * proposta de origem — agiliza quando o mesmo tipo de proposta se repete.
  * `clienteDestinoId` permite duplicar pra outro cliente (perfil parecido);

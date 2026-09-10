@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   atualizarStatusPropostaAction,
   atualizarTextoPropostaAction,
+  atualizarValorPropostaAction,
   excluirPropostaAction,
 } from "../actions";
 import { STATUS_PROPOSTA, STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
@@ -35,11 +36,20 @@ export function PropostaEditor({ proposta }: { proposta: Proposta }) {
   const numero = String(proposta.numeroSequencial).padStart(6, "0");
   const [status, setStatus] = useState(proposta.status);
   const [textoCompleto, setTextoCompleto] = useState(proposta.textoCompleto);
+  const [valorFinal, setValorFinal] = useState(proposta.valorFinal);
   const [isPendingStatus, startTransitionStatus] = useTransition();
   const [isPendingTexto, startTransitionTexto] = useTransition();
   const [isPendingExcluir, startTransitionExcluir] = useTransition();
+  const [, startTransitionValor] = useTransition();
   const [erroTexto, setErroTexto] = useState<string | null>(null);
   const [salvo, setSalvo] = useState(false);
+
+  function salvarValor() {
+    if (valorFinal === proposta.valorFinal) return;
+    startTransitionValor(() => {
+      atualizarValorPropostaAction(proposta.id, valorFinal);
+    });
+  }
 
   function excluir() {
     if (
@@ -111,7 +121,15 @@ export function PropostaEditor({ proposta }: { proposta: Proposta }) {
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-ink-muted">Valor</dt>
-            <dd className="mt-0.5 text-ink">{proposta.valorFinal}</dd>
+            <dd className="mt-0.5">
+              <input
+                value={valorFinal}
+                onChange={(e) => setValorFinal(e.target.value)}
+                onBlur={salvarValor}
+                className="w-full rounded border border-transparent px-1 py-0.5 text-sm text-ink hover:border-line focus:border-accent focus:outline-none"
+                title="Ajuste aqui se o investimento foi alterado no texto da proposta — este valor é o que aparece nas listas de propostas e no painel (não afeta o texto/PDF, nem o valor do contrato gerado a partir do plano do cliente)"
+              />
+            </dd>
           </div>
           <div>
             <dt className="text-xs uppercase tracking-wide text-ink-muted">Vigência</dt>
