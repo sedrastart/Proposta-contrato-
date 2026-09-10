@@ -247,55 +247,108 @@ export function PlanoCard({ plano }: { plano: Plano }) {
         </div>
       )}
 
-      <div className="mt-3 flex items-end gap-2 border-t border-dashed border-line pt-3">
-        <input
-          placeholder="unidade (ex.: lançamentos)"
-          value={novoLimite.unidade}
-          onChange={(e) => setNovoLimite({ ...novoLimite, unidade: e.target.value })}
-          className={`${inputClass} w-40`}
-          title="O que você quer limitar/cobrar por excedente (ex.: 'lançamentos', 'notas fiscais', 'colaboradores')"
-        />
-        <input
-          type="number"
-          placeholder="qtd/mês"
-          value={novoLimite.quantidade}
-          onChange={(e) => setNovoLimite({ ...novoLimite, quantidade: e.target.value })}
-          className={`${inputClass} w-24`}
-          title="Quantidade já incluída no valor mensal do plano — o que passar disso é cobrado à parte"
-        />
-        <select
-          value={novoLimite.tipoCobranca}
-          onChange={(e) =>
-            setNovoLimite({ ...novoLimite, tipoCobranca: e.target.value as "por_unidade" | "faixa" })
-          }
-          className={inputClass}
-          title="Como cobrar o que passar da quantidade incluída: valor fixo por unidade extra, ou faixas por % de excedente"
-        >
-          <option value="por_unidade">por unidade</option>
-          <option value="faixa">faixas (%)</option>
-        </select>
+      <div className="mt-4 rounded-lg border border-dashed border-line p-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
+          + Adicionar limite de uso
+        </p>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <label className="text-xs text-ink-muted">
+            O que limitar
+            <input
+              placeholder="ex.: lançamentos, notas fiscais"
+              value={novoLimite.unidade}
+              onChange={(e) => setNovoLimite({ ...novoLimite, unidade: e.target.value })}
+              className={`${inputClass} mt-0.5 w-full`}
+              title="Nome da unidade que será contada e cobrada por excedente (ex.: 'lançamentos', 'notas fiscais', 'colaboradores')"
+            />
+          </label>
+          <label className="text-xs text-ink-muted">
+            Quantidade incluída por mês
+            <input
+              type="number"
+              placeholder="ex.: 50"
+              value={novoLimite.quantidade}
+              onChange={(e) => setNovoLimite({ ...novoLimite, quantidade: e.target.value })}
+              className={`${inputClass} mt-0.5 w-full`}
+              title="Quantidade já incluída no valor mensal do plano — o que passar disso é cobrado à parte"
+            />
+          </label>
+        </div>
+
+        <p className="mt-3 text-xs text-ink-muted">Como cobrar o que passar disso?</p>
+        <div className="mt-1 inline-flex overflow-hidden rounded-md border border-line">
+          <button
+            type="button"
+            onClick={() => setNovoLimite({ ...novoLimite, tipoCobranca: "por_unidade" })}
+            className={`px-3 py-1.5 text-xs font-medium ${
+              novoLimite.tipoCobranca === "por_unidade"
+                ? "bg-accent text-white"
+                : "bg-white text-ink-muted hover:bg-neutral-50"
+            }`}
+            title="Cada unidade que exceder o incluído custa um valor fixo"
+          >
+            Valor fixo por unidade
+          </button>
+          <button
+            type="button"
+            onClick={() => setNovoLimite({ ...novoLimite, tipoCobranca: "faixa" })}
+            className={`border-l border-line px-3 py-1.5 text-xs font-medium ${
+              novoLimite.tipoCobranca === "faixa"
+                ? "bg-accent text-white"
+                : "bg-white text-ink-muted hover:bg-neutral-50"
+            }`}
+            title="O excedente é cobrado em degraus, conforme o % acima do incluído (ex.: até 33% = R$9,90, até 66% = R$19,90)"
+          >
+            Faixas por % de excedente
+          </button>
+        </div>
+
         {novoLimite.tipoCobranca === "por_unidade" && (
-          <input
-            type="number"
-            step="0.01"
-            placeholder="R$/unidade"
-            value={novoLimite.valorPorUnidade}
-            onChange={(e) => setNovoLimite({ ...novoLimite, valorPorUnidade: e.target.value })}
-            className={`${inputClass} w-28`}
-            title="Valor cobrado para cada unidade que passar da quantidade incluída"
-          />
+          <label className="mt-3 block text-xs text-ink-muted">
+            Valor por unidade excedente (R$)
+            <input
+              type="number"
+              step="0.01"
+              placeholder="ex.: 9,90"
+              value={novoLimite.valorPorUnidade}
+              onChange={(e) => setNovoLimite({ ...novoLimite, valorPorUnidade: e.target.value })}
+              className={`${inputClass} mt-0.5 w-40`}
+              title="Valor cobrado para cada unidade que passar da quantidade incluída"
+            />
+          </label>
         )}
+
+        {novoLimite.unidade.trim() && novoLimite.quantidade && (
+          <p className="mt-3 rounded-md bg-accent-soft px-3 py-2 text-xs text-ink">
+            {resumoNovoLimite(novoLimite)}
+          </p>
+        )}
+
         <button
           type="button"
           onClick={adicionarLimite}
-          className="rounded-md border border-line px-3 py-1 text-sm text-ink hover:bg-neutral-50"
+          className="mt-3 rounded-md border border-line px-3 py-1.5 text-sm text-ink hover:bg-neutral-50"
           title="Adiciona este limite de uso ao plano"
         >
-          + limite
+          + Adicionar limite
         </button>
       </div>
     </div>
   );
+}
+
+function resumoNovoLimite(novoLimite: {
+  unidade: string;
+  quantidade: string;
+  tipoCobranca: "por_unidade" | "faixa";
+  valorPorUnidade: string;
+}): string {
+  const base = `Inclui até ${novoLimite.quantidade} ${novoLimite.unidade}/mês no plano.`;
+  if (novoLimite.tipoCobranca === "por_unidade") {
+    const valor = novoLimite.valorPorUnidade || "0,00";
+    return `${base} Cada unidade de ${novoLimite.unidade} acima disso custa R$ ${valor}.`;
+  }
+  return `${base} O que passar disso é cobrado em faixas por % de excedente — defina as faixas depois de adicionar.`;
 }
 
 function LimiteRow({ limite }: { limite: Limite }) {
@@ -330,38 +383,47 @@ function LimiteRow({ limite }: { limite: Limite }) {
     });
   }
 
+  const resumo =
+    limite.tipoCobranca === "por_unidade"
+      ? `Inclui ${quantidade} ${limite.unidade}/mês. Acima disso, R$ ${valorPorUnidade.toFixed(2).replace(".", ",")} por unidade excedente.`
+      : `Inclui ${quantidade} ${limite.unidade}/mês. O excedente é cobrado em faixas por % acima do incluído.`;
+
   return (
     <div className="rounded-md bg-neutral-50 p-3">
-      <div className="flex items-center gap-2">
-        <input
-          type="number"
-          value={quantidade}
-          onChange={(e) => setQuantidade(Number(e.target.value))}
-          onBlur={salvar}
-          className={`${inputClass} w-20`}
-          title="Quantidade incluída no plano por mês"
-        />
-        <span className="text-sm text-ink-muted">{limite.unidade}/mês —</span>
+      <p className="text-xs text-ink-muted">{resumo}</p>
+      <div className="mt-2 flex items-end gap-2">
+        <label className="text-xs text-ink-muted">
+          Incluído/mês
+          <input
+            type="number"
+            value={quantidade}
+            onChange={(e) => setQuantidade(Number(e.target.value))}
+            onBlur={salvar}
+            className={`${inputClass} mt-0.5 w-20`}
+            title="Quantidade incluída no plano por mês"
+          />
+        </label>
+        <span className="pb-1.5 text-sm text-ink-muted">{limite.unidade}</span>
         {limite.tipoCobranca === "por_unidade" ? (
-          <>
+          <label className="text-xs text-ink-muted">
+            R$ por excedente
             <input
               type="number"
               step="0.01"
               value={valorPorUnidade}
               onChange={(e) => setValorPorUnidade(Number(e.target.value))}
               onBlur={salvar}
-              className={`${inputClass} w-24`}
+              className={`${inputClass} mt-0.5 w-24`}
               title="Valor cobrado para cada unidade que passar da quantidade incluída"
             />
-            <span className="text-sm text-ink-muted">por unidade excedente</span>
-          </>
+          </label>
         ) : (
-          <span className="text-sm text-ink-muted">faixas por % de excedente</span>
+          <span className="pb-1.5 text-sm text-ink-muted">faixas por % de excedente</span>
         )}
         <button
           type="button"
           onClick={remover}
-          className="ml-auto text-xs text-red-600 hover:underline"
+          className="ml-auto pb-1.5 text-xs text-red-600 hover:underline"
           title="Remove este limite de uso do plano"
         >
           remover limite
@@ -373,24 +435,30 @@ function LimiteRow({ limite }: { limite: Limite }) {
           {limite.faixas.map((faixa) => (
             <FaixaRow key={faixa.id} faixa={faixa} />
           ))}
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              placeholder="até % de excedente"
-              value={novaFaixa.percentualAte}
-              onChange={(e) => setNovaFaixa({ ...novaFaixa, percentualAte: e.target.value })}
-              className={`${inputClass} w-32`}
-              title="Até quantos % de excedente essa faixa vale (ex.: 33 = até 33% acima da quantidade incluída)"
-            />
-            <input
-              type="number"
-              step="0.01"
-              placeholder="valor R$"
-              value={novaFaixa.valorAdicional}
-              onChange={(e) => setNovaFaixa({ ...novaFaixa, valorAdicional: e.target.value })}
-              className={`${inputClass} w-24`}
-              title="Valor extra cobrado quando o excedente cai dentro dessa faixa"
-            />
+          <div className="flex items-end gap-2">
+            <label className="text-xs text-ink-muted">
+              Até % de excedente
+              <input
+                type="number"
+                placeholder="ex.: 33"
+                value={novaFaixa.percentualAte}
+                onChange={(e) => setNovaFaixa({ ...novaFaixa, percentualAte: e.target.value })}
+                className={`${inputClass} mt-0.5 w-32`}
+                title="Até quantos % de excedente essa faixa vale (ex.: 33 = até 33% acima da quantidade incluída)"
+              />
+            </label>
+            <label className="text-xs text-ink-muted">
+              Valor da faixa (R$)
+              <input
+                type="number"
+                step="0.01"
+                placeholder="ex.: 9,90"
+                value={novaFaixa.valorAdicional}
+                onChange={(e) => setNovaFaixa({ ...novaFaixa, valorAdicional: e.target.value })}
+                className={`${inputClass} mt-0.5 w-24`}
+                title="Valor extra cobrado quando o excedente cai dentro dessa faixa"
+              />
+            </label>
             <button
               type="button"
               onClick={adicionarFaixa}
@@ -425,7 +493,7 @@ function FaixaRow({ faixa }: { faixa: Faixa }) {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs text-ink-muted">até</span>
+      <span className="text-xs text-ink-muted">Até</span>
       <input
         type="number"
         value={percentualAte}
@@ -434,7 +502,7 @@ function FaixaRow({ faixa }: { faixa: Faixa }) {
         className={`${inputClass} w-20`}
         title="Até quantos % de excedente essa faixa vale"
       />
-      <span className="text-xs text-ink-muted">% =</span>
+      <span className="text-xs text-ink-muted">% de excedente → R$</span>
       <input
         type="number"
         step="0.01"
@@ -444,10 +512,11 @@ function FaixaRow({ faixa }: { faixa: Faixa }) {
         className={`${inputClass} w-24`}
         title="Valor extra cobrado quando o excedente cai dentro dessa faixa"
       />
+      <span className="text-xs text-ink-muted">extra</span>
       <button
         type="button"
         onClick={remover}
-        className="text-xs text-red-600 hover:underline"
+        className="ml-auto text-xs text-red-600 hover:underline"
         title="Remove esta faixa"
       >
         remover
