@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { currency } from "@/lib/format";
 import {
   atualizarPlanoAction,
   alternarAtivoPlanoAction,
@@ -50,6 +51,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
     parcelas: plano.parcelas,
   });
   const [isPending, startTransition] = useTransition();
+  const [expandido, setExpandido] = useState(false);
   const [erroExcluir, setErroExcluir] = useState<string | null>(null);
   const [novoLimite, setNovoLimite] = useState({
     unidade: "",
@@ -107,11 +109,23 @@ export function PlanoCard({ plano }: { plano: Plano }) {
 
   return (
     <div className="rounded-lg border border-line p-4">
-      <div className="flex items-center justify-between">
-        <p className="text-xs uppercase tracking-wide text-ink-muted">
-          {plano.servico.nome} · {plano.regimeTributario?.nome ?? "qualquer regime do serviço"}
-        </p>
-        <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => setExpandido((v) => !v)}
+        className="flex w-full items-center justify-between gap-3 text-left"
+        title={expandido ? "Recolher plano" : "Expandir para editar este plano"}
+      >
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-ink">{plano.nome}</p>
+          <p className="text-xs text-ink-muted">
+            {plano.servico.nome} · {plano.regimeTributario?.nome ?? "qualquer regime do serviço"}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="tabular-nums text-sm text-ink">{currency.format(plano.valor)}/mês</span>
+          <span className="hidden text-xs text-ink-muted sm:inline">
+            {plano.vigenciaMeses > 0 ? `${plano.vigenciaMeses} meses` : "sem vigência fixa"}
+          </span>
           <span
             className={`rounded-full px-2 py-0.5 text-xs font-medium ${
               plano.ativo ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-ink-muted"
@@ -119,26 +133,32 @@ export function PlanoCard({ plano }: { plano: Plano }) {
           >
             {plano.ativo ? "ativo" : "inativo"}
           </span>
-          <button
-            type="button"
-            onClick={alternarAtivo}
-            disabled={isPending}
-            className="text-sm text-ink-muted hover:underline disabled:opacity-50"
-          >
-            {plano.ativo ? "desativar" : "ativar"}
-          </button>
-          <button
-            type="button"
-            onClick={excluir}
-            disabled={isPending}
-            className="text-sm text-red-600 hover:underline disabled:opacity-50"
-            title="Apaga este plano definitivamente"
-          >
-            excluir
-          </button>
+          <span className="text-ink-muted">{expandido ? "▲" : "▼"}</span>
         </div>
-      </div>
-      {erroExcluir && <p className="mt-1 text-xs text-red-600">{erroExcluir}</p>}
+      </button>
+
+      {expandido && (
+        <>
+          <div className="mt-3 flex items-center justify-end gap-3 border-t border-dashed border-line pt-3">
+            <button
+              type="button"
+              onClick={alternarAtivo}
+              disabled={isPending}
+              className="text-sm text-ink-muted hover:underline disabled:opacity-50"
+            >
+              {plano.ativo ? "desativar" : "ativar"}
+            </button>
+            <button
+              type="button"
+              onClick={excluir}
+              disabled={isPending}
+              className="text-sm text-red-600 hover:underline disabled:opacity-50"
+              title="Apaga este plano definitivamente"
+            >
+              excluir
+            </button>
+          </div>
+          {erroExcluir && <p className="mt-1 text-xs text-red-600">{erroExcluir}</p>}
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <input
@@ -333,6 +353,8 @@ export function PlanoCard({ plano }: { plano: Plano }) {
           + Adicionar limite
         </button>
       </div>
+        </>
+      )}
     </div>
   );
 }
