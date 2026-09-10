@@ -81,6 +81,7 @@ export async function atualizarRegimeAction(
   id: string,
   data: { nome?: string; ordem?: number }
 ) {
+  if (data.nome !== undefined && data.nome.trim().length < 2) return;
   await prisma.regimeTributario.update({ where: { id }, data });
   revalidatePath("/admin/regimes");
 }
