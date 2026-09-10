@@ -27,7 +27,7 @@ export default async function PreviaPage({
     prisma.proposta.findMany({
       where: { clienteId: id },
       orderBy: { numeroSequencial: "desc" },
-      select: { id: true, numeroSequencial: true, status: true },
+      select: { id: true, numeroSequencial: true, status: true, valorFinal: true },
     }),
   ]);
   if (!cliente) notFound();

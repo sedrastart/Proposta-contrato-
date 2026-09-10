@@ -11,7 +11,7 @@ const inputClass =
   "w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-accent focus:ring-1 focus:ring-accent";
 const labelClass = "mb-1 block text-xs font-medium uppercase tracking-wide text-ink-muted";
 
-type PropostaResumo = { id: string; numeroSequencial: number; status: string };
+type PropostaResumo = { id: string; numeroSequencial: number; status: string; valorFinal: string };
 
 export function PreviaEditor({
   clienteId,
@@ -35,7 +35,7 @@ export function PreviaEditor({
     contratanteNome: dadosIniciais.contratanteNome,
     contratanteCpfCnpj: dadosIniciais.contratanteCpfCnpj,
     contratanteEndereco: dadosIniciais.contratanteEndereco,
-    valor: dadosIniciais.valor,
+    valor: propostaOrigem?.valorFinal ?? dadosIniciais.valor,
     vigenciaMeses: dadosIniciais.vigenciaMeses,
     multaDescricao: dadosIniciais.multaDescricao,
     condicaoPagamento: dadosIniciais.condicaoPagamento,
