@@ -190,6 +190,8 @@ function paginaCompleta(corpo: string, tipo: TipoDocumento): string {
   h2 {
     font-size: 12pt;
     margin: 16pt 0 6pt;
+    page-break-after: avoid;
+    break-after: avoid-page;
   }
   p { margin: 0 0 6pt; }
   p.rotulo { font-weight: bold; margin-top: 10pt; }
@@ -197,6 +199,14 @@ function paginaCompleta(corpo: string, tipo: TipoDocumento): string {
   ul { margin: 0 0 8pt; padding-left: 20pt; }
   li { margin-bottom: 3pt; }
   .linha-vazia { height: 6pt; }
+  /* Sem isso, um parágrafo/item que cai bem na quebra de página pode ter
+     a última linha cortada pelo Chrome ao gerar o PDF (o texto some, não
+     migra pra próxima página) — força o bloco inteiro pra próxima página
+     quando não cabe inteiro na atual. */
+  p, li {
+    page-break-inside: avoid;
+    break-inside: avoid-page;
+  }
 </style>
 </head>
 <body>

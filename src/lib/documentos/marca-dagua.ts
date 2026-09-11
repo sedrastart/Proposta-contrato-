@@ -167,7 +167,7 @@ export async function carimbarPaginas(
     // clicáveis (abrem o app de e-mail / o site direto no PDF).
     const xTexto = 20 * MM + 6;
     linhasRodape.forEach(({ texto, url }, i) => {
-      const y = 16 * MM - i * 5 * MM;
+      const y = 24 * MM - i * 5 * MM;
       pagina.drawCircle({
         x: 20 * MM + 1.5,
         y: y + 3,
@@ -294,7 +294,7 @@ export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer
     // clicáveis (abrem o app de e-mail / o site direto no PDF).
     const xTexto = 20 * MM + 6;
     linhasRodape.forEach(({ texto, url }, i) => {
-      const y = 16 * MM - i * 5 * MM;
+      const y = 24 * MM - i * 5 * MM;
       pagina.drawCircle({
         x: 20 * MM + 1.5,
         y: y + 3,
