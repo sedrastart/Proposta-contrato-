@@ -1,8 +1,9 @@
-import { PDFDocument, PDFName, PDFString, PDFPage, PDFFont, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFName, PDFString, PDFPage, rgb, StandardFonts } from "pdf-lib";
 import {
   LOGO_SEDRA_PNG_BASE64,
   MARCA_DAGUA_PNG_BASE64,
   LOGO_OFICIAL_PRATA_PNG_BASE64,
+  SEDRA_WORDMARK_PNG_BASE64,
 } from "./marca-assets";
 import { CONTRATADO } from "../templates/contratado";
 import type { TipoDocumento } from "./pdf";
@@ -61,35 +62,6 @@ function desenharRetanguloGradiente(
       pagina.drawRectangle({ x, y: y + i * alturaFaixa, width, height: alturaFaixa + 0.5, color: cor });
     }
   }
-}
-
-// pdf-lib desenha texto sem letter-spacing — aproxima o efeito desenhando
-// letra por letra e avançando o cursor manualmente. Usado pra reproduzir o
-// "SEDRA" com letter-spacing da capa (página 1) nas demais páginas.
-function desenharTextoComEspacamento(
-  pagina: PDFPage,
-  texto: string,
-  opcoes: {
-    x: number;
-    y: number;
-    size: number;
-    font: PDFFont;
-    color: ReturnType<typeof rgb>;
-    espacamento: number;
-  }
-): number {
-  let cursorX = opcoes.x;
-  for (const letra of texto) {
-    pagina.drawText(letra, {
-      x: cursorX,
-      y: opcoes.y,
-      size: opcoes.size,
-      font: opcoes.font,
-      color: opcoes.color,
-    });
-    cursorX += opcoes.font.widthOfTextAtSize(letra, opcoes.size) + opcoes.espacamento;
-  }
-  return cursorX - opcoes.x - opcoes.espacamento;
 }
 
 // pdf-lib não tem um helper de alto nível para links clicáveis — a anotação
@@ -230,12 +202,14 @@ export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer
   const logoImage = await pdfDoc.embedPng(
     Buffer.from(LOGO_OFICIAL_PRATA_PNG_BASE64, "base64")
   );
+  const wordmarkImage = await pdfDoc.embedPng(
+    Buffer.from(SEDRA_WORDMARK_PNG_BASE64, "base64")
+  );
   const marcaDaguaImage = await pdfDoc.embedPng(
     Buffer.from(MARCA_DAGUA_PNG_BASE64, "base64")
   );
   const fonte = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fonteNegrito = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const fonteMarca = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
   const paginas = pdfDoc.getPages();
   const total = paginas.length;
@@ -275,31 +249,26 @@ export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer
       direcao: "vertical",
     });
 
-    // Selo + "SEDRA" — mesmo ícone prata e a mesma composição da capa
-    // (página 1), com o texto desenhado à parte (a fonte Georgia da capa
-    // não está disponível aqui; Times-Bold é a serifada mais próxima do
-    // conjunto padrão do pdf-lib).
-    const tamanhoTextoMarca = 12;
-    const espacamentoMarca = 1.5;
-    const larguraTextoMarca =
-      fonteMarca.widthOfTextAtSize("SEDRA", tamanhoTextoMarca) + espacamentoMarca * 4;
+    // Selo + "SEDRA" — mesmo ícone prata e o mesmo wordmark (recorte em
+    // PNG renderizado em Georgia bold, a mesma fonte da capa) usados na
+    // página 1, já que o pdf-lib não tem a Georgia entre as fontes padrão.
     const iconeLargura = 11 * MM;
     const iconeAltura = iconeLargura * (logoImage.height / logoImage.width);
     const gapMarca = 3 * MM;
-    const xIcone = width - 14 * MM - larguraTextoMarca - gapMarca - iconeLargura;
+    const alturaWordmark = 14.25; // pt — altura real do "SEDRA" em Georgia 12pt na capa
+    const larguraWordmark = alturaWordmark * (wordmarkImage.width / wordmarkImage.height);
+    const xIcone = width - 14 * MM - larguraWordmark - gapMarca - iconeLargura;
     pagina.drawImage(logoImage, {
       x: xIcone,
       y: height - alturaFaixa / 2 - iconeAltura / 2,
       width: iconeLargura,
       height: iconeAltura,
     });
-    desenharTextoComEspacamento(pagina, "SEDRA", {
+    pagina.drawImage(wordmarkImage, {
       x: xIcone + iconeLargura + gapMarca,
-      y: height - alturaFaixa / 2 - tamanhoTextoMarca * 0.36,
-      size: tamanhoTextoMarca,
-      font: fonteMarca,
-      color: rgb(1, 1, 1),
-      espacamento: espacamentoMarca,
+      y: height - alturaFaixa / 2 - alturaWordmark / 2,
+      width: larguraWordmark,
+      height: alturaWordmark,
     });
 
     // Marca d'água — canto inferior direito, atrás do texto.
