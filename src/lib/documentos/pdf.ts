@@ -2,7 +2,12 @@ import puppeteer from "puppeteer-core";
 import { PDFDocument } from "pdf-lib";
 import { classificarLinha } from "./linhas";
 import { carimbarPaginas, carimbarPaginasProposta } from "./marca-dagua";
-import { montarHtmlCapaProposta, type DadosCapaProposta } from "./capa-proposta";
+import {
+  montarHtmlCapaProposta,
+  formatarData,
+  formatarValidade,
+  type DadosCapaProposta,
+} from "./capa-proposta";
 
 export type { DadosCapaProposta } from "./capa-proposta";
 
@@ -200,20 +205,37 @@ ${corpo}
 </html>`;
 }
 
-/** Junta a capa+abertura (2 páginas, sem carimbo) com as páginas de
- * conteúdo já carimbadas, num único PDF. */
-async function juntarPdfs(capaBuffer: Buffer, conteudoBuffer: Buffer): Promise<Buffer> {
+/** Junta múltiplos PDFs (na ordem passada) num único documento. */
+async function juntarPdfs(...buffers: Buffer[]): Promise<Buffer> {
   const final = await PDFDocument.create();
-  const capaDoc = await PDFDocument.load(capaBuffer);
-  const conteudoDoc = await PDFDocument.load(conteudoBuffer);
-
-  const paginasCapa = await final.copyPages(capaDoc, capaDoc.getPageIndices());
-  paginasCapa.forEach((p) => final.addPage(p));
-
-  const paginasConteudo = await final.copyPages(conteudoDoc, conteudoDoc.getPageIndices());
-  paginasConteudo.forEach((p) => final.addPage(p));
-
+  for (const buffer of buffers) {
+    const doc = await PDFDocument.load(buffer);
+    const paginas = await final.copyPages(doc, doc.getPageIndices());
+    paginas.forEach((p) => final.addPage(p));
+  }
   return Buffer.from(await final.save());
+}
+
+/** Corpo da página "Em favor de" — reaproveita as mesmas classes de
+ * `paginaCompleta` (h1, p.rotulo, .linha-vazia) para ficar com o layout
+ * idêntico ao das páginas de conteúdo da proposta, em vez de um desenho
+ * próprio; só o carimbo (faixa/rail/numeração) é que muda por página. */
+function montarCorpoAbertura(dados: DadosCapaProposta): string {
+  const clienteNome = escapeHtml(dados.clienteNome);
+  const dataFormatada = formatarData(dados.dataEmissao);
+  const validadeFormatada = formatarValidade(dados.dataEmissao);
+
+  return `<h1>Em favor de</h1>
+<p class="rotulo">Cliente</p>
+<p>${clienteNome}</p>
+<p class="rotulo">Data da proposta</p>
+<p>${dataFormatada}</p>
+<p class="rotulo">Validade da proposta</p>
+<p>${validadeFormatada}</p>
+<div class="linha-vazia"></div>
+<div class="linha-vazia"></div>
+<p class="rotulo">Quem somos</p>
+<p>Cuidamos da parte contábil e fiscal do seu negócio com atenção e proximidade, para que você possa focar no que só você pode fazer: fazer sua empresa crescer.</p>`;
 }
 
 async function gerarPdfPropostaComCapa(
@@ -222,10 +244,15 @@ async function gerarPdfPropostaComCapa(
 ): Promise<Buffer> {
   const browser = await lancarBrowser();
   let capaBuffer: Buffer;
+  let aberturaBuffer: Buffer;
   let conteudoBrutoPdf: Buffer;
   try {
     // Sequencial, não em paralelo — um só Chromium por vez.
     capaBuffer = await renderizarPaginaComBrowser(browser, montarHtmlCapaProposta(dadosCapa));
+    aberturaBuffer = await renderizarPaginaComBrowser(
+      browser,
+      paginaCompleta(montarCorpoAbertura(dadosCapa), "proposta")
+    );
     conteudoBrutoPdf = await renderizarPaginaComBrowser(
       browser,
       paginaCompleta(textoParaHtml(textoCompleto, true), "proposta")
@@ -233,7 +260,10 @@ async function gerarPdfPropostaComCapa(
   } finally {
     await browser.close();
   }
-  const conteudoCarimbado = await carimbarPaginasProposta(conteudoBrutoPdf);
+  // Abertura + conteúdo são carimbados juntos (mesmo layout/degradê/
+  // numeração de página); só a capa (página 1) fica fora do carimbo.
+  const aberturaMaisConteudo = await juntarPdfs(aberturaBuffer, conteudoBrutoPdf);
+  const conteudoCarimbado = await carimbarPaginasProposta(aberturaMaisConteudo);
   return juntarPdfs(capaBuffer, conteudoCarimbado);
 }
 

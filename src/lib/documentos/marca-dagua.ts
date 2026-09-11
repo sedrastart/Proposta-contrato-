@@ -18,6 +18,51 @@ const ACCENT_RGB: Record<TipoDocumento, ReturnType<typeof rgb>> = {
   proposta: rgb(0.2118, 0.5529, 0.8000),
 };
 
+// Mesmo par de cores do degradê da capa da proposta (ACCENT → NAVY em
+// capa-proposta.ts) — repetido aqui pra faixa/rail das páginas de conteúdo
+// (e da "Em favor de", que agora usa o mesmo layout) terem a cor da capa
+// em vez de um azul sólido só.
+const GRADIENTE_PROPOSTA: {
+  inicio: [number, number, number];
+  fim: [number, number, number];
+} = {
+  inicio: [0.2118, 0.5529, 0.8000], // #368DCC
+  fim: [0.0627, 0.1882, 0.3647], // #10305D
+};
+
+// pdf-lib não tem preenchimento em degradê nativo — aproxima desenhando
+// várias faixas finas com a cor interpolada entre início e fim.
+function desenharRetanguloGradiente(
+  pagina: PDFPage,
+  opcoes: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    inicio: [number, number, number];
+    fim: [number, number, number];
+    direcao: "horizontal" | "vertical";
+  }
+) {
+  const { x, y, width, height, inicio, fim, direcao } = opcoes;
+  const faixas = 60;
+  for (let i = 0; i < faixas; i++) {
+    const t = i / (faixas - 1);
+    const cor = rgb(
+      inicio[0] + (fim[0] - inicio[0]) * t,
+      inicio[1] + (fim[1] - inicio[1]) * t,
+      inicio[2] + (fim[2] - inicio[2]) * t
+    );
+    if (direcao === "horizontal") {
+      const larguraFaixa = width / faixas;
+      pagina.drawRectangle({ x: x + i * larguraFaixa, y, width: larguraFaixa + 0.5, height, color: cor });
+    } else {
+      const alturaFaixa = height / faixas;
+      pagina.drawRectangle({ x, y: y + i * alturaFaixa, width, height: alturaFaixa + 0.5, color: cor });
+    }
+  }
+}
+
 // pdf-lib não tem um helper de alto nível para links clicáveis — a anotação
 // precisa ser montada manualmente (padrão documentado pela comunidade do
 // pdf-lib para adicionar anotações "Link" com ação URI).
@@ -176,12 +221,29 @@ export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer
   paginas.forEach((pagina, indice) => {
     const { width, height } = pagina.getSize();
 
-    // Faixa grossa no topo — mesma função da capa/abertura, agora
-    // repetida nas páginas de conteúdo pra manter a identidade da proposta.
-    pagina.drawRectangle({ x: 0, y: height - alturaFaixa, width, height: alturaFaixa, color: accent });
+    // Faixa grossa no topo — mesmo degradê da capa, agora repetida nas
+    // páginas de conteúdo (e na "Em favor de") pra manter a identidade
+    // visual da proposta em todas as páginas.
+    desenharRetanguloGradiente(pagina, {
+      x: 0,
+      y: height - alturaFaixa,
+      width,
+      height: alturaFaixa,
+      inicio: GRADIENTE_PROPOSTA.inicio,
+      fim: GRADIENTE_PROPOSTA.fim,
+      direcao: "horizontal",
+    });
 
     // Barra de destaque na lateral esquerda, full-height.
-    pagina.drawRectangle({ x: 0, y: 0, width: larguraRail, height, color: accent });
+    desenharRetanguloGradiente(pagina, {
+      x: 0,
+      y: 0,
+      width: larguraRail,
+      height,
+      inicio: GRADIENTE_PROPOSTA.inicio,
+      fim: GRADIENTE_PROPOSTA.fim,
+      direcao: "vertical",
+    });
 
     // Logo (selo + "SEDRA") — dentro da faixa, canto superior direito.
     const larguraLogo = 34 * MM;
