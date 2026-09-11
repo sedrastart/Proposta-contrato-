@@ -5,8 +5,8 @@ const ABAS = [
   { href: "/admin/regimes", label: "Regimes" },
   { href: "/admin/servicos", label: "Serviços" },
   { href: "/admin/planos", label: "Planos" },
-  { href: "/admin/contratos", label: "Contratos" },
   { href: "/admin/propostas", label: "Propostas" },
+  { href: "/admin/contratos", label: "Contratos" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
