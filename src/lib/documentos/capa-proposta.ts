@@ -1,4 +1,4 @@
-import { LOGO_OFICIAL_PRATA_PNG_BASE64 } from "./marca-assets";
+import { LOGO_OFICIAL_PRATA_PNG_BASE64, SEDRA_WORDMARK_PNG_BASE64 } from "./marca-assets";
 
 export type DadosCapaProposta = {
   clienteNome: string;
@@ -31,6 +31,7 @@ function formatarNumero(numeroSequencial: number): string {
 // faixa/rail de cor e numeração de página.
 export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
   const marcaPrata = `data:image/png;base64,${LOGO_OFICIAL_PRATA_PNG_BASE64}`;
+  const wordmark = `data:image/png;base64,${SEDRA_WORDMARK_PNG_BASE64}`;
   const clienteNome = dados.clienteNome
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -78,14 +79,8 @@ export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
     gap: 3mm;
     z-index: 2;
   }
-  .capa-marca-top img { width: 11mm; border-radius: 2mm; }
-  .capa-marca-top span {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 12pt;
-    font-weight: 700;
-    letter-spacing: 1.5pt;
-    color: white;
-  }
+  .capa-marca-top img.icone { width: 11mm; border-radius: 2mm; }
+  .capa-marca-top img.wordmark { height: 5mm; }
   .capa-titulo {
     position: absolute;
     left: 20mm; top: 122mm;
@@ -124,8 +119,8 @@ export function montarHtmlCapaProposta(dados: DadosCapaProposta): string {
     <div class="capa-banda"></div>
     <div class="capa-banda-linha"></div>
     <div class="capa-marca-top">
-      <img src="${marcaPrata}" alt="">
-      <span>SEDRA</span>
+      <img class="icone" src="${marcaPrata}" alt="">
+      <img class="wordmark" src="${wordmark}" alt="SEDRA">
     </div>
     <div class="capa-titulo">
       <div class="linha1">Proposta</div>
