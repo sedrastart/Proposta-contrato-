@@ -22,26 +22,21 @@ function slugify(nome: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-const MODELO_PROPOSTA_PADRAO = `PROPOSTA DE PRESTAÇÃO DE SERVIÇOS
-Cliente: {{contratanteNome}}
-CNPJ: {{contratanteCpfCnpj}}
+const MODELO_PROPOSTA_PADRAO = `PROPOSTA COMERCIAL
 
-[Descreva aqui a situação do cliente, se houver diagnóstico ou pendências identificadas. Apague esta linha se não se aplicar.]
+Olá! Somos a Sedra Consultoria e preparamos esta proposta para {{contratanteNome}}.
 
-OPÇÃO 1 – {{servicosSelecionados}}
-Investimento: {{valor}}
-Inclui:
+Cuidamos da parte contábil e fiscal do seu negócio com atenção e agilidade, para você não perder tempo com burocracia e focar no que importa: fazer sua empresa crescer.
+
+O que está incluído:
 {{servicosLista}}
 
-[Se aplicável, adicione aqui uma OPÇÃO 2 com outro escopo/valor.]
+Investimento: {{valor}} por mês, pagamento {{condicaoPagamento}}.
+Vigência: {{vigenciaTexto}}.
 
-Observações:
-1. Esta proposta considera as informações apresentadas até a presente data.
-2. Caso sejam identificadas novas pendências não relacionadas ao escopo acima, poderá ser apresentado orçamento complementar.
+Esta proposta é válida por 15 dias a partir da data de emissão.
 
-Atenção!
-As condições desta proposta são válidas por 15 dias a partir da emissão.
-
+Ficou com alguma dúvida? Fale com a gente:
 {{telefoneContratado}}
 {{emailContratado}}
 {{siteContratado}}`;
