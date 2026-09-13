@@ -17,7 +17,22 @@ export const DADOS_EXEMPLO_GERAL: DadosContrato = {
   dataEmissaoExtenso: "1 de agosto de 2026",
   cidadeEmissao: "São Paulo",
   servicosSelecionados: ["Contabilidade", "Departamento Pessoal"],
-  limitesUso: [],
+  limitesUso: [
+    {
+      unidade: "lançamentos",
+      quantidade: 100,
+      tipoCobranca: "por_unidade",
+      valorPorUnidade: "R$ 2,00",
+      faixas: [],
+    },
+    {
+      unidade: "colaboradores",
+      quantidade: 5,
+      tipoCobranca: "por_unidade",
+      valorPorUnidade: "R$ 29,90",
+      faixas: [],
+    },
+  ],
 };
 
 export const DADOS_EXEMPLO_MEI: DadosContrato = {

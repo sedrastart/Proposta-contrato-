@@ -14,6 +14,7 @@ export function construirContextoGeral(dados: DadosContrato): Record<string, str
     vigenciaTexto: vigenciaExtenso(dados.vigenciaMeses),
     multaDescricao: dados.multaDescricao,
     condicaoPagamento: dados.condicaoPagamento,
+    limitesUsoLista: limitesUsoLista(dados),
   };
 }
 
@@ -62,6 +63,24 @@ function limiteNotasFiscais(dados: DadosContrato) {
     quantidade: limite?.quantidade ?? 3,
     valorAdicional: limite?.valorPorUnidade ?? "R$ 5,00",
   };
+}
+
+// Usada pelos regimes fora do MEI (que não têm placeholders individuais por
+// unidade) — lista, num só bloco, a franquia de TODOS os serviços contratados
+// que tiverem limite configurado no plano (ex.: lançamentos da Contabilidade,
+// colaboradores do Departamento Pessoal, notas fiscais da Escrita Fiscal).
+function limitesUsoLista(dados: DadosContrato): string {
+  if (dados.limitesUso.length === 0) {
+    return "Os serviços contratados não possuem franquia de uso limitada por volume.";
+  }
+  return dados.limitesUso
+    .map((l) => {
+      if (l.tipoCobranca === "faixa" && l.faixas.length > 0) {
+        return `● ${l.unidade}: ${l.quantidade} incluído(s) por mês; excedente cobrado por faixa:\n${renderFaixasExcedente(l.faixas)}`;
+      }
+      return `● ${l.unidade}: ${l.quantidade} incluído(s) por mês; excedente de ${l.valorPorUnidade ?? "valor a combinar"} por unidade.`;
+    })
+    .join("\n");
 }
 
 function limiteLancamentos(dados: DadosContrato) {

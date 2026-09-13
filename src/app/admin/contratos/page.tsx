@@ -10,6 +10,7 @@ const PLACEHOLDERS_GERAL = [
   "{{multaDescricao}}",
   "{{condicaoPagamento}}",
   "{{servicosSelecionados}}",
+  "{{limitesUsoLista}}",
 ];
 
 const PLACEHOLDERS_POR_SLUG: Record<string, string[]> = {

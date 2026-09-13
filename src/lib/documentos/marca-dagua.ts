@@ -1,4 +1,4 @@
-import { PDFDocument, PDFName, PDFString, PDFPage, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, PDFName, PDFString, PDFPage, PDFImage, rgb, StandardFonts } from "pdf-lib";
 import {
   LOGO_SEDRA_PNG_BASE64,
   MARCA_DAGUA_PNG_BASE64,
@@ -94,6 +94,42 @@ function adicionarLinkClicavel(
   }
 }
 
+// A marca d'água (a silhueta da montanha) precisa ficar ATRÁS do texto, não
+// por cima cortando letras. Só que o pdf-lib sempre desenha por cima do que
+// já existe numa página — não tem como "inserir atrás" com um drawImage()
+// comum. A saída é reincorporar cada página original (já com o texto
+// renderizado pelo Chrome) como um objeto gráfico (`embedPage`) e desenhá-la
+// por cima de uma página nova onde a marca d'água foi pintada primeiro:
+// como o Chrome não pinta fundo branco (a página HTML não define
+// background-color), a página original é transparente em toda área sem
+// texto, e a marca aparece por baixo naturalmente, sem cobrir nem cortar
+// nenhuma letra.
+async function colocarMarcaDaguaAtras(
+  pdfDoc: PDFDocument,
+  marcaDaguaImage: PDFImage
+): Promise<void> {
+  const larguraMarca = 110 * MM;
+  const alturaMarca = larguraMarca * (marcaDaguaImage.height / marcaDaguaImage.width);
+
+  const paginasOriginais = pdfDoc.getPages();
+  for (const original of paginasOriginais) {
+    const { width, height } = original.getSize();
+    const paginaEmbutida = await pdfDoc.embedPage(original);
+    const indiceAtual = pdfDoc.getPages().indexOf(original);
+    const novaPagina = pdfDoc.insertPage(indiceAtual, [width, height]);
+
+    novaPagina.drawImage(marcaDaguaImage, {
+      x: width - larguraMarca,
+      y: 0,
+      width: larguraMarca,
+      height: alturaMarca,
+    });
+    novaPagina.drawPage(paginaEmbutida, { x: 0, y: 0, width, height });
+
+    pdfDoc.removePage(indiceAtual + 1);
+  }
+}
+
 // Aplica o mesmo modelo visual da Sedra (logo, marca d'água, numeração de
 // página e rodapé de contato) em todas as páginas de um PDF já gerado —
 // tanto para Contrato quanto para Proposta, garantindo visual consistente.
@@ -110,6 +146,14 @@ export async function carimbarPaginas(
   );
   const fonte = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fonteNegrito = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  // pdf-lib só sabe desenhar POR CIMA do que já existe na página — um
+  // drawImage() chamado depois que o Chrome já "assou" o texto na página
+  // sempre fica na frente, nunca atrás. Pra marca d'água ficar de fato atrás
+  // do texto (sem cortar letras), cada página original é reincorporada como
+  // um objeto (`embedPage`) desenhado por cima de uma página nova em que a
+  // marca d'água já foi pintada antes.
+  await colocarMarcaDaguaAtras(pdfDoc, marcaDaguaImage);
 
   const paginas = pdfDoc.getPages();
   const total = paginas.length;
@@ -132,16 +176,6 @@ export async function carimbarPaginas(
       width,
       height: 3,
       color: accent,
-    });
-
-    // Marca d'água — canto inferior direito, atrás do texto.
-    const larguraMarca = 110 * MM;
-    const alturaMarca = larguraMarca * (marcaDaguaImage.height / marcaDaguaImage.width);
-    pagina.drawImage(marcaDaguaImage, {
-      x: width - larguraMarca,
-      y: 0,
-      width: larguraMarca,
-      height: alturaMarca,
     });
 
     // Logo — canto superior direito.
@@ -211,6 +245,8 @@ export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer
   const fonte = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fonteNegrito = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
+  await colocarMarcaDaguaAtras(pdfDoc, marcaDaguaImage);
+
   const paginas = pdfDoc.getPages();
   const total = paginas.length;
   const alturaFaixa = 14 * MM;
@@ -269,16 +305,6 @@ export async function carimbarPaginasProposta(pdfBuffer: Buffer): Promise<Buffer
       y: height - alturaFaixa / 2 - alturaWordmark / 2,
       width: larguraWordmark,
       height: alturaWordmark,
-    });
-
-    // Marca d'água — canto inferior direito, atrás do texto.
-    const larguraMarca = 110 * MM;
-    const alturaMarca = larguraMarca * (marcaDaguaImage.height / marcaDaguaImage.width);
-    pagina.drawImage(marcaDaguaImage, {
-      x: width - larguraMarca,
-      y: 0,
-      width: larguraMarca,
-      height: alturaMarca,
     });
 
     // Numeração — logo abaixo da faixa, canto superior esquerdo.

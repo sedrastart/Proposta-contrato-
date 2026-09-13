@@ -72,16 +72,22 @@ export function montarDadosContrato(cliente: ClienteParaContrato): DadosContrato
     dataEmissaoExtenso: dataExtenso(new Date()),
     cidadeEmissao: "São Paulo",
     servicosSelecionados: cliente.servicos.map((s) => s.servico.nome),
-    limitesUso: planoAncora.limites.map((l) => ({
-      unidade: l.unidade,
-      quantidade: l.quantidade,
-      tipoCobranca: l.tipoCobranca,
-      valorPorUnidade: l.valorPorUnidade != null ? currency.format(l.valorPorUnidade) : undefined,
-      faixas: l.faixas.map((f) => ({
-        percentualAte: f.percentualAte,
-        valorAdicional: currency.format(f.valorAdicional),
-      })),
-    })),
+    // Todos os serviços contratados podem ter franquia própria (ex.: Contabilidade
+    // tem lançamentos, Departamento Pessoal tem colaboradores) — por isso agrega os
+    // limites de TODOS os planos do cliente, não só do plano-âncora (que só decide
+    // vigência/multa/condição de pagamento do contrato como um todo).
+    limitesUso: cliente.servicos.flatMap((s) =>
+      (s.plano?.limites ?? []).map((l) => ({
+        unidade: l.unidade,
+        quantidade: l.quantidade,
+        tipoCobranca: l.tipoCobranca,
+        valorPorUnidade: l.valorPorUnidade != null ? currency.format(l.valorPorUnidade) : undefined,
+        faixas: l.faixas.map((f) => ({
+          percentualAte: f.percentualAte,
+          valorAdicional: currency.format(f.valorAdicional),
+        })),
+      }))
+    ),
   };
 }
 
@@ -142,8 +148,8 @@ export function montarDadosProposta(cliente: ClienteParaProposta): DadosContrato
     dataEmissaoExtenso: dataExtenso(new Date()),
     cidadeEmissao: "São Paulo",
     servicosSelecionados: cliente.servicos.map((s) => s.servico.nome),
-    limitesUso:
-      planoAncora?.limites.map((l) => ({
+    limitesUso: cliente.servicos.flatMap((s) =>
+      (s.plano?.limites ?? []).map((l) => ({
         unidade: l.unidade,
         quantidade: l.quantidade,
         tipoCobranca: l.tipoCobranca,
@@ -152,7 +158,8 @@ export function montarDadosProposta(cliente: ClienteParaProposta): DadosContrato
           percentualAte: f.percentualAte,
           valorAdicional: currency.format(f.valorAdicional),
         })),
-      })) ?? [],
+      }))
+    ),
   };
 }
 
