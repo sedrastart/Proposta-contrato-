@@ -18,7 +18,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
             className="h-6 w-auto"
           />
         </Link>
-        <Link href="/painel" className="text-xs text-ink-muted hover:underline">
+        <Link href="/painel?full=1" className="text-xs text-ink-muted hover:underline">
           Versão completa →
         </Link>
       </header>
