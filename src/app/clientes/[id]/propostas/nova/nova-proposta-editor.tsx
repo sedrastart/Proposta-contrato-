@@ -7,9 +7,14 @@ import { criarPropostaAction } from "../actions";
 export function NovaPropostaEditor({
   clienteId,
   textoInicial,
+  aoCriar,
 }: {
   clienteId: string;
   textoInicial: string;
+  /** Por padrão navega para a página de detalhe da proposta no fluxo
+   * completo — o fluxo simplificado de celular (/m) passa isso pra ir
+   * direto pro próximo passo (gerar contrato) em vez de mostrar o detalhe. */
+  aoCriar?: (propostaId: string) => void;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -25,7 +30,8 @@ export function NovaPropostaEditor({
     startTransition(async () => {
       const resultado = await criarPropostaAction(clienteId, propostaTexto);
       if (resultado.sucesso) {
-        router.push(`/clientes/${clienteId}/propostas/${resultado.propostaId}`);
+        if (aoCriar) aoCriar(resultado.propostaId);
+        else router.push(`/clientes/${clienteId}/propostas/${resultado.propostaId}`);
       } else {
         setErro(resultado.erro);
       }

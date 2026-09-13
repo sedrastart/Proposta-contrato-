@@ -12,10 +12,11 @@ export type CriarClienteState = {
   values: Record<string, string>;
 };
 
-export async function criarClienteAction(
-  _prevState: CriarClienteState,
-  formData: FormData
-): Promise<CriarClienteState> {
+type CriarClienteResultado =
+  | { sucesso: true; cliente: { id: string } }
+  | { sucesso: false; state: CriarClienteState };
+
+async function criarClienteComum(formData: FormData): Promise<CriarClienteResultado> {
   const raw = Object.fromEntries(formData.entries()) as Record<string, string>;
 
   const parsed = clienteSchema.safeParse(raw);
@@ -24,7 +25,7 @@ export async function criarClienteAction(
     for (const issue of parsed.error.issues) {
       errors[String(issue.path[0])] = issue.message;
     }
-    return { errors, values: raw };
+    return { sucesso: false, state: { errors, values: raw } };
   }
 
   const data = parsed.data;
@@ -35,8 +36,11 @@ export async function criarClienteAction(
   });
   if (existente) {
     return {
-      errors: { cpfCnpj: "Já existe um cliente cadastrado com este CPF/CNPJ" },
-      values: raw,
+      sucesso: false,
+      state: {
+        errors: { cpfCnpj: "Já existe um cliente cadastrado com este CPF/CNPJ" },
+        values: raw,
+      },
     };
   }
 
@@ -61,7 +65,28 @@ export async function criarClienteAction(
     },
   });
 
-  redirect(`/clientes/${cliente.id}`);
+  return { sucesso: true, cliente };
+}
+
+export async function criarClienteAction(
+  _prevState: CriarClienteState,
+  formData: FormData
+): Promise<CriarClienteState> {
+  const resultado = await criarClienteComum(formData);
+  if (!resultado.sucesso) return resultado.state;
+  redirect(`/clientes/${resultado.cliente.id}`);
+}
+
+/** Mesma criação de sempre, só muda o destino — usada pelo fluxo simplificado
+ * de celular (/m), que segue direto pra configuração comercial em vez da
+ * página de detalhe completa do cliente. */
+export async function criarClienteMobileAction(
+  _prevState: CriarClienteState,
+  formData: FormData
+): Promise<CriarClienteState> {
+  const resultado = await criarClienteComum(formData);
+  if (!resultado.sucesso) return resultado.state;
+  redirect(`/m/${resultado.cliente.id}/comercial`);
 }
 
 export async function buscarCepAction(cep: string) {

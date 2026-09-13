@@ -18,7 +18,10 @@ export function AppShell({
 }) {
   const pathname = usePathname();
 
-  if (pathname === "/") {
+  // "/" (login) e "/m/..." (fluxo simplificado pra celular, sem menu lateral
+  // — a barra fixa de 232px não cabe numa tela de telefone) ficam sem o
+  // shell administrativo.
+  if (pathname === "/" || pathname.startsWith("/m")) {
     return <>{children}</>;
   }
 
