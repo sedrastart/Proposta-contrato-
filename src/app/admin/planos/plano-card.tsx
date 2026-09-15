@@ -108,7 +108,11 @@ export function PlanoCard({ plano }: { plano: Plano }) {
   }
 
   return (
-    <div className="rounded-lg border border-line p-4">
+    <div
+      className={`rounded-lg border p-4 transition-colors ${
+        expandido ? "border-accent bg-accent-soft" : "border-line"
+      }`}
+    >
       <button
         type="button"
         onClick={() => setExpandido((v) => !v)}
