@@ -53,6 +53,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
   const [isPending, startTransition] = useTransition();
   const [expandido, setExpandido] = useState(false);
   const [erroExcluir, setErroExcluir] = useState<string | null>(null);
+  const [mostrarNovoLimite, setMostrarNovoLimite] = useState(false);
   const [novoLimite, setNovoLimite] = useState({
     unidade: "",
     quantidade: "",
@@ -104,6 +105,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             : undefined,
       });
       setNovoLimite({ unidade: "", quantidade: "", tipoCobranca: "por_unidade", valorPorUnidade: "" });
+      setMostrarNovoLimite(false);
     });
   }
 
@@ -259,103 +261,136 @@ export function PlanoCard({ plano }: { plano: Plano }) {
         )}
       </div>
 
-      {plano.limites.length > 0 && (
-        <div
-          className="mt-4 space-y-2"
-          title="Quantidade incluída no plano por mês e como cobrar o que passar disso"
-        >
-          <p className="text-xs uppercase tracking-wide text-ink-muted">Limites de uso</p>
-          {plano.limites.map((limite) => (
-            <LimiteRow key={limite.id} limite={limite} />
-          ))}
-        </div>
-      )}
-
-      <div className="mt-4 rounded-lg border border-dashed border-line p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
-          + Adicionar limite de uso
+      <div className="mt-4 rounded-lg border border-line bg-white p-4">
+        <p className="text-sm font-medium text-ink">Limites de uso</p>
+        <p className="mt-0.5 text-xs text-ink-muted">
+          Quanto o cliente já tem incluído no plano por mês (ex.: lançamentos,
+          notas fiscais, colaboradores) e quanto cobrar a mais pelo que passar
+          disso.
         </p>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <label className="text-xs text-ink-muted">
-            O que limitar
-            <input
-              placeholder="ex.: lançamentos, notas fiscais"
-              value={novoLimite.unidade}
-              onChange={(e) => setNovoLimite({ ...novoLimite, unidade: e.target.value })}
-              className={`${inputClass} mt-0.5 w-full`}
-              title="Nome da unidade que será contada e cobrada por excedente (ex.: 'lançamentos', 'notas fiscais', 'colaboradores')"
-            />
-          </label>
-          <label className="text-xs text-ink-muted">
-            Quantidade incluída por mês
-            <input
-              type="number"
-              placeholder="ex.: 50"
-              value={novoLimite.quantidade}
-              onChange={(e) => setNovoLimite({ ...novoLimite, quantidade: e.target.value })}
-              className={`${inputClass} mt-0.5 w-full`}
-              title="Quantidade já incluída no valor mensal do plano — o que passar disso é cobrado à parte"
-            />
-          </label>
-        </div>
 
-        <p className="mt-3 text-xs text-ink-muted">Como cobrar o que passar disso?</p>
-        <div className="mt-1 inline-flex overflow-hidden rounded-md border border-line">
-          <button
-            type="button"
-            onClick={() => setNovoLimite({ ...novoLimite, tipoCobranca: "por_unidade" })}
-            className={`px-3 py-1.5 text-xs font-medium ${
-              novoLimite.tipoCobranca === "por_unidade"
-                ? "bg-accent text-white"
-                : "bg-white text-ink-muted hover:bg-neutral-50"
-            }`}
-            title="Cada unidade que exceder o incluído custa um valor fixo"
-          >
-            Valor fixo por unidade
-          </button>
-          <button
-            type="button"
-            onClick={() => setNovoLimite({ ...novoLimite, tipoCobranca: "faixa" })}
-            className={`border-l border-line px-3 py-1.5 text-xs font-medium ${
-              novoLimite.tipoCobranca === "faixa"
-                ? "bg-accent text-white"
-                : "bg-white text-ink-muted hover:bg-neutral-50"
-            }`}
-            title="O excedente é cobrado em degraus, conforme o % acima do incluído (ex.: até 33% = R$9,90, até 66% = R$19,90)"
-          >
-            Faixas por % de excedente
-          </button>
-        </div>
-
-        {novoLimite.tipoCobranca === "por_unidade" && (
-          <label className="mt-3 block text-xs text-ink-muted">
-            Valor por unidade excedente (R$)
-            <input
-              type="number"
-              step="0.01"
-              placeholder="ex.: 9,90"
-              value={novoLimite.valorPorUnidade}
-              onChange={(e) => setNovoLimite({ ...novoLimite, valorPorUnidade: e.target.value })}
-              className={`${inputClass} mt-0.5 w-40`}
-              title="Valor cobrado para cada unidade que passar da quantidade incluída"
-            />
-          </label>
+        {plano.limites.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {plano.limites.map((limite) => (
+              <LimiteRow key={limite.id} limite={limite} />
+            ))}
+          </div>
         )}
 
-        {novoLimite.unidade.trim() && novoLimite.quantidade && (
-          <p className="mt-3 rounded-md bg-accent-soft px-3 py-2 text-xs text-ink">
-            {resumoNovoLimite(novoLimite)}
+        {plano.limites.length === 0 && !mostrarNovoLimite && (
+          <p className="mt-3 text-xs text-ink-muted">
+            Nenhum limite configurado — o plano vale para uso ilimitado desses itens.
           </p>
         )}
 
-        <button
-          type="button"
-          onClick={adicionarLimite}
-          className="mt-3 rounded-md border border-line px-3 py-1.5 text-sm text-ink hover:bg-neutral-50"
-          title="Adiciona este limite de uso ao plano"
-        >
-          + Adicionar limite
-        </button>
+        {!mostrarNovoLimite ? (
+          <button
+            type="button"
+            onClick={() => setMostrarNovoLimite(true)}
+            className="mt-3 rounded-md border border-line px-3 py-1.5 text-sm text-ink hover:bg-neutral-50"
+            title="Adiciona um novo limite de uso a este plano"
+          >
+            + Adicionar limite de uso
+          </button>
+        ) : (
+          <div className="mt-3 rounded-lg border border-dashed border-accent bg-accent-soft p-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
+                Novo limite de uso
+              </p>
+              <button
+                type="button"
+                onClick={() => setMostrarNovoLimite(false)}
+                className="text-xs text-ink-muted hover:underline"
+              >
+                cancelar
+              </button>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <label className="text-xs text-ink-muted">
+                O que limitar
+                <input
+                  placeholder="ex.: lançamentos, notas fiscais"
+                  value={novoLimite.unidade}
+                  onChange={(e) => setNovoLimite({ ...novoLimite, unidade: e.target.value })}
+                  className={`${inputClass} mt-0.5 w-full bg-white`}
+                  title="Nome da unidade que será contada e cobrada por excedente (ex.: 'lançamentos', 'notas fiscais', 'colaboradores')"
+                />
+              </label>
+              <label className="text-xs text-ink-muted">
+                Incluídos por mês
+                <input
+                  type="number"
+                  placeholder="ex.: 50"
+                  value={novoLimite.quantidade}
+                  onChange={(e) => setNovoLimite({ ...novoLimite, quantidade: e.target.value })}
+                  className={`${inputClass} mt-0.5 w-full bg-white`}
+                  title="Quantidade já incluída no valor mensal do plano — o que passar disso é cobrado à parte"
+                />
+              </label>
+            </div>
+
+            <p className="mt-3 text-xs text-ink-muted">Como cobrar o que passar disso?</p>
+            <div className="mt-1 inline-flex overflow-hidden rounded-md border border-line">
+              <button
+                type="button"
+                onClick={() => setNovoLimite({ ...novoLimite, tipoCobranca: "por_unidade" })}
+                className={`px-3 py-1.5 text-xs font-medium ${
+                  novoLimite.tipoCobranca === "por_unidade"
+                    ? "bg-accent text-white"
+                    : "bg-white text-ink-muted hover:bg-neutral-50"
+                }`}
+                title="Cada unidade que exceder o incluído custa um valor fixo"
+              >
+                Valor fixo por unidade
+              </button>
+              <button
+                type="button"
+                onClick={() => setNovoLimite({ ...novoLimite, tipoCobranca: "faixa" })}
+                className={`border-l border-line px-3 py-1.5 text-xs font-medium ${
+                  novoLimite.tipoCobranca === "faixa"
+                    ? "bg-accent text-white"
+                    : "bg-white text-ink-muted hover:bg-neutral-50"
+                }`}
+                title="O excedente é cobrado em degraus, conforme o % acima do incluído (ex.: até 33% = R$9,90, até 66% = R$19,90)"
+              >
+                Faixas por % de excedente
+              </button>
+            </div>
+
+            {novoLimite.tipoCobranca === "por_unidade" && (
+              <label className="mt-3 block text-xs text-ink-muted">
+                Valor do excedente (R$ por unidade)
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="ex.: 9,90"
+                  value={novoLimite.valorPorUnidade}
+                  onChange={(e) => setNovoLimite({ ...novoLimite, valorPorUnidade: e.target.value })}
+                  className={`${inputClass} mt-0.5 w-full bg-white`}
+                  title="Valor cobrado para cada unidade que passar da quantidade incluída"
+                />
+              </label>
+            )}
+
+            {novoLimite.unidade.trim() && novoLimite.quantidade && (
+              <p className="mt-3 rounded-md bg-white px-3 py-2 text-xs text-ink">
+                {resumoNovoLimite(novoLimite)}
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={adicionarLimite}
+              disabled={!novoLimite.unidade.trim() || !novoLimite.quantidade}
+              className="mt-3 w-full rounded-md bg-accent px-3 py-2 text-sm font-medium text-white hover:brightness-110 disabled:opacity-50"
+              title="Adiciona este limite de uso ao plano"
+            >
+              + Adicionar limite
+            </button>
+          </div>
+        )}
       </div>
         </>
       )}
@@ -415,49 +450,58 @@ function LimiteRow({ limite }: { limite: Limite }) {
       : `Inclui ${quantidade} ${limite.unidade}/mês. O excedente é cobrado em faixas por % acima do incluído.`;
 
   return (
-    <div className="rounded-md bg-neutral-50 p-3">
-      <p className="text-xs text-ink-muted">{resumo}</p>
-      <div className="mt-2 flex items-end gap-2">
+    <div className="rounded-lg border border-line bg-neutral-50 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-medium capitalize text-ink">{limite.unidade}</p>
+        <button
+          type="button"
+          onClick={remover}
+          className="text-xs text-red-600 hover:underline"
+          title="Remove este limite de uso do plano"
+        >
+          remover
+        </button>
+      </div>
+
+      <div className="mt-2 grid grid-cols-2 gap-3">
         <label className="text-xs text-ink-muted">
-          Incluído/mês
+          Incluídos por mês
           <input
             type="number"
             value={quantidade}
             onChange={(e) => setQuantidade(Number(e.target.value))}
             onBlur={salvar}
-            className={`${inputClass} mt-0.5 w-20`}
+            className={`${inputClass} mt-0.5 w-full bg-white`}
             title="Quantidade incluída no plano por mês"
           />
         </label>
-        <span className="pb-1.5 text-sm text-ink-muted">{limite.unidade}</span>
         {limite.tipoCobranca === "por_unidade" ? (
           <label className="text-xs text-ink-muted">
-            R$ por excedente
+            Valor do excedente (R$)
             <input
               type="number"
               step="0.01"
               value={valorPorUnidade}
               onChange={(e) => setValorPorUnidade(Number(e.target.value))}
               onBlur={salvar}
-              className={`${inputClass} mt-0.5 w-24`}
+              className={`${inputClass} mt-0.5 w-full bg-white`}
               title="Valor cobrado para cada unidade que passar da quantidade incluída"
             />
           </label>
         ) : (
-          <span className="pb-1.5 text-sm text-ink-muted">faixas por % de excedente</span>
+          <div className="text-xs text-ink-muted">
+            Cobrança
+            <p className="mt-0.5 rounded-md border border-line bg-white px-2 py-1.5 text-ink">
+              por faixas de %
+            </p>
+          </div>
         )}
-        <button
-          type="button"
-          onClick={remover}
-          className="ml-auto pb-1.5 text-xs text-red-600 hover:underline"
-          title="Remove este limite de uso do plano"
-        >
-          remover limite
-        </button>
       </div>
 
+      <p className="mt-2 text-xs text-ink-muted">{resumo}</p>
+
       {limite.tipoCobranca === "faixa" && (
-        <div className="mt-2 space-y-1 pl-4">
+        <div className="mt-3 space-y-1 border-t border-dashed border-line pt-2 pl-1">
           {limite.faixas.map((faixa) => (
             <FaixaRow key={faixa.id} faixa={faixa} />
           ))}
@@ -469,7 +513,7 @@ function LimiteRow({ limite }: { limite: Limite }) {
                 placeholder="ex.: 33"
                 value={novaFaixa.percentualAte}
                 onChange={(e) => setNovaFaixa({ ...novaFaixa, percentualAte: e.target.value })}
-                className={`${inputClass} mt-0.5 w-32`}
+                className={`${inputClass} mt-0.5 w-32 bg-white`}
                 title="Até quantos % de excedente essa faixa vale (ex.: 33 = até 33% acima da quantidade incluída)"
               />
             </label>
@@ -481,7 +525,7 @@ function LimiteRow({ limite }: { limite: Limite }) {
                 placeholder="ex.: 9,90"
                 value={novaFaixa.valorAdicional}
                 onChange={(e) => setNovaFaixa({ ...novaFaixa, valorAdicional: e.target.value })}
-                className={`${inputClass} mt-0.5 w-24`}
+                className={`${inputClass} mt-0.5 w-24 bg-white`}
                 title="Valor extra cobrado quando o excedente cai dentro dessa faixa"
               />
             </label>
