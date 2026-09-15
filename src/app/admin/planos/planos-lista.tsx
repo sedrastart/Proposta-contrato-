@@ -92,7 +92,9 @@ export function PlanosLista({
                 <button
                   type="button"
                   onClick={() => alternarMinimizado(chave)}
-                  className="mb-3 flex w-full items-center justify-between text-left"
+                  className={`mb-3 flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors ${
+                    estaMinimizado ? "border-transparent" : "border-accent bg-accent-soft"
+                  }`}
                   title={estaMinimizado ? "Mostrar os planos deste regime" : "Minimizar os planos deste regime"}
                 >
                   <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-muted">
