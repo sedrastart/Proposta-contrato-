@@ -35,6 +35,16 @@ export function PlanosLista({
   ordemRegimes: string[];
 }) {
   const [busca, setBusca] = useState("");
+  const [minimizados, setMinimizados] = useState<Set<string>>(new Set());
+
+  function alternarMinimizado(chave: string) {
+    setMinimizados((prev) => {
+      const next = new Set(prev);
+      if (next.has(chave)) next.delete(chave);
+      else next.add(chave);
+      return next;
+    });
+  }
 
   const buscaLower = busca.trim().toLowerCase();
   const filtrados = buscaLower
@@ -74,18 +84,35 @@ export function PlanosLista({
             Nenhum plano encontrado para &quot;{busca}&quot;.
           </p>
         ) : (
-          chavesOrdenadas.map((chave) => (
-            <section key={chave}>
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-muted">
-                {chave}
-              </h2>
-              <div className="space-y-4">
-                {grupos.get(chave)!.map((plano) => (
-                  <PlanoCard key={plano.id} plano={plano} />
-                ))}
-              </div>
-            </section>
-          ))
+          chavesOrdenadas.map((chave) => {
+            const planosDoGrupo = grupos.get(chave)!;
+            const estaMinimizado = minimizados.has(chave);
+            return (
+              <section key={chave}>
+                <button
+                  type="button"
+                  onClick={() => alternarMinimizado(chave)}
+                  className="mb-3 flex w-full items-center justify-between text-left"
+                  title={estaMinimizado ? "Mostrar os planos deste regime" : "Minimizar os planos deste regime"}
+                >
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-muted">
+                    {chave}{" "}
+                    <span className="font-normal normal-case text-ink-muted">
+                      ({planosDoGrupo.length})
+                    </span>
+                  </h2>
+                  <span className="text-xs text-ink-muted">{estaMinimizado ? "▼" : "▲"}</span>
+                </button>
+                {!estaMinimizado && (
+                  <div className="space-y-4">
+                    {planosDoGrupo.map((plano) => (
+                      <PlanoCard key={plano.id} plano={plano} />
+                    ))}
+                  </div>
+                )}
+              </section>
+            );
+          })
         )}
       </div>
     </div>
