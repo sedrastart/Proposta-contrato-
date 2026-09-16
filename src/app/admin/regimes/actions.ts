@@ -34,6 +34,11 @@ O que está incluído:
 Investimento: {{valor}} por mês, pagamento {{condicaoPagamento}}.
 Vigência: {{vigenciaTexto}}.
 
+Franquia incluída por mês:
+{{limitesUsoLista}}
+
+Multa por cancelamento antecipado: {{multaDescricao}}.
+
 Esta proposta é válida por 15 dias a partir da data de emissão.
 
 Ficou com alguma dúvida? Fale com a gente:

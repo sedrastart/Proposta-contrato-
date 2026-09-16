@@ -47,6 +47,8 @@ export function construirContextoProposta(dados: DadosContrato): Record<string, 
         ? `${dados.vigenciaMeses} ${dados.vigenciaMeses === 1 ? "mês" : "meses"}`
         : "a definir",
     condicaoPagamento: dados.condicaoPagamento,
+    multaDescricao: dados.multaDescricao,
+    limitesUsoLista: limitesUsoLista(dados),
     telefoneContratado: CONTRATADO.telefone,
     emailContratado: CONTRATADO.email,
     siteContratado: CONTRATADO.site,
