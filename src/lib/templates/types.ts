@@ -11,6 +11,11 @@ export type LimiteUsoTexto = {
   faixas: FaixaExcedenteTexto[];
 };
 
+export type EscopoServicoTexto = {
+  nome: string;
+  descricao: string | null;
+};
+
 export type DadosContrato = {
   contratanteNome: string;
   contratanteTipoPessoa: string; // "PF" | "PJ" — define a concordância de gênero no cabeçalho
@@ -28,4 +33,5 @@ export type DadosContrato = {
   cidadeEmissao: string;
   servicosSelecionados: string[];
   limitesUso: LimiteUsoTexto[];
+  escopoServicos: EscopoServicoTexto[];
 };

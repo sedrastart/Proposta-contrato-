@@ -123,6 +123,7 @@ model Plano {
   vigenciaMeses      Int
   multaPercentual    Float? // ex.: 50 :: nulo/zero = "não possui"
   multaDescricao     String? // ex.: "50% do saldo restante"
+  escopoProposta     String? // descrição do que está incluído neste plano — só aparece na proposta, nunca no contrato (cujas cláusulas são redigidas à parte)
   condicaoPagamento  String            @default("a_vista") // "a_vista" | "parcelado"
   parcelas           Int               @default(1) // usado quando condicaoPagamento = "parcelado"
   ordem              Int               @default(0)

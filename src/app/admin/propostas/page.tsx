@@ -65,6 +65,12 @@ export default async function AdminPropostasPage({
               {PLACEHOLDERS.join(" ")}
             </span>
           </p>
+          <p className="mt-1 text-xs text-ink-muted">
+            {"{{servicosLista}}"} já inclui o &quot;Escopo para a proposta&quot;
+            cadastrado em cada plano (Planos → editar plano), quando
+            preenchido — ex.: &quot;✔ Contabilidade — emissão e acompanhamento
+            de notas fiscais...&quot;.
+          </p>
 
           <div className="mt-4">
             <ModeloPropostaEditor key={modeloAtivo.id} modelo={modeloAtivo} />

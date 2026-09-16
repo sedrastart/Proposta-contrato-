@@ -32,6 +32,7 @@ type Plano = {
   multaDescricao: string | null;
   condicaoPagamento: string;
   parcelas: number;
+  escopoProposta: string | null;
   ativo: boolean;
   servico: { nome: string };
   regimeTributario: { nome: string } | null;
@@ -49,6 +50,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
     multaDescricao: plano.multaDescricao ?? "",
     condicaoPagamento: plano.condicaoPagamento,
     parcelas: plano.parcelas,
+    escopoProposta: plano.escopoProposta ?? "",
   });
   const [isPending, startTransition] = useTransition();
   const [expandido, setExpandido] = useState(false);
@@ -82,6 +84,7 @@ export function PlanoCard({ plano }: { plano: Plano }) {
         multaDescricao: campos.multaDescricao,
         condicaoPagamento: campos.condicaoPagamento,
         parcelas: Number(campos.parcelas) || 1,
+        escopoProposta: campos.escopoProposta.trim() || null,
       });
     });
   }
@@ -259,6 +262,18 @@ export function PlanoCard({ plano }: { plano: Plano }) {
             />
           </label>
         )}
+        <label className="col-span-2 text-xs text-ink-muted">
+          Escopo para a proposta (opcional)
+          <textarea
+            rows={2}
+            className={`${inputClass} mt-0.5 w-full`}
+            placeholder='ex.: "emissão e acompanhamento de notas fiscais, além da elaboração e entrega de declarações acessórias"'
+            value={campos.escopoProposta}
+            onChange={(e) => setCampos({ ...campos, escopoProposta: e.target.value })}
+            onBlur={salvar}
+            title="Aparece só na proposta comercial, ao lado do nome do serviço — as cláusulas do contrato são escritas à parte, em Contratos"
+          />
+        </label>
       </div>
 
       <div className="mt-4 rounded-lg border border-line bg-white p-4">

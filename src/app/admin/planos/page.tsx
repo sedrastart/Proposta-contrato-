@@ -150,6 +150,16 @@ export default async function AdminPlanosPage() {
                 title="Em quantas vezes o pagamento é dividido (só usado se a condição for 'parcelado')"
               />
             </label>
+            <label className="col-span-2 text-xs text-ink-muted">
+              Escopo para a proposta (opcional)
+              <textarea
+                name="escopoProposta"
+                rows={2}
+                placeholder='ex.: "emissão e acompanhamento de notas fiscais, além da elaboração e entrega de declarações acessórias"'
+                className={`${inputClass} mt-0.5 w-full`}
+                title="Aparece só na proposta comercial, ao lado do nome do serviço — as cláusulas do contrato são escritas à parte, em Contratos"
+              />
+            </label>
           </div>
           <button
             type="submit"

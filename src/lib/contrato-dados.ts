@@ -72,6 +72,13 @@ export function montarDadosContrato(cliente: ClienteParaContrato): DadosContrato
     dataEmissaoExtenso: dataExtenso(new Date()),
     cidadeEmissao: "São Paulo",
     servicosSelecionados: cliente.servicos.map((s) => s.servico.nome),
+    // Descrição do escopo por serviço — só usada no contexto da proposta
+    // (construirContextoProposta); nas cláusulas do contrato ela nunca é
+    // referenciada, pois o texto jurídico é redigido/editado à parte.
+    escopoServicos: cliente.servicos.map((s) => ({
+      nome: s.servico.nome,
+      descricao: s.plano?.escopoProposta ?? null,
+    })),
     // Todos os serviços contratados podem ter franquia própria (ex.: Contabilidade
     // tem lançamentos, Departamento Pessoal tem colaboradores) — por isso agrega os
     // limites de TODOS os planos do cliente, não só do plano-âncora (que só decide
@@ -148,6 +155,10 @@ export function montarDadosProposta(cliente: ClienteParaProposta): DadosContrato
     dataEmissaoExtenso: dataExtenso(new Date()),
     cidadeEmissao: "São Paulo",
     servicosSelecionados: cliente.servicos.map((s) => s.servico.nome),
+    escopoServicos: cliente.servicos.map((s) => ({
+      nome: s.servico.nome,
+      descricao: s.plano?.escopoProposta ?? null,
+    })),
     limitesUso: cliente.servicos.flatMap((s) =>
       (s.plano?.limites ?? []).map((l) => ({
         unidade: l.unidade,

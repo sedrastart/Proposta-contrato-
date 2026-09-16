@@ -12,6 +12,7 @@ type Plano = {
   multaDescricao: string | null;
   condicaoPagamento: string;
   parcelas: number;
+  escopoProposta: string | null;
   ativo: boolean;
   servico: { nome: string };
   regimeTributario: { nome: string } | null;

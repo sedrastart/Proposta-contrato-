@@ -17,6 +17,13 @@ export const DADOS_EXEMPLO_GERAL: DadosContrato = {
   dataEmissaoExtenso: "1 de agosto de 2026",
   cidadeEmissao: "São Paulo",
   servicosSelecionados: ["Contabilidade", "Departamento Pessoal"],
+  escopoServicos: [
+    {
+      nome: "Contabilidade",
+      descricao: "escrituração contábil, emissão de notas fiscais e apuração dos impostos do mês",
+    },
+    { nome: "Departamento Pessoal", descricao: "folha de pagamento, admissões e rescisões" },
+  ],
   limitesUso: [
     {
       unidade: "lançamentos",
@@ -41,6 +48,12 @@ export const DADOS_EXEMPLO_MEI: DadosContrato = {
   contratanteCpfCnpj: "12.345.678/0001-90",
   valor: "R$ 39,90",
   servicosSelecionados: ["Contabilidade"],
+  escopoServicos: [
+    {
+      nome: "Contabilidade",
+      descricao: "escrituração contábil, emissão de notas fiscais e apuração do DAS mensal",
+    },
+  ],
   multaDescricao: "50% do valor restante até o término do contrato",
   limitesUso: [
     {
