@@ -4,6 +4,8 @@ import { PlanosLista } from "./planos-lista";
 
 export const dynamic = "force-dynamic";
 
+const inputClass = "rounded-md border border-line bg-white px-2 py-1.5 text-sm";
+
 export default async function AdminPlanosPage() {
   const [servicos, regimes, planos] = await Promise.all([
     prisma.servico.findMany({ where: { ativo: true }, orderBy: { ordem: "asc" } }),
@@ -31,101 +33,132 @@ export default async function AdminPlanosPage() {
         <PlanosLista planos={planos} ordemRegimes={regimes.map((r) => r.nome)} />
       </div>
 
-      <form
-        action={criarPlanoAction}
-        className="mt-6 rounded-lg border border-dashed border-line p-5"
-      >
-        <p className="mb-3 text-sm font-medium text-ink">Novo plano</p>
-        <div className="grid grid-cols-2 gap-3">
-          <select
-            name="servicoId"
-            required
-            className="rounded-md border border-line px-3 py-2 text-sm"
-            title="Qual serviço esse plano se aplica (ex.: Contabilidade, Departamento Pessoal)"
+      <div className="mt-6 rounded-lg border border-line bg-white p-4">
+        <p className="text-sm font-medium text-ink">Novo plano</p>
+        <p className="mt-0.5 text-xs text-ink-muted">
+          Vincule a um serviço (e, se for o caso, a um regime específico) —
+          valor, vigência, multa e condição de pagamento entram
+          automaticamente no contrato gerado com este plano.
+        </p>
+
+        <form action={criarPlanoAction} className="mt-3">
+          <div className="grid grid-cols-2 gap-3">
+            <label className="text-xs text-ink-muted">
+              Serviço
+              <select
+                name="servicoId"
+                required
+                className={`${inputClass} mt-0.5 w-full`}
+                title="Qual serviço esse plano se aplica (ex.: Contabilidade, Departamento Pessoal)"
+              >
+                <option value="">Selecione...</option>
+                {servicos.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs text-ink-muted">
+              Regime
+              <select
+                name="regimeTributarioId"
+                className={`${inputClass} mt-0.5 w-full`}
+                title="Deixe em branco se o plano vale para qualquer regime do serviço, ou escolha um regime específico (ex.: MEI) se este plano for exclusivo dele"
+              >
+                <option value="">Qualquer regime do serviço</option>
+                {regimes.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="col-span-2 text-xs text-ink-muted">
+              Nome do plano
+              <input
+                name="nome"
+                placeholder='ex.: "Contabilidade — 12 meses"'
+                required
+                className={`${inputClass} mt-0.5 w-full`}
+                title="Nome do plano, como aparece para o cliente (ex.: 'Plano Essencial')"
+              />
+            </label>
+            <label className="text-xs text-ink-muted">
+              Valor mensal (R$)
+              <input
+                name="valor"
+                type="number"
+                step="0.01"
+                placeholder="ex.: 199,90"
+                required
+                className={`${inputClass} mt-0.5 w-full`}
+                title="Valor mensal cobrado do cliente nesse plano"
+              />
+            </label>
+            <label className="text-xs text-ink-muted">
+              Vigência (meses)
+              <input
+                name="vigenciaMeses"
+                type="number"
+                placeholder="ex.: 12"
+                required
+                className={`${inputClass} mt-0.5 w-full`}
+                title="Duração do contrato em meses (ex.: 12 = um ano)"
+              />
+            </label>
+            <label className="text-xs text-ink-muted">
+              Multa (%) — opcional
+              <input
+                name="multaPercentual"
+                type="number"
+                step="0.01"
+                placeholder="ex.: 50"
+                className={`${inputClass} mt-0.5 w-full`}
+                title="Percentual de multa cobrado se o cliente quebrar o contrato antes do fim da vigência (opcional)"
+              />
+            </label>
+            <label className="text-xs text-ink-muted">
+              Texto da multa
+              <input
+                name="multaDescricao"
+                placeholder='ex.: "50% do saldo restante"'
+                className={`${inputClass} mt-0.5 w-full`}
+                title="Como a multa aparece escrita no contrato"
+              />
+            </label>
+            <label className="text-xs text-ink-muted">
+              Condição de pagamento
+              <select
+                name="condicaoPagamento"
+                defaultValue="a_vista"
+                className={`${inputClass} mt-0.5 w-full`}
+                title="Se o pagamento desse plano é à vista ou dividido em parcelas — vira o padrão sugerido ao gerar o contrato"
+              >
+                <option value="a_vista">à vista</option>
+                <option value="parcelado">parcelado</option>
+              </select>
+            </label>
+            <label className="text-xs text-ink-muted">
+              Número de parcelas
+              <input
+                name="parcelas"
+                type="number"
+                min={1}
+                defaultValue={1}
+                className={`${inputClass} mt-0.5 w-full`}
+                title="Em quantas vezes o pagamento é dividido (só usado se a condição for 'parcelado')"
+              />
+            </label>
+          </div>
+          <button
+            type="submit"
+            className="mt-4 w-full rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110"
           >
-            <option value="">Serviço...</option>
-            {servicos.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.nome}
-              </option>
-            ))}
-          </select>
-          <select
-            name="regimeTributarioId"
-            className="rounded-md border border-line px-3 py-2 text-sm"
-            title="Deixe em branco se o plano vale para qualquer regime do serviço, ou escolha um regime específico (ex.: MEI) se este plano for exclusivo dele"
-          >
-            <option value="">Qualquer regime do serviço</option>
-            {regimes.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.nome}
-              </option>
-            ))}
-          </select>
-          <input
-            name="nome"
-            placeholder="Nome do plano"
-            required
-            className="col-span-2 rounded-md border border-line px-3 py-2 text-sm"
-            title="Nome do plano, como aparece para o cliente (ex.: 'Plano Essencial')"
-          />
-          <input
-            name="valor"
-            type="number"
-            step="0.01"
-            placeholder="Valor mensal (R$)"
-            required
-            className="rounded-md border border-line px-3 py-2 text-sm"
-            title="Valor mensal cobrado do cliente nesse plano"
-          />
-          <input
-            name="vigenciaMeses"
-            type="number"
-            placeholder="Vigência (meses)"
-            required
-            className="rounded-md border border-line px-3 py-2 text-sm"
-            title="Duração do contrato em meses (ex.: 12 = um ano)"
-          />
-          <input
-            name="multaPercentual"
-            type="number"
-            step="0.01"
-            placeholder="Multa (%) — opcional"
-            className="rounded-md border border-line px-3 py-2 text-sm"
-            title="Percentual de multa cobrado se o cliente quebrar o contrato antes do fim da vigência (opcional)"
-          />
-          <input
-            name="multaDescricao"
-            placeholder='Texto da multa (ex.: "50% do saldo restante")'
-            className="rounded-md border border-line px-3 py-2 text-sm"
-            title="Como a multa aparece escrita no contrato"
-          />
-          <select
-            name="condicaoPagamento"
-            defaultValue="a_vista"
-            className="rounded-md border border-line px-3 py-2 text-sm"
-            title="Se o pagamento desse plano é à vista ou dividido em parcelas — vira o padrão sugerido ao gerar o contrato"
-          >
-            <option value="a_vista">à vista</option>
-            <option value="parcelado">parcelado</option>
-          </select>
-          <input
-            name="parcelas"
-            type="number"
-            min={1}
-            defaultValue={1}
-            placeholder="Número de parcelas"
-            className="rounded-md border border-line px-3 py-2 text-sm"
-            title="Em quantas vezes o pagamento é dividido (só usado se a condição for 'parcelado')"
-          />
-        </div>
-        <button
-          type="submit"
-          className="mt-4 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:brightness-110"
-        >
-          + Criar plano
-        </button>
-      </form>
+            + Criar plano
+          </button>
+        </form>
+      </div>
     </main>
   );
 }
