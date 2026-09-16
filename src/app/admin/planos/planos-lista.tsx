@@ -36,7 +36,12 @@ export function PlanosLista({
   ordemRegimes: string[];
 }) {
   const [busca, setBusca] = useState("");
-  const [minimizados, setMinimizados] = useState<Set<string>>(new Set());
+  // Começa com todos os regimes minimizados — com 40+ planos ao todo, abrir
+  // a página já mostrando os 5 grupos expandidos exige rolar bastante antes
+  // de achar o que se procura.
+  const [minimizados, setMinimizados] = useState<Set<string>>(
+    () => new Set(planos.map((p) => p.regimeTributario?.nome ?? SEM_REGIME))
+  );
 
   function alternarMinimizado(chave: string) {
     setMinimizados((prev) => {
@@ -87,7 +92,9 @@ export function PlanosLista({
         ) : (
           chavesOrdenadas.map((chave) => {
             const planosDoGrupo = grupos.get(chave)!;
-            const estaMinimizado = minimizados.has(chave);
+            // Uma busca ativa expande tudo automaticamente — senão um
+            // resultado dentro de um regime minimizado ficaria escondido.
+            const estaMinimizado = buscaLower ? false : minimizados.has(chave);
             return (
               <section key={chave}>
                 <button
