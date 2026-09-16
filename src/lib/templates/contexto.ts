@@ -39,12 +39,12 @@ export function construirContextoProposta(dados: DadosContrato): Record<string, 
   return {
     contratanteNome: dados.contratanteNome,
     contratanteCpfCnpj: dados.contratanteCpfCnpj,
-    // Cada serviço ganha o detalhe do escopo (cadastrado no plano) quando
-    // existir — some sozinho para serviços sem descrição preenchida, sem
-    // deixar linha vazia ou "traço" pendurado.
+    // Cada serviço ganha o detalhe do escopo (cadastrado no plano) numa
+    // linha abaixo do nome, quando existir — some sozinho para serviços
+    // sem descrição preenchida, sem deixar linha vazia pendurada.
     servicosLista: dados.escopoServicos
       .map((s) =>
-        s.descricao?.trim() ? `✔ ${s.nome} — ${s.descricao.trim()}` : `✔ ${s.nome}`
+        s.descricao?.trim() ? `✔ ${s.nome}\n${s.descricao.trim()}` : `✔ ${s.nome}`
       )
       .join("\n"),
     servicosSelecionados: dados.servicosSelecionados.join(", "),
