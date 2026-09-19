@@ -14,6 +14,7 @@ const PLACEHOLDERS = [
   "{{condicaoPagamento}}",
   "{{multaDescricao}}",
   "{{limitesUsoLista}}",
+  "{{validadeTexto}}",
   "{{telefoneContratado}}",
   "{{emailContratado}}",
   "{{siteContratado}}",

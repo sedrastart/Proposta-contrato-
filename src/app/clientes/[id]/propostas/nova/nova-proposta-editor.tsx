@@ -20,6 +20,7 @@ export function NovaPropostaEditor({
   const [isPending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
   const [propostaTexto, setPropostaTexto] = useState(textoInicial);
+  const [validadeDias, setValidadeDias] = useState(15);
 
   function recarregarRascunho() {
     setPropostaTexto(textoInicial);
@@ -28,7 +29,7 @@ export function NovaPropostaEditor({
   function criar() {
     setErro(null);
     startTransition(async () => {
-      const resultado = await criarPropostaAction(clienteId, propostaTexto);
+      const resultado = await criarPropostaAction(clienteId, propostaTexto, validadeDias);
       if (resultado.sucesso) {
         if (aoCriar) aoCriar(resultado.propostaId);
         else router.push(`/clientes/${clienteId}/propostas/${resultado.propostaId}`);
@@ -58,6 +59,18 @@ export function NovaPropostaEditor({
         className="w-full rounded-md border border-line bg-white px-3 py-2 font-mono text-xs leading-relaxed text-ink outline-none focus:border-accent focus:ring-1 focus:ring-accent"
         title="Texto completo da proposta, editável livremente antes de gerar o PDF"
       />
+
+      <label className="mt-3 flex items-center gap-2 text-xs text-ink-muted">
+        Validade da proposta (dias)
+        <input
+          type="number"
+          min={1}
+          value={validadeDias}
+          onChange={(e) => setValidadeDias(Number(e.target.value))}
+          className="w-20 rounded-md border border-line px-2 py-1 text-sm text-ink outline-none focus:border-accent"
+          title="Por quantos dias, a partir da emissão, esta proposta fica válida — aparece na capa do PDF e substitui {{validadeTexto}} no texto"
+        />
+      </label>
 
       {erro && (
         <div className="mt-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">

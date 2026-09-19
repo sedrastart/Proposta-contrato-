@@ -34,4 +34,5 @@ export type DadosContrato = {
   servicosSelecionados: string[];
   limitesUso: LimiteUsoTexto[];
   escopoServicos: EscopoServicoTexto[];
+  validadeDias: number;
 };

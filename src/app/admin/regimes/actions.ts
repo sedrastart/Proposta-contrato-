@@ -39,7 +39,7 @@ Franquia incluída por mês:
 
 Multa por cancelamento antecipado: {{multaDescricao}}.
 
-Esta proposta é válida por 15 dias a partir da data de emissão.
+Esta proposta é válida por {{validadeTexto}} a partir da data de emissão.
 
 Ficou com alguma dúvida? Fale com a gente:
 {{telefoneContratado}}

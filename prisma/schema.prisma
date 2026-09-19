@@ -265,6 +265,7 @@ model Proposta {
   servicosSnapshot           String
   textoCompleto              String
   arquivoPdf                 String?
+  validadeDias               Int      @default(15) // por quantos dias a proposta vale, a partir de dataEmissao
   dataEmissao                DateTime @default(now())
   criadoEm                   DateTime @default(now())
   atualizadoEm               DateTime @updatedAt

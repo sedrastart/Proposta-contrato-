@@ -25,7 +25,8 @@ function revalidar(clienteId: string, propostaId?: string) {
  * serviço selecionado, sem exigir plano definido (diferente do contrato). */
 export async function criarPropostaAction(
   clienteId: string,
-  textoCompleto: string
+  textoCompleto: string,
+  validadeDias: number = 15
 ): Promise<CriarPropostaResultado> {
   const cliente = await buscarClienteParaProposta(clienteId);
   if (!cliente || !cliente.regimeTributario || cliente.servicos.length === 0) {
@@ -36,6 +37,7 @@ export async function criarPropostaAction(
   }
 
   const dados = montarDadosProposta(cliente);
+  const validade = Number.isFinite(validadeDias) && validadeDias > 0 ? Math.trunc(validadeDias) : 15;
 
   const numeroSequencial = await proximoNumeroSequencial("proposta");
   const dataEmissao = new Date();
@@ -43,6 +45,7 @@ export async function criarPropostaAction(
     clienteNome: dados.contratanteNome,
     numeroSequencial,
     dataEmissao,
+    validadeDias: validade,
   });
   const { arquivoPdf } = await salvarArquivoProposta(numeroSequencial, pdf);
 
@@ -60,6 +63,7 @@ export async function criarPropostaAction(
       vigenciaMeses: dados.vigenciaMeses,
       multaTexto: dados.multaDescricao,
       servicosSnapshot: dados.servicosSelecionados.join(", "),
+      validadeDias: validade,
       textoCompleto,
       arquivoPdf,
     },
@@ -97,6 +101,7 @@ export async function atualizarTextoPropostaAction(
     clienteNome: proposta.contratanteNomeSnapshot,
     numeroSequencial: proposta.numeroSequencial,
     dataEmissao: proposta.dataEmissao,
+    validadeDias: proposta.validadeDias,
   });
   const { arquivoPdf } = await salvarArquivoProposta(proposta.numeroSequencial, pdf);
 
@@ -117,6 +122,18 @@ export async function atualizarValorPropostaAction(propostaId: string, valorFina
   const proposta = await prisma.proposta.update({
     where: { id: propostaId },
     data: { valorFinal },
+  });
+  revalidar(proposta.clienteId, propostaId);
+}
+
+/** Atualiza só os dias de validade guardados na proposta — como o valor,
+ * não mexe no PDF já emitido nem no texto; use "Salvar e reemitir PDF"
+ * depois para a data na capa refletir o novo prazo. */
+export async function atualizarValidadePropostaAction(propostaId: string, validadeDias: number) {
+  if (!Number.isFinite(validadeDias) || validadeDias <= 0) return;
+  const proposta = await prisma.proposta.update({
+    where: { id: propostaId },
+    data: { validadeDias: Math.trunc(validadeDias) },
   });
   revalidar(proposta.clienteId, propostaId);
 }
@@ -157,6 +174,7 @@ export async function duplicarPropostaAction(
     clienteNome: dados.contratanteNome,
     numeroSequencial,
     dataEmissao,
+    validadeDias: origem.validadeDias,
   });
   const { arquivoPdf } = await salvarArquivoProposta(numeroSequencial, pdf);
 
@@ -174,6 +192,7 @@ export async function duplicarPropostaAction(
       vigenciaMeses: origem.vigenciaMeses,
       multaTexto: origem.multaTexto,
       servicosSnapshot: origem.servicosSnapshot,
+      validadeDias: origem.validadeDias,
       textoCompleto,
       arquivoPdf,
     },

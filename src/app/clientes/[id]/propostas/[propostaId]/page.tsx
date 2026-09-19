@@ -37,6 +37,7 @@ export default async function PropostaDetalhePage({
           status: proposta.status,
           valorFinal: proposta.valorFinal,
           vigenciaMeses: proposta.vigenciaMeses,
+          validadeDias: proposta.validadeDias,
           servicosSnapshot: proposta.servicosSnapshot,
           textoCompleto: proposta.textoCompleto,
           dataEmissao: proposta.dataEmissao.toISOString(),

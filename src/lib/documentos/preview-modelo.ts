@@ -16,6 +16,7 @@ export const DADOS_EXEMPLO_GERAL: DadosContrato = {
   condicaoPagamento: "à vista",
   dataEmissaoExtenso: "1 de agosto de 2026",
   cidadeEmissao: "São Paulo",
+  validadeDias: 15,
   servicosSelecionados: ["Contabilidade", "Departamento Pessoal"],
   escopoServicos: [
     {

@@ -7,6 +7,7 @@ import {
   atualizarStatusPropostaAction,
   atualizarTextoPropostaAction,
   atualizarValorPropostaAction,
+  atualizarValidadePropostaAction,
   excluirPropostaAction,
 } from "../actions";
 import { STATUS_PROPOSTA, STATUS_PROPOSTA_LABEL, type StatusProposta } from "@/lib/proposta-status";
@@ -18,6 +19,7 @@ type Proposta = {
   status: string;
   valorFinal: string;
   vigenciaMeses: number;
+  validadeDias: number;
   servicosSnapshot: string;
   textoCompleto: string;
   dataEmissao: string;
@@ -37,10 +39,12 @@ export function PropostaEditor({ proposta }: { proposta: Proposta }) {
   const [status, setStatus] = useState(proposta.status);
   const [textoCompleto, setTextoCompleto] = useState(proposta.textoCompleto);
   const [valorFinal, setValorFinal] = useState(proposta.valorFinal);
+  const [validadeDias, setValidadeDias] = useState(proposta.validadeDias);
   const [isPendingStatus, startTransitionStatus] = useTransition();
   const [isPendingTexto, startTransitionTexto] = useTransition();
   const [isPendingExcluir, startTransitionExcluir] = useTransition();
   const [, startTransitionValor] = useTransition();
+  const [, startTransitionValidade] = useTransition();
   const [erroTexto, setErroTexto] = useState<string | null>(null);
   const [salvo, setSalvo] = useState(false);
 
@@ -48,6 +52,13 @@ export function PropostaEditor({ proposta }: { proposta: Proposta }) {
     if (valorFinal === proposta.valorFinal) return;
     startTransitionValor(() => {
       atualizarValorPropostaAction(proposta.id, valorFinal);
+    });
+  }
+
+  function salvarValidade() {
+    if (validadeDias === proposta.validadeDias) return;
+    startTransitionValidade(() => {
+      atualizarValidadePropostaAction(proposta.id, validadeDias);
     });
   }
 
@@ -135,6 +146,20 @@ export function PropostaEditor({ proposta }: { proposta: Proposta }) {
             <dt className="text-xs uppercase tracking-wide text-ink-muted">Vigência</dt>
             <dd className="mt-0.5 text-ink">
               {proposta.vigenciaMeses > 0 ? `${proposta.vigenciaMeses} meses` : "a definir"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-ink-muted">Validade (dias)</dt>
+            <dd className="mt-0.5">
+              <input
+                type="number"
+                min={1}
+                value={validadeDias}
+                onChange={(e) => setValidadeDias(Number(e.target.value))}
+                onBlur={salvarValidade}
+                className="w-20 rounded border border-transparent px-1 py-0.5 text-sm text-ink hover:border-line focus:border-accent focus:outline-none"
+                title="Por quantos dias, a partir da emissão, esta proposta vale — clique em 'Salvar e reemitir PDF' pra atualizar a data na capa"
+              />
             </dd>
           </div>
           <div>

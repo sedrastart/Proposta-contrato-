@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "propostas" ADD COLUMN IF NOT EXISTS "validadeDias" INTEGER NOT NULL DEFAULT 15;

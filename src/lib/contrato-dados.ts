@@ -71,6 +71,10 @@ export function montarDadosContrato(cliente: ClienteParaContrato): DadosContrato
     condicaoPagamento: formatarCondicaoPagamento(planoAncora.condicaoPagamento, planoAncora.parcelas),
     dataEmissaoExtenso: dataExtenso(new Date()),
     cidadeEmissao: "São Paulo",
+    // Validade de um rascunho novo — só tem efeito na proposta (o campo real
+    // fica em Proposta.validadeDias, editável por proposta já criada); o
+    // contrato nunca referencia isso.
+    validadeDias: 15,
     servicosSelecionados: cliente.servicos.map((s) => s.servico.nome),
     // Descrição do escopo por serviço — só usada no contexto da proposta
     // (construirContextoProposta); nas cláusulas do contrato ela nunca é
@@ -154,6 +158,7 @@ export function montarDadosProposta(cliente: ClienteParaProposta): DadosContrato
       : "à vista",
     dataEmissaoExtenso: dataExtenso(new Date()),
     cidadeEmissao: "São Paulo",
+    validadeDias: 15,
     servicosSelecionados: cliente.servicos.map((s) => s.servico.nome),
     escopoServicos: cliente.servicos.map((s) => ({
       nome: s.servico.nome,

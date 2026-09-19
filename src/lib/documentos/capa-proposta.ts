@@ -4,6 +4,7 @@ export type DadosCapaProposta = {
   clienteNome: string;
   numeroSequencial: number;
   dataEmissao: Date;
+  validadeDias: number;
 };
 
 const ACCENT = "#368DCC";
@@ -15,9 +16,9 @@ export function formatarData(data: Date): string {
   return new Intl.DateTimeFormat("pt-BR").format(data);
 }
 
-export function formatarValidade(dataEmissao: Date): string {
+export function formatarValidade(dataEmissao: Date, validadeDias: number): string {
   const validade = new Date(dataEmissao);
-  validade.setDate(validade.getDate() + 15);
+  validade.setDate(validade.getDate() + validadeDias);
   return formatarData(validade);
 }
 

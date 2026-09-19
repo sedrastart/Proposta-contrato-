@@ -233,7 +233,7 @@ async function juntarPdfs(...buffers: Buffer[]): Promise<Buffer> {
 function montarCorpoAbertura(dados: DadosCapaProposta): string {
   const clienteNome = escapeHtml(dados.clienteNome);
   const dataFormatada = formatarData(dados.dataEmissao);
-  const validadeFormatada = formatarValidade(dados.dataEmissao);
+  const validadeFormatada = formatarValidade(dados.dataEmissao, dados.validadeDias);
 
   return `<h1>Em favor de</h1>
 <p class="rotulo">Cliente</p>
