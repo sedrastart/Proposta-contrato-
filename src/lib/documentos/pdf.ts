@@ -193,11 +193,15 @@ function paginaCompleta(corpo: string, tipo: TipoDocumento): string {
     page-break-after: avoid;
     break-after: avoid-page;
   }
-  p { margin: 0 0 6pt; }
-  p.rotulo { font-weight: bold; margin-top: 10pt; }
+  p {
+    margin: 0 0 6pt;
+    text-align: justify;
+    hyphens: auto;
+  }
+  p.rotulo { font-weight: bold; margin-top: 10pt; text-align: left; }
   p.assinatura { margin-top: 14pt; }
   ul { margin: 0 0 8pt; padding-left: 20pt; }
-  li { margin-bottom: 3pt; }
+  li { margin-bottom: 3pt; text-align: justify; hyphens: auto; }
   .linha-vazia { height: 6pt; }
   /* Sem isso, um parágrafo/item que cai bem na quebra de página pode ter
      a última linha cortada pelo Chrome ao gerar o PDF (o texto some, não
