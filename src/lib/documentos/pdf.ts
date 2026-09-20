@@ -245,7 +245,9 @@ function montarCorpoAbertura(dados: DadosCapaProposta): string {
 <div class="linha-vazia"></div>
 <div class="linha-vazia"></div>
 <p class="rotulo">Quem somos</p>
-<p>Cuidamos da parte contábil e fiscal do seu negócio com atenção e proximidade, para que você possa focar no que só você pode fazer: fazer sua empresa crescer.</p>`;
+<p>${escapeHtml("A Sedra Contabilidade & Consultoria é uma empresa especializada em oferecer soluções contábeis, fiscais, trabalhistas e empresariais de forma simples, segura e personalizada.")}</p>
+<p>${escapeHtml("Nosso propósito é ir além das obrigações contábeis do dia a dia. Buscamos compreender a realidade de cada cliente, oferecendo orientação próxima, informações claras e alternativas que contribuam para uma gestão mais organizada e para o crescimento sustentável do negócio.")}</p>
+<p>${escapeHtml("Sedra Contabilidade & Consultoria, mais do que cuidar dos números, cuidamos do seu negócio.")}</p>`;
 }
 
 async function gerarPdfPropostaComCapa(
