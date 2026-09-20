@@ -42,20 +42,31 @@ export default async function AdminPropostasPage({
         pode ser adaptada livremente depois, por cliente.
       </p>
 
-      <div className="mt-6 flex flex-wrap gap-1 border-b border-line">
-        {modelos.map((modelo) => (
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-line">
+        <div className="flex flex-wrap gap-1">
+          {modelos.map((modelo) => (
+            <Link
+              key={modelo.slug}
+              href={`/admin/propostas?modelo=${modelo.slug}`}
+              className={`border-b-2 px-4 py-2 text-sm font-medium ${
+                modelo.slug === modeloAtivo?.slug
+                  ? "border-accent text-ink"
+                  : "border-transparent text-ink-muted hover:text-ink"
+              }`}
+            >
+              {modelo.nome}
+            </Link>
+          ))}
+        </div>
+        {modeloAtivo && (
           <Link
-            key={modelo.slug}
-            href={`/admin/propostas?modelo=${modelo.slug}`}
-            className={`border-b-2 px-4 py-2 text-sm font-medium ${
-              modelo.slug === modeloAtivo?.slug
-                ? "border-accent text-ink"
-                : "border-transparent text-ink-muted hover:text-ink"
-            }`}
+            href={`/admin/propostas/preview?modelo=${modeloAtivo.slug}`}
+            target="_blank"
+            className="mb-2 rounded-md border border-line px-3 py-1.5 text-xs font-medium text-ink hover:bg-neutral-50"
           >
-            {modelo.nome}
+            Visualizar proposta →
           </Link>
-        ))}
+        )}
       </div>
 
       {modeloAtivo ? (
@@ -71,6 +82,10 @@ export default async function AdminPropostasPage({
             cadastrado em cada plano (Planos → editar plano), quando
             preenchido — ex.: &quot;✔ Contabilidade — emissão e acompanhamento
             de notas fiscais...&quot;.
+          </p>
+          <p className="mt-1 text-xs text-ink-muted">
+            Para deixar um trecho em <strong>negrito</strong> no PDF, envolva
+            com dois asteriscos: **texto em negrito**.
           </p>
 
           <div className="mt-4">

@@ -33,6 +33,28 @@ function pxParaMm(mm: number): number {
   return (mm / 25.4) * 96;
 }
 
+// Mesmo marcador **trecho** aceito no PDF (ver formatarTexto em pdf.ts) —
+// aqui vira negrito de verdade no Word, dividindo a linha em múltiplos
+// TextRun (um por trecho normal/negrito) em vez de um único texto.
+function construirRuns(texto: string): TextRun[] {
+  return texto
+    .split(/(\*\*.+?\*\*)/g)
+    .filter((parte) => parte !== "")
+    .map((parte) => {
+      const negrito = parte.match(/^\*\*(.+)\*\*$/);
+      return negrito
+        ? new TextRun({ text: negrito[1], bold: true })
+        : new TextRun({ text: parte });
+    });
+}
+
+// Para linhas que já são inteiramente negrito (cláusula, rótulo da parte) —
+// os marcadores **...** não fazem sentido ali, então só removemos os
+// asteriscos em vez de processá-los como negrito extra.
+function removerMarcadores(texto: string): string {
+  return texto.replace(/\*\*(.+?)\*\*/g, "$1");
+}
+
 function construirCabecalho(): Header {
   const larguraLogoMm = 20;
   const larguraLogoPx = pxParaMm(larguraLogoMm);
@@ -129,7 +151,7 @@ export function gerarDocx(textoCompleto: string): Promise<Buffer> {
       case "titulo":
         paragraphs.push(
           new Paragraph({
-            text: linha,
+            children: construirRuns(linha),
             heading: HeadingLevel.TITLE,
             alignment: AlignmentType.CENTER,
             spacing: { after: 300 },
@@ -137,12 +159,14 @@ export function gerarDocx(textoCompleto: string): Promise<Buffer> {
         );
         break;
       case "assinatura":
-        paragraphs.push(new Paragraph({ text: linha, spacing: { before: 200 } }));
+        paragraphs.push(
+          new Paragraph({ children: construirRuns(linha), spacing: { before: 200 } })
+        );
         break;
       case "clausula":
         paragraphs.push(
           new Paragraph({
-            children: [new TextRun({ text: linha, bold: true })],
+            children: [new TextRun({ text: removerMarcadores(linha), bold: true })],
             heading: HeadingLevel.HEADING_2,
             spacing: { before: 260, after: 120 },
           })
@@ -151,18 +175,23 @@ export function gerarDocx(textoCompleto: string): Promise<Buffer> {
       case "rotuloParte":
         paragraphs.push(
           new Paragraph({
-            children: [new TextRun({ text: linha, bold: true })],
+            children: [new TextRun({ text: removerMarcadores(linha), bold: true })],
             spacing: { before: 160 },
           })
         );
         break;
       case "item":
         paragraphs.push(
-          new Paragraph({ text: linha.replace(/^●\s*/, ""), bullet: { level: 0 } })
+          new Paragraph({
+            children: construirRuns(linha.replace(/^●\s*/, "")),
+            bullet: { level: 0 },
+          })
         );
         break;
       default:
-        paragraphs.push(new Paragraph({ text: linha, spacing: { after: 80 } }));
+        paragraphs.push(
+          new Paragraph({ children: construirRuns(linha), spacing: { after: 80 } })
+        );
     }
   }
 

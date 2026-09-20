@@ -99,3 +99,19 @@ export async function buscarPreviewModelo(regimeSlug: string): Promise<{
   const dados = regimeSlug === "mei" ? DADOS_EXEMPLO_MEI : DADOS_EXEMPLO_GERAL;
   return { regimeSlug, nome: modelo.nome, dados, clausulas: modelo.clausulas };
 }
+
+export async function buscarPreviewModeloProposta(regimeSlug: string): Promise<{
+  regimeSlug: string;
+  nome: string;
+  dados: DadosContrato;
+  corpo: string;
+} | null> {
+  const modelo = await prisma.modeloProposta.findUnique({
+    where: { slug: regimeSlug },
+    select: { nome: true, corpo: true },
+  });
+  if (!modelo) return null;
+
+  const dados = regimeSlug === "mei" ? DADOS_EXEMPLO_MEI : DADOS_EXEMPLO_GERAL;
+  return { regimeSlug, nome: modelo.nome, dados, corpo: modelo.corpo };
+}

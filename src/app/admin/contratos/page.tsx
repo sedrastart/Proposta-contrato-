@@ -87,6 +87,10 @@ export default async function AdminContratosPage({
               {(PLACEHOLDERS_POR_SLUG[modeloAtivo.slug] ?? PLACEHOLDERS_GERAL).join(" ")}
             </span>
           </p>
+          <p className="mt-1 text-xs text-ink-muted">
+            Para deixar um trecho em <strong>negrito</strong> no PDF/DOCX,
+            envolva com dois asteriscos: **texto em negrito**.
+          </p>
 
           <div className="mt-4">
             <ClausulasLista

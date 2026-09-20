@@ -79,6 +79,18 @@ function escapeHtml(texto: string): string {
     .replace(/>/g, "&gt;");
 }
 
+// Único marcador de formatação aceito no texto (digitado à mão no admin):
+// **trecho** vira negrito. Roda depois do escapeHtml, então é seguro
+// injetar a tag <strong> literal — o conteúdo entre os asteriscos já está
+// escapado, sem risco de HTML solto no texto do usuário.
+function aplicarNegrito(textoEscapado: string): string {
+  return textoEscapado.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+}
+
+function formatarTexto(texto: string): string {
+  return aplicarNegrito(escapeHtml(texto));
+}
+
 /** `suprimirTitulo`: quando a proposta já tem capa própria com o título
  * grande, a primeira linha do texto (que viraria `<h1>`) fica redundante
  * — é omitida por completo nesse caso. */
@@ -100,22 +112,22 @@ function textoParaHtml(textoCompleto: string, suprimirTitulo = false): string {
         partes.push("<div class=\"linha-vazia\"></div>");
         break;
       case "titulo":
-        partes.push(`<h1>${escapeHtml(linha)}</h1>`);
+        partes.push(`<h1>${formatarTexto(linha)}</h1>`);
         break;
       case "assinatura":
-        partes.push(`<p class="assinatura">${escapeHtml(linha)}</p>`);
+        partes.push(`<p class="assinatura">${formatarTexto(linha)}</p>`);
         break;
       case "clausula":
-        partes.push(`<h2>${escapeHtml(linha)}</h2>`);
+        partes.push(`<h2>${formatarTexto(linha)}</h2>`);
         break;
       case "rotuloParte":
-        partes.push(`<p class="rotulo">${escapeHtml(linha)}</p>`);
+        partes.push(`<p class="rotulo">${formatarTexto(linha)}</p>`);
         break;
       case "item":
-        partes.push(`<li>${escapeHtml(linha.replace(/^●\s*/, ""))}</li>`);
+        partes.push(`<li>${formatarTexto(linha.replace(/^●\s*/, ""))}</li>`);
         break;
       default:
-        partes.push(`<p>${escapeHtml(linha)}</p>`);
+        partes.push(`<p>${formatarTexto(linha)}</p>`);
     }
   }
 
